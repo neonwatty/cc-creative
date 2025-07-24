@@ -1,0 +1,282 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Setup Rails 8 Project with Required Dependencies",
+        "description": "Initialize a new Rails 8 project with all required dependencies including Tailwind CSS, Vite via ruby_vite, and configure the database for SQLite in development and PostgreSQL in production.",
+        "details": "1. Install Ruby 3.3+ if not already installed\n2. Install Rails 8.0+: `gem install rails -v 8.0.0`\n3. Create new Rails project: `rails new claude_code_creators --css=tailwind --database=sqlite3`\n4. Add ruby_vite for JS bundling: Add `gem 'ruby_vite'` to Gemfile\n5. Add required gems to Gemfile:\n   ```ruby\n   gem 'solid_cable'\n   gem 'solid_queue'\n   gem 'solid_cache'\n   gem 'turbo-rails'\n   gem 'stimulus-rails'\n   gem 'view_component'\n   gem 'active_storage'\n   ```\n6. Run `bundle install`\n7. Configure database.yml for PostgreSQL in production\n8. Setup Vite configuration: `bin/rails vite:install`\n9. Initialize Git repository: `git init`\n10. Create initial commit with project structure",
+        "testStrategy": "1. Verify Rails server starts without errors\n2. Confirm Tailwind CSS is properly configured by testing a simple Tailwind class\n3. Verify Vite is working by creating a simple JS component\n4. Test database connections for both development and production environments\n5. Ensure all gems are properly installed and accessible",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Implement Claude Code SDK Integration",
+        "description": "Integrate the Claude Code SDK to enable core AI functionality including context management, sub-agents, and MCP tool support.",
+        "details": "1. Add Claude Code SDK gem to Gemfile: `gem 'claude_code_sdk'`\n2. Create an initializer file at `config/initializers/claude_code_sdk.rb`\n3. Configure SDK with API keys using Rails credentials:\n   ```ruby\n   # config/initializers/claude_code_sdk.rb\n   ClaudeCodeSDK.configure do |config|\n     config.api_key = Rails.application.credentials.claude_code[:api_key]\n     config.base_url = Rails.application.credentials.claude_code[:base_url]\n     config.max_context_size = 100_000 # Adjust based on Claude model limits\n   end\n   ```\n4. Create a service object for Claude Code interactions:\n   ```ruby\n   # app/services/claude_service.rb\n   class ClaudeService\n     def initialize(session_id = nil)\n       @session_id = session_id || SecureRandom.uuid\n       @client = ClaudeCodeSDK::Client.new(session_id: @session_id)\n     end\n\n     def send_message(content, context = {})\n       @client.send_message(content: content, context: context)\n     end\n\n     def create_sub_agent(name, initial_context = {})\n       @client.create_sub_agent(name: name, context: initial_context)\n     end\n\n     # Add methods for other SDK features\n   end\n   ```\n5. Create a background job for async Claude interactions\n6. Set up secure credential storage for API keys",
+        "testStrategy": "1. Write unit tests for ClaudeService methods\n2. Create a mock for Claude Code SDK responses for testing\n3. Test API key configuration is properly loaded from credentials\n4. Verify sub-agent creation functionality\n5. Test error handling for API failures",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Design and Implement Core Document Editor UI",
+        "description": "Create a polished document editor interface tailored for creative professionals, with support for rich text editing and Claude AI integration.",
+        "details": "1. Create document editor controller and views:\n   ```ruby\n   # app/controllers/documents_controller.rb\n   class DocumentsController < ApplicationController\n     def new\n       @document = Document.new\n     end\n\n     def create\n       @document = Document.new(document_params)\n       # Implementation\n     end\n\n     def show\n       @document = Document.find(params[:id])\n     end\n\n     # Other actions\n   end\n   ```\n2. Implement document model with ActiveRecord\n3. Create editor component using ViewComponent:\n   ```ruby\n   # app/components/editor_component.rb\n   class EditorComponent < ViewComponent::Base\n     def initialize(document:, current_user:)\n       @document = document\n       @current_user = current_user\n     end\n   end\n   ```\n4. Implement rich text editor using Trix or a similar library\n5. Style the editor with Tailwind CSS for a creative-friendly design\n6. Add basic document operations (save, load, create new)\n7. Implement autosave functionality using Turbo\n8. Add document metadata fields (title, description, tags)",
+        "testStrategy": "1. Write system tests for document creation and editing\n2. Test rich text editor functionality (formatting, pasting, etc.)\n3. Verify autosave works correctly\n4. Test document loading and rendering\n5. Ensure UI is responsive and works on different screen sizes",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Document Model and Database Schema",
+            "description": "Implement the ActiveRecord Document model with necessary database migrations and validations for storing document content, metadata, and user associations.",
+            "dependencies": [],
+            "details": "Create migration for documents table with fields: title (string), content (text), description (text), tags (text array), user_id (references), created_at, updated_at. Implement Document model with validations, associations (belongs_to :user), and methods for content manipulation. Add indexes for performance on user_id and created_at fields.",
+            "status": "done",
+            "testStrategy": "Write model tests for validations, associations, and custom methods. Test database constraints and indexes."
+          },
+          {
+            "id": 2,
+            "title": "Build Documents Controller with CRUD Operations",
+            "description": "Create the DocumentsController with full CRUD operations including proper authorization, parameter filtering, and error handling for document management.",
+            "dependencies": [
+              "3.1"
+            ],
+            "details": "Implement controller actions: index, new, create, show, edit, update, destroy. Add before_action callbacks for finding documents and authorization. Implement strong parameters with document_params method. Add proper error handling and flash messages. Ensure only document owners can access/modify their documents.",
+            "status": "done",
+            "testStrategy": "Write controller tests for all actions, test authorization boundaries, verify proper parameter filtering, and test error scenarios."
+          },
+          {
+            "id": 3,
+            "title": "Create Document Editor Views and Layouts",
+            "description": "Design and implement the view templates for document creation, editing, and display with a clean, creative-professional focused layout structure.",
+            "dependencies": [
+              "3.2"
+            ],
+            "details": "Create view templates: documents/index.html.erb, documents/new.html.erb, documents/show.html.erb, documents/edit.html.erb, documents/_form.html.erb. Implement responsive layout with sidebar navigation, main content area, and toolbar. Add form helpers for document fields and basic styling structure using Tailwind CSS classes.",
+            "status": "done",
+            "testStrategy": "Write view tests using Capybara to verify form rendering, navigation elements, and responsive behavior across different screen sizes."
+          },
+          {
+            "id": 4,
+            "title": "Implement Rich Text Editor Component with Trix",
+            "description": "Build the EditorComponent using ViewComponent and integrate Trix editor for rich text editing capabilities with document-specific customizations.",
+            "dependencies": [
+              "3.3"
+            ],
+            "details": "Create EditorComponent class inheriting from ViewComponent::Base. Add Trix gem to Gemfile and configure Action Text if needed. Implement component template with Trix editor, custom toolbar, and JavaScript for editor initialization. Add CSS customizations for creative-friendly styling. Implement content serialization and deserialization methods.",
+            "status": "done",
+            "testStrategy": "Test component rendering, Trix editor initialization, content saving/loading, and custom toolbar functionality. Verify rich text formatting works correctly."
+          },
+          {
+            "id": 5,
+            "title": "Add Autosave and Document Operations",
+            "description": "Implement autosave functionality using Turbo Streams and add essential document operations like save, duplicate, and metadata management.",
+            "dependencies": [
+              "3.4"
+            ],
+            "details": "Create autosave JavaScript using Turbo and Rails UJS to save document content every 30 seconds or on content change. Implement save status indicator in UI. Add document operations: duplicate document, change title/description, manage tags. Create background job for processing autosaves. Add document version tracking for basic history.",
+            "status": "pending",
+            "testStrategy": "Test autosave triggers correctly, verify save status indicators update, test document operations work properly, and ensure no data loss during autosave failures."
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Implement Persistent Context Management",
+        "description": "Create a sidebar for managing snippets, drafts, and versions that are saved in-app and easily recallable without external tools or re-uploads.",
+        "details": "1. Create models for context items:\n   ```ruby\n   # app/models/context_item.rb\n   class ContextItem < ApplicationRecord\n     belongs_to :document\n     belongs_to :user\n     validates :content, presence: true\n     validates :item_type, inclusion: { in: %w[snippet draft version] }\n   end\n   ```\n2. Implement sidebar component using ViewComponent:\n   ```ruby\n   # app/components/context_sidebar_component.rb\n   class ContextSidebarComponent < ViewComponent::Base\n     def initialize(document:, current_user:)\n       @document = document\n       @current_user = current_user\n       @context_items = ContextItem.where(document: document, user: current_user)\n                                  .order(created_at: :desc)\n     end\n   end\n   ```\n3. Create controllers for managing context items\n4. Implement drag-and-drop functionality for context items using Stimulus\n5. Add context item preview functionality\n6. Implement context item insertion into the document\n7. Create versioning system for documents\n8. Add search functionality for context items",
+        "testStrategy": "1. Test creation and management of different context item types\n2. Verify drag-and-drop functionality works correctly\n3. Test insertion of context items into documents\n4. Verify versioning system correctly tracks document changes\n5. Test search functionality for context items\n6. Ensure context items persist between sessions",
+        "priority": "high",
+        "dependencies": [
+          2,
+          3
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Implement Sub-Agent Functionality",
+        "description": "Create functionality to spawn isolated mini-AI threads (e.g., \"outline helper,\" \"ad copy draft\") that don't clutter the main document and can be merged when ready.",
+        "details": "1. Create sub-agent model and controller:\n   ```ruby\n   # app/models/sub_agent.rb\n   class SubAgent < ApplicationRecord\n     belongs_to :document\n     belongs_to :user\n     has_many :messages\n     validates :name, presence: true\n   end\n\n   # app/controllers/sub_agents_controller.rb\n   class SubAgentsController < ApplicationController\n     def create\n       @document = Document.find(params[:document_id])\n       @sub_agent = @document.sub_agents.build(sub_agent_params)\n       @sub_agent.user = current_user\n       \n       claude_service = ClaudeService.new\n       agent_id = claude_service.create_sub_agent(@sub_agent.name)\n       @sub_agent.external_id = agent_id\n       \n       # Save and respond\n     end\n     # Other actions\n   end\n   ```\n2. Create UI for sub-agent creation and management\n3. Implement sub-agent conversation interface\n4. Add functionality to merge sub-agent content into main document\n5. Create Stimulus controller for sub-agent interactions\n6. Implement sub-agent context isolation\n7. Add ability to share context between main document and sub-agents",
+        "testStrategy": "1. Test sub-agent creation and initialization\n2. Verify sub-agent conversations work correctly\n3. Test merging sub-agent content into main document\n4. Verify context isolation between sub-agents\n5. Test sharing context between document and sub-agents\n6. Ensure sub-agents persist between sessions",
+        "priority": "high",
+        "dependencies": [
+          2,
+          3
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Implement File Integration with Cloud Services",
+        "description": "Connect Google Drive, Dropbox, Notion, or manually upload files to import/export whole documents or folders into the workspace.",
+        "details": "1. Set up ActiveStorage for file handling:\n   ```ruby\n   # Run ActiveStorage installation\n   rails active_storage:install\n   ```\n2. Add necessary gems for cloud service integrations:\n   ```ruby\n   # Gemfile\n   gem 'google_drive'\n   gem 'dropbox_api'\n   gem 'notion-ruby-client'\n   ```\n3. Create service objects for each cloud provider:\n   ```ruby\n   # app/services/google_drive_service.rb\n   class GoogleDriveService\n     def initialize(user)\n       @user = user\n       # Setup authentication using user's credentials\n     end\n\n     def list_files\n       # Implementation\n     end\n\n     def import_file(file_id)\n       # Implementation\n     end\n\n     def export_document(document, folder_id = nil)\n       # Implementation\n     end\n   end\n   ```\n4. Create similar services for Dropbox and Notion\n5. Implement OAuth flow for each service\n6. Create UI for connecting accounts\n7. Implement file browser for each service\n8. Add import/export functionality\n9. Create background jobs for file operations",
+        "testStrategy": "1. Test OAuth authentication flow for each service\n2. Verify file listing functionality\n3. Test file import from each service\n4. Verify document export to each service\n5. Test error handling for API failures\n6. Ensure file operations work asynchronously",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          3
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Implement Context Control Commands",
+        "description": "Create slash commands like /compact, /clear, /include, /snippet to manage session context within the document editor.",
+        "details": "1. Create a command parser service:\n   ```ruby\n   # app/services/command_parser_service.rb\n   class CommandParserService\n     COMMANDS = %w[compact clear include snippet]\n\n     def initialize(document, user)\n       @document = document\n       @user = user\n       @claude_service = ClaudeService.new(@document.session_id)\n     end\n\n     def process_command(command_text)\n       command, *args = command_text.split\n       command = command.sub('/', '')\n\n       return { error: 'Unknown command' } unless COMMANDS.include?(command)\n\n       send(\"process_#{command}\", *args)\n     end\n\n     private\n\n     def process_compact\n       # Implementation using Claude SDK\n     end\n\n     # Other command methods\n   end\n   ```\n2. Create a Stimulus controller for command detection and processing:\n   ```javascript\n   // app/javascript/controllers/slash_commands_controller.js\n   import { Controller } from \"@hotwired/stimulus\"\n\n   export default class extends Controller {\n     static targets = [\"editor\"]\n\n     connect() {\n       this.editorTarget.addEventListener('keydown', this.handleKeydown.bind(this))\n     }\n\n     handleKeydown(event) {\n       // Detect slash commands and process them\n     }\n\n     // Other methods\n   }\n   ```\n3. Implement command execution endpoints in controller\n4. Create UI for command suggestions\n5. Implement each command's functionality using Claude SDK\n6. Add visual feedback for command execution\n7. Create command history tracking",
+        "testStrategy": "1. Test command parsing and detection\n2. Verify each command functions correctly\n3. Test command suggestion UI\n4. Verify visual feedback for command execution\n5. Test error handling for invalid commands\n6. Ensure commands interact correctly with Claude SDK",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          3
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Implement Custom Tools & Widgets",
+        "description": "Create a wizard to define slash-driven tools and implement drag-dock widgets for outlines, research, and world-building using the Claude Code SDK.",
+        "details": "1. Create models for custom tools:\n   ```ruby\n   # app/models/custom_tool.rb\n   class CustomTool < ApplicationRecord\n     belongs_to :user\n     validates :name, presence: true\n     validates :command, presence: true, format: { with: /\\A[a-z0-9\\-]+\\z/ }\n     validates :prompt_template, presence: true\n   end\n   ```\n2. Implement tool wizard UI using Stimulus and Tailwind:\n   ```javascript\n   // app/javascript/controllers/tool_wizard_controller.js\n   import { Controller } from \"@hotwired/stimulus\"\n\n   export default class extends Controller {\n     static targets = [\"step\", \"nextButton\", \"prevButton\", \"form\"]\n\n     // Wizard navigation and validation methods\n   }\n   ```\n3. Create widget components using ViewComponent:\n   ```ruby\n   # app/components/outline_widget_component.rb\n   class OutlineWidgetComponent < ViewComponent::Base\n     def initialize(document:)\n       @document = document\n     end\n   end\n   ```\n4. Implement drag-and-dock functionality using Stimulus\n5. Create controllers for widget data management\n6. Implement widget state persistence\n7. Add widget interaction with Claude SDK\n8. Create standard widgets (outline, research, world-building)\n9. Implement custom tool execution using Claude SDK",
+        "testStrategy": "1. Test custom tool creation and validation\n2. Verify tool wizard UI functionality\n3. Test widget rendering and interaction\n4. Verify drag-and-dock functionality\n5. Test widget state persistence\n6. Ensure widgets interact correctly with Claude SDK\n7. Test custom tool execution",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          3,
+          7
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Design and Implement Creative-Tailored UX",
+        "description": "Create a polished editor, drag-n-drop widgets, presence UI, and creative-friendly design tailored specifically for document creation rather than code.",
+        "details": "1. Create a comprehensive Tailwind design system:\n   ```javascript\n   // tailwind.config.js\n   module.exports = {\n     theme: {\n       extend: {\n         colors: {\n           'creative-primary': '#3b82f6',\n           'creative-secondary': '#10b981',\n           // Other custom colors\n         },\n         // Custom spacing, typography, etc.\n       }\n     },\n     plugins: [\n       require('@tailwindcss/typography'),\n       require('@tailwindcss/forms')\n     ]\n   }\n   ```\n2. Implement custom UI components using ViewComponent\n3. Create animations and transitions for UI elements\n4. Design and implement a document-focused layout\n5. Create custom editor toolbar with formatting options\n6. Implement drag-n-drop interface for widgets and context items\n7. Design presence indicators for collaborative editing\n8. Create responsive layouts for different screen sizes\n9. Implement dark mode support\n10. Design and implement onboarding UI",
+        "testStrategy": "1. Test UI components across different browsers and screen sizes\n2. Verify animations and transitions work correctly\n3. Test drag-n-drop functionality\n4. Verify presence indicators update in real-time\n5. Test dark mode functionality\n6. Ensure UI is accessible and meets WCAG standards\n7. Test onboarding flow",
+        "priority": "medium",
+        "dependencies": [
+          3
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Implement Real-Time Collaboration Support",
+        "description": "Enable real-time or async co-editing with shared rooms, live cursors, and optional voice chat—all backed by Claude Code's backend.",
+        "details": "1. Set up SolidCable for WebSocket communication:\n   ```ruby\n   # config/solid_cable.rb\n   SolidCable.configure do |config|\n     config.adapter = :postgresql\n     config.worker_pool_size = 5\n   end\n   ```\n2. Implement Yjs for collaborative editing:\n   ```javascript\n   // app/javascript/controllers/collaborative_editor_controller.js\n   import { Controller } from \"@hotwired/stimulus\"\n   import * as Y from 'yjs'\n   import { WebsocketProvider } from 'y-websocket'\n\n   export default class extends Controller {\n     static targets = [\"editor\"]\n\n     connect() {\n       const documentId = this.element.dataset.documentId\n       this.ydoc = new Y.Doc()\n       this.provider = new WebsocketProvider(\n         `/cable/document/${documentId}`,\n         documentId,\n         this.ydoc\n       )\n       // Setup editor binding\n     }\n\n     // Other methods\n   }\n   ```\n3. Create channels for document collaboration:\n   ```ruby\n   # app/channels/document_channel.rb\n   class DocumentChannel < ApplicationCable::Channel\n     def subscribed\n       document = Document.find(params[:id])\n       stream_for document\n     end\n\n     def cursor_moved(data)\n       document = Document.find(params[:id])\n       broadcast_to(document, { type: 'cursor_moved', user_id: current_user.id, position: data['position'] })\n     end\n\n     # Other methods\n   end\n   ```\n4. Implement presence tracking using SolidCable\n5. Create UI for showing active collaborators\n6. Implement live cursor tracking\n7. Add optional voice chat using WebRTC\n8. Create shared room functionality\n9. Implement permissions system for collaboration",
+        "testStrategy": "1. Test real-time document updates between multiple clients\n2. Verify cursor positions update correctly\n3. Test presence indicators for joining/leaving users\n4. Verify conflict resolution works correctly\n5. Test voice chat functionality\n6. Ensure collaboration features work across different browsers\n7. Test permission controls for document access",
+        "priority": "medium",
+        "dependencies": [
+          3,
+          9
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 11,
+        "title": "Implement User Authentication and Authorization",
+        "description": "Create a secure authentication system with user registration, login, and role-based permissions for document access and collaboration.",
+        "details": "1. Set up authentication using Devise or a similar gem:\n   ```ruby\n   # Add to Gemfile\n   gem 'devise'\n\n   # Run installer\n   rails generate devise:install\n   rails generate devise User\n   ```\n2. Customize user model with additional fields:\n   ```ruby\n   # db/migrate/YYYYMMDDHHMMSS_add_fields_to_users.rb\n   class AddFieldsToUsers < ActiveRecord::Migration[8.0]\n     def change\n       add_column :users, :name, :string\n       add_column :users, :role, :string, default: 'user'\n       # Other fields\n     end\n   end\n   ```\n3. Create authorization system using Pundit:\n   ```ruby\n   # Add to Gemfile\n   gem 'pundit'\n\n   # app/policies/document_policy.rb\n   class DocumentPolicy < ApplicationPolicy\n     def show?\n       record.user_id == user.id || record.collaborators.include?(user)\n     end\n\n     def update?\n       show?\n     end\n\n     # Other permissions\n   end\n   ```\n4. Implement user profile management\n5. Create UI for user registration and login\n6. Add password reset functionality\n7. Implement email verification\n8. Create user roles and permissions\n9. Add OAuth login options (Google, GitHub, etc.)",
+        "testStrategy": "1. Test user registration and login flows\n2. Verify authorization controls access correctly\n3. Test password reset functionality\n4. Verify email verification works\n5. Test user profile management\n6. Ensure OAuth login works correctly\n7. Test role-based permissions",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 12,
+        "title": "Implement Document Version Control",
+        "description": "Create a version control system for documents that allows users to view, compare, and restore previous versions.",
+        "details": "1. Create version model and associations:\n   ```ruby\n   # app/models/version.rb\n   class Version < ApplicationRecord\n     belongs_to :document\n     belongs_to :user\n     validates :content, presence: true\n   end\n\n   # In document.rb\n   has_many :versions, dependent: :destroy\n\n   def create_version(user)\n     versions.create(content: content, user: user)\n   end\n   ```\n2. Implement automatic versioning on significant changes\n3. Create UI for version history:\n   ```ruby\n   # app/components/version_history_component.rb\n   class VersionHistoryComponent < ViewComponent::Base\n     def initialize(document:)\n       @document = document\n       @versions = document.versions.order(created_at: :desc)\n     end\n   end\n   ```\n4. Add version comparison functionality\n5. Implement version restoration\n6. Create version diff visualization\n7. Add version tagging and naming\n8. Implement version comments/annotations",
+        "testStrategy": "1. Test automatic version creation\n2. Verify version history UI displays correctly\n3. Test version comparison functionality\n4. Verify version restoration works correctly\n5. Test diff visualization\n6. Ensure version tagging and naming works\n7. Test version comments/annotations",
+        "priority": "medium",
+        "dependencies": [
+          3,
+          4
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 13,
+        "title": "Implement Export and Sharing Features",
+        "description": "Create functionality to export documents in various formats and share them with others through links or direct invitations.",
+        "details": "1. Implement document export in multiple formats:\n   ```ruby\n   # app/services/document_export_service.rb\n   class DocumentExportService\n     def initialize(document)\n       @document = document\n     end\n\n     def to_pdf\n       # Implementation using a PDF generation library\n     end\n\n     def to_markdown\n       # Implementation\n     end\n\n     def to_html\n       # Implementation\n     end\n\n     def to_docx\n       # Implementation using a DOCX generation library\n     end\n   end\n   ```\n2. Create sharing functionality:\n   ```ruby\n   # app/models/share_link.rb\n   class ShareLink < ApplicationRecord\n     belongs_to :document\n     before_create :generate_token\n\n     private\n\n     def generate_token\n       self.token = SecureRandom.urlsafe_base64(10)\n     end\n   end\n   ```\n3. Implement share link controller and views\n4. Add email invitation functionality\n5. Create UI for export options\n6. Implement permission settings for shared documents\n7. Add expiration options for share links\n8. Create public/private visibility controls",
+        "testStrategy": "1. Test document export in each format\n2. Verify share link generation and access\n3. Test email invitation functionality\n4. Verify permission settings work correctly\n5. Test expiration of share links\n6. Ensure public/private visibility controls work\n7. Test accessing shared documents as different users",
+        "priority": "medium",
+        "dependencies": [
+          3,
+          11
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 14,
+        "title": "Implement Deployment Configuration with Kamal",
+        "description": "Set up deployment configuration using Kamal 2 for containerized Rails deployment with Docker and TLS support.",
+        "details": "1. Install Kamal:\n   ```bash\n   gem install kamal\n   ```\n2. Initialize Kamal configuration:\n   ```bash\n   kamal init\n   ```\n3. Configure deployment settings in `config/deploy.yml`:\n   ```yaml\n   # config/deploy.yml\n   service: claude-code-creators\n   image: your-registry/claude-code-creators\n\n   servers:\n     web:\n       hosts:\n         - your-server-ip\n       labels:\n         traefik.http.routers.claude-code-creators.rule: Host(`your-domain.com`)\n\n   registry:\n     username: your-username\n     password:\n       - KAMAL_REGISTRY_PASSWORD\n\n   env:\n     clear:\n       RAILS_ENV: production\n     secret:\n       - RAILS_MASTER_KEY\n       - CLAUDE_CODE_API_KEY\n   ```\n4. Create Dockerfile for the application:\n   ```dockerfile\n   # Dockerfile\n   FROM ruby:3.3-slim\n\n   # Install dependencies\n   RUN apt-get update -qq && \\\n       apt-get install -y build-essential libpq-dev nodejs npm\n\n   # Set working directory\n   WORKDIR /app\n\n   # Install gems\n   COPY Gemfile Gemfile.lock ./\n   RUN bundle install --jobs 4\n\n   # Install npm packages\n   COPY package.json package-lock.json ./\n   RUN npm install\n\n   # Copy application code\n   COPY . .\n\n   # Precompile assets\n   RUN bundle exec rails assets:precompile\n\n   # Start the server\n   CMD [\"bundle\", \"exec\", \"rails\", \"server\", \"-b\", \"0.0.0.0\"]\n   ```\n5. Configure database for production\n6. Set up SSL/TLS with Let's Encrypt\n7. Configure environment variables and secrets\n8. Set up CI/CD pipeline for automated deployment",
+        "testStrategy": "1. Test Docker build process locally\n2. Verify application runs correctly in Docker container\n3. Test deployment to staging environment\n4. Verify SSL/TLS configuration works correctly\n5. Test environment variable configuration\n6. Ensure database migrations run correctly during deployment\n7. Test rollback functionality",
+        "priority": "low",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 15,
+        "title": "Implement Analytics and Monitoring",
+        "description": "Set up analytics tracking, error monitoring, and performance metrics to understand user behavior and application health.",
+        "details": "1. Implement application monitoring with Sentry:\n   ```ruby\n   # Gemfile\n   gem 'sentry-ruby'\n   gem 'sentry-rails'\n\n   # config/initializers/sentry.rb\n   Sentry.init do |config|\n     config.dsn = Rails.application.credentials.sentry[:dsn]\n     config.breadcrumbs_logger = [:active_support_logger, :http_logger]\n     config.traces_sample_rate = 0.5\n   end\n   ```\n2. Set up performance monitoring with Skylight:\n   ```ruby\n   # Gemfile\n   gem 'skylight'\n\n   # config/skylight.yml\n   ---\n   authentication: <%= Rails.application.credentials.skylight[:authentication] %>\n   ```\n3. Implement user analytics with Ahoy:\n   ```ruby\n   # Gemfile\n   gem 'ahoy_matey'\n\n   # app/models/ahoy/event.rb\n   module Ahoy\n     class Event < ApplicationRecord\n       include Ahoy::QueryMethods\n\n       self.table_name = 'ahoy_events'\n\n       belongs_to :visit\n       belongs_to :user, optional: true\n     end\n   end\n   ```\n4. Create custom event tracking for key user actions\n5. Set up health check endpoints\n6. Implement logging enhancements\n7. Create admin dashboard for analytics\n8. Set up alerting for critical errors",
+        "testStrategy": "1. Verify error tracking captures exceptions correctly\n2. Test performance monitoring data collection\n3. Verify user analytics events are tracked correctly\n4. Test health check endpoints\n5. Verify logging captures important information\n6. Test admin dashboard functionality\n7. Ensure alerting works for critical errors",
+        "priority": "low",
+        "dependencies": [
+          1,
+          3
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 16,
+        "title": "Implement Custom Review Slash Commands",
+        "description": "Create the four custom review slash commands: /review_for_clarity, /review_for_brand_alignment, /review_for_proof, and /review_for_concision. These should be user-definable prompts that can be built by users or provided as default examples.",
+        "details": "1. Extend the command parser service to handle review commands:\n   ```ruby\n   # app/services/command_parser_service.rb\n   class CommandParserService\n     REVIEW_COMMANDS = %w[review_for_clarity review_for_brand_alignment review_for_proof review_for_concision]\n\n     def process_review_command(command, document_content, args = [])\n       case command\n       when 'review_for_clarity'\n         review_for_clarity(document_content)\n       when 'review_for_brand_alignment'\n         review_for_brand_alignment(document_content, args.first)\n       when 'review_for_proof'\n         review_for_proof(document_content)\n       when 'review_for_concision'\n         review_for_concision(document_content)\n       end\n     end\n\n     private\n\n     def review_for_clarity(content)\n       prompt = \"Review the following writing to ensure arguments are expressed clearly. Identify any unclear passages and suggest improvements:\\n\\n#{content}\"\n       @claude_service.send_message(prompt)\n     end\n\n     def review_for_brand_alignment(content, brand_guidelines_path = nil)\n       guidelines = brand_guidelines_path ? load_brand_guidelines(brand_guidelines_path) : default_brand_guidelines\n       prompt = \"Review the following writing for brand guideline compliance. Brand guidelines:\\n#{guidelines}\\n\\nContent to review:\\n#{content}\"\n       @claude_service.send_message(prompt)\n     end\n\n     def review_for_proof(content)\n       prompt = \"Review the following writing for evidence. Examine claims and associated data/hyperlinks to verify factual evidence. Point out where evidence is missing or could be improved:\\n\\n#{content}\"\n       @claude_service.send_message(prompt)\n     end\n\n     def review_for_concision(content)\n       prompt = \"Review the following writing for potential shortening and concision opportunities. Identify verbose passages and suggest more concise alternatives:\\n\\n#{content}\"\n       @claude_service.send_message(prompt)\n     end\n   end\n   ```\n2. Create default prompt templates for each review command\n3. Implement brand guidelines loading functionality\n4. Add UI for customizing review command prompts\n5. Create review results display component\n6. Implement review history tracking\n7. Add review command suggestions in the editor\n8. Create review command wizard for user customization",
+        "testStrategy": "1. Test each review command with sample content\n2. Verify brand guidelines loading works correctly\n3. Test custom prompt creation and editing\n4. Verify review results display correctly\n5. Test review history tracking\n6. Ensure review commands integrate with existing slash command system\n7. Test review command wizard functionality",
+        "priority": "medium",
+        "dependencies": [
+          7,
+          8
+        ],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-07-20T19:39:17.985Z",
+      "updated": "2025-07-23T09:32:34.069Z",
+      "description": "Tasks for master context"
+    }
+  }
+}
