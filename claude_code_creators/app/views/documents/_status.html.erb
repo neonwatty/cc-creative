@@ -1,0 +1,27 @@
+<div id="document_status" class="flex items-center gap-2 text-sm">
+  <span class="relative flex h-2 w-2">
+    <% if status == 'saved' %>
+      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+      <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+    <% elsif status == 'saving' %>
+      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+      <span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
+    <% elsif status == 'error' %>
+      <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+    <% else %>
+      <span class="relative inline-flex rounded-full h-2 w-2 bg-gray-400"></span>
+    <% end %>
+  </span>
+  <span class="text-gray-600">
+    <% case status %>
+    <% when 'saved' %>
+      Saved
+    <% when 'saving' %>
+      Saving...
+    <% when 'error' %>
+      Error saving
+    <% else %>
+      Ready
+    <% end %>
+  </span>
+</div>

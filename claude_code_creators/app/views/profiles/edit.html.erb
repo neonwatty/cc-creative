@@ -1,0 +1,42 @@
+<div class="mx-auto md:w-2/3 w-full">
+  <% if @user.errors.any? %>
+    <div class="py-2 px-3 bg-red-50 mb-5 text-red-500 font-medium rounded-lg" id="error_explanation">
+      <h2 class="font-bold mb-2"><%= pluralize(@user.errors.count, "error") %> prohibited this profile from being saved:</h2>
+      <ul class="list-disc list-inside">
+        <% @user.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <h1 class="font-bold text-4xl mb-6">Edit Profile</h1>
+
+  <%= form_with model: @user, url: profile_path, class: "contents" do |form| %>
+    <div class="my-5">
+      <%= form.label :name, class: "block text-sm font-medium text-gray-700 mb-2" %>
+      <%= form.text_field :name, 
+          required: true, 
+          autofocus: true, 
+          placeholder: "Enter your full name", 
+          class: "block shadow-sm rounded-md border border-gray-400 focus:outline-blue-600 focus:ring-2 focus:ring-blue-500 px-3 py-2 w-full" %>
+    </div>
+
+    <div class="my-5">
+      <%= form.label :email_address, class: "block text-sm font-medium text-gray-700 mb-2" %>
+      <%= form.email_field :email_address, 
+          required: true, 
+          autocomplete: "email", 
+          placeholder: "Enter your email address", 
+          class: "block shadow-sm rounded-md border border-gray-400 focus:outline-blue-600 focus:ring-2 focus:ring-blue-500 px-3 py-2 w-full" %>
+    </div>
+
+    <div class="flex items-center gap-3 my-8">
+      <%= form.submit "Save Changes", 
+          class: "text-center rounded-md px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium cursor-pointer transition-colors" %>
+      
+      <%= link_to "Cancel", profile_path, 
+          class: "text-center rounded-md px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium transition-colors" %>
+    </div>
+  <% end %>
+</div>

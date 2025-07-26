@@ -1,0 +1,16 @@
+Welcome to Claude Code Creators, <%= @user.name %>!
+
+Thank you for signing up! Please confirm your email address to complete your registration.
+
+By confirming your email, you'll be able to:
+- Create and manage AI-powered documents
+- Collaborate with team members  
+- Access all features of Claude Code Creators
+
+To confirm your email address, visit this link:
+<%= confirm_email_url(token: @user.generate_token_for(:email_confirmation)) %>
+
+This link will expire in 24 hours.
+
+--
+Claude Code Creators - AI-Powered Document Creation

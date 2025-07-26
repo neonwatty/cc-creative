@@ -1,0 +1,9 @@
+document_one_content:
+  record: document_one (Document)
+  name: content
+  body: <p>This is the content of the first document. It contains <strong>sample text</strong> for testing.</p>
+
+document_two_content:
+  record: document_two (Document)
+  name: content
+  body: <p>This is the content of the second document. It has <em>different content</em> for variety.</p>
