@@ -230,7 +230,7 @@
               "11.2"
             ],
             "details": "Add Pundit gem to Gemfile, include Pundit in ApplicationController, generate application policy, create DocumentPolicy with methods for show?, update?, destroy?, and collaborate? permissions. Implement role-based authorization logic checking user roles and document ownership/collaboration status.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test policy methods return correct permissions, verify unauthorized access raises Pundit::NotAuthorizedError, test role-based permissions work correctly"
           },
           {
@@ -330,7 +330,7 @@
     ],
     "metadata": {
       "created": "2025-07-20T19:39:17.985Z",
-      "updated": "2025-07-26T17:41:19.824Z",
+      "updated": "2025-07-26T17:57:23.043Z",
       "description": "Tasks for master context"
     }
   }
