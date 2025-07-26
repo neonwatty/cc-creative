@@ -35,7 +35,7 @@
         "dependencies": [
           1
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -87,7 +87,7 @@
               "3.4"
             ],
             "details": "Create autosave JavaScript using Turbo and Rails UJS to save document content every 30 seconds or on content change. Implement save status indicator in UI. Add document operations: duplicate document, change title/description, manage tags. Create background job for processing autosaves. Add document version tracking for basic history.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test autosave triggers correctly, verify save status indicators update, test document operations work properly, and ensure no data loss during autosave failures."
           }
         ]
@@ -201,7 +201,62 @@
           1
         ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up Devise authentication gem and generate User model",
+            "description": "Install and configure Devise gem, generate User model with basic authentication fields, and run initial setup",
+            "dependencies": [],
+            "details": "Add Devise gem to Gemfile, run bundle install, execute rails generate devise:install to create initializer and views, then rails generate devise User to create User model with email, encrypted_password, and basic Devise fields. Run rails db:migrate to create users table.",
+            "status": "done",
+            "testStrategy": "Test user model creation, verify Devise routes are generated, test basic user creation in Rails console"
+          },
+          {
+            "id": 2,
+            "title": "Customize User model with additional fields and roles",
+            "description": "Extend the User model with name, role, and other necessary fields for the application",
+            "dependencies": [
+              "11.1"
+            ],
+            "details": "Create migration to add name (string), role (string with default 'user'), created_at, updated_at fields. Update User model with validations for name presence and role inclusion. Add enum for roles (user, admin, editor). Configure strong parameters in ApplicationController for additional fields.",
+            "status": "pending",
+            "testStrategy": "Test user creation with new fields, verify role enum works correctly, test validations for name and role fields"
+          },
+          {
+            "id": 3,
+            "title": "Implement Pundit authorization system with policies",
+            "description": "Install Pundit gem and create authorization policies for document access and collaboration permissions",
+            "dependencies": [
+              "11.2"
+            ],
+            "details": "Add Pundit gem to Gemfile, include Pundit in ApplicationController, generate application policy, create DocumentPolicy with methods for show?, update?, destroy?, and collaborate? permissions. Implement role-based authorization logic checking user roles and document ownership/collaboration status.",
+            "status": "pending",
+            "testStrategy": "Test policy methods return correct permissions, verify unauthorized access raises Pundit::NotAuthorizedError, test role-based permissions work correctly"
+          },
+          {
+            "id": 4,
+            "title": "Create authentication UI and user registration/login flows",
+            "description": "Generate and customize Devise views for user registration, login, and profile management",
+            "dependencies": [
+              "11.2"
+            ],
+            "details": "Run rails generate devise:views to create customizable views, style registration and login forms to match application design, create user profile page with editable name and email fields, implement password change functionality, add flash messages for authentication actions.",
+            "status": "pending",
+            "testStrategy": "Test user registration flow, verify login/logout functionality, test profile update features, verify flash messages display correctly"
+          },
+          {
+            "id": 5,
+            "title": "Implement password reset, email verification, and OAuth integration",
+            "description": "Configure email functionality for password reset and verification, and add OAuth login options",
+            "dependencies": [
+              "11.3",
+              "11.4"
+            ],
+            "details": "Configure Action Mailer for password reset emails, enable Devise confirmable module for email verification, set up SMTP settings for production, add OmniAuth gems for Google and GitHub, configure OAuth providers in Devise initializer, create user association methods for OAuth accounts, handle OAuth callback and user creation/linking.",
+            "status": "pending",
+            "testStrategy": "Test password reset email delivery and functionality, verify email confirmation process, test OAuth login flows for Google and GitHub, verify user account linking works correctly"
+          }
+        ]
       },
       {
         "id": 12,
@@ -275,7 +330,7 @@
     ],
     "metadata": {
       "created": "2025-07-20T19:39:17.985Z",
-      "updated": "2025-07-23T09:32:34.069Z",
+      "updated": "2025-07-25T16:29:43.374Z",
       "description": "Tasks for master context"
     }
   }
