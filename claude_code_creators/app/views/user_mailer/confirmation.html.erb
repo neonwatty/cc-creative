@@ -1,0 +1,38 @@
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+  <h2 style="color: #333;">Welcome to Claude Code Creators, <%= @user.name %>!</h2>
+  
+  <p style="color: #666; line-height: 1.6;">
+    Thank you for signing up! Please confirm your email address to complete your registration.
+  </p>
+  
+  <p style="color: #666; line-height: 1.6;">
+    By confirming your email, you'll be able to:
+  </p>
+  
+  <ul style="color: #666; line-height: 1.8;">
+    <li>Create and manage AI-powered documents</li>
+    <li>Collaborate with team members</li>
+    <li>Access all features of Claude Code Creators</li>
+  </ul>
+  
+  <div style="text-align: center; margin: 30px 0;">
+    <%= link_to "Confirm Email Address", confirm_email_url(token: @user.generate_token_for(:email_confirmation)), 
+        style: "display: inline-block; padding: 12px 30px; background-color: #10b981; color: white; text-decoration: none; border-radius: 6px; font-weight: 500;" %>
+  </div>
+  
+  <p style="color: #666; line-height: 1.6;">
+    This link will expire in <strong>24 hours</strong>.
+  </p>
+  
+  <p style="color: #666; line-height: 1.6;">
+    If the button doesn't work, you can copy and paste this link into your browser:
+    <br>
+    <span style="color: #3b82f6; word-break: break-all;"><%= confirm_email_url(token: @user.generate_token_for(:email_confirmation)) %></span>
+  </p>
+  
+  <hr style="border: none; border-top: 1px solid #e5e5e5; margin: 30px 0;">
+  
+  <p style="color: #999; font-size: 14px;">
+    Claude Code Creators - AI-Powered Document Creation
+  </p>
+</div>

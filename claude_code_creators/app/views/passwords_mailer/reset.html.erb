@@ -1,0 +1,33 @@
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+  <h2 style="color: #333;">Hello <%= @user.name %>,</h2>
+  
+  <p style="color: #666; line-height: 1.6;">
+    We received a request to reset your password for your Claude Code Creators account. 
+    If you didn't make this request, you can safely ignore this email.
+  </p>
+  
+  <p style="color: #666; line-height: 1.6;">
+    To reset your password, click the button below:
+  </p>
+  
+  <div style="text-align: center; margin: 30px 0;">
+    <%= link_to "Reset Password", edit_password_url(@user.password_reset_token), 
+        style: "display: inline-block; padding: 12px 30px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 6px; font-weight: 500;" %>
+  </div>
+  
+  <p style="color: #666; line-height: 1.6;">
+    This link will expire in <strong>2 hours</strong> for security reasons.
+  </p>
+  
+  <p style="color: #666; line-height: 1.6;">
+    If the button doesn't work, you can copy and paste this link into your browser:
+    <br>
+    <span style="color: #3b82f6; word-break: break-all;"><%= edit_password_url(@user.password_reset_token) %></span>
+  </p>
+  
+  <hr style="border: none; border-top: 1px solid #e5e5e5; margin: 30px 0;">
+  
+  <p style="color: #999; font-size: 14px;">
+    Claude Code Creators - AI-Powered Document Creation
+  </p>
+</div>

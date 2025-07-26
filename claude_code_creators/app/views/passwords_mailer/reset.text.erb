@@ -1,0 +1,12 @@
+Hello <%= @user.name %>,
+
+We received a request to reset your password for your Claude Code Creators account. 
+If you didn't make this request, you can safely ignore this email.
+
+To reset your password, visit this link:
+<%= edit_password_url(@user.password_reset_token) %>
+
+This link will expire in 2 hours for security reasons.
+
+--
+Claude Code Creators - AI-Powered Document Creation

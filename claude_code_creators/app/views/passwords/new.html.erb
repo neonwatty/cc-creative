@@ -1,0 +1,35 @@
+<div>
+  <% if alert = flash[:alert] %>
+    <div class="py-2 px-3 bg-red-50 mb-5 text-red-500 font-medium rounded-lg" id="alert"><%= alert %></div>
+  <% end %>
+
+  <% if notice = flash[:notice] %>
+    <div class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-lg" id="notice"><%= notice %></div>
+  <% end %>
+
+  <h1 class="font-bold text-4xl mb-6">Forgot your password?</h1>
+  <p class="text-gray-600 mb-8">No worries! Enter your email address and we'll send you reset instructions.</p>
+
+  <%= form_with url: passwords_path, class: "contents" do |form| %>
+    <div class="my-5">
+      <%= form.label :email_address, "Email", class: "block text-sm font-medium text-gray-700 mb-2" %>
+      <%= form.email_field :email_address, 
+          required: true, 
+          autofocus: true, 
+          autocomplete: "username", 
+          placeholder: "Enter your email address", 
+          value: params[:email_address], 
+          class: "block shadow-sm rounded-md border border-gray-400 focus:outline-blue-600 focus:ring-2 focus:ring-blue-500 px-3 py-2 w-full" %>
+    </div>
+
+    <div class="flex items-center justify-between my-8">
+      <%= form.submit "Send reset instructions", 
+          class: "w-full sm:w-auto text-center rounded-md px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium cursor-pointer transition-colors" %>
+    </div>
+
+    <div class="text-center text-sm text-gray-600">
+      Remember your password? 
+      <%= link_to "Sign in", new_session_path, class: "text-blue-600 hover:text-blue-700 font-medium" %>
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Claude Code Creators" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
+    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+    <%= vite_client_tag %>
+    <%= vite_javascript_tag 'application' %>
+
+  </head>
+
+  <body class="bg-gray-50">
+    <div class="min-h-screen flex">
+      <!-- Sidebar -->
+      <aside class="w-64 bg-white shadow-md">
+        <div class="p-6">
+          <h2 class="text-2xl font-bold text-gray-800">Claude Code</h2>
+          <p class="text-sm text-gray-600">Document Creator</p>
+        </div>
+        
+        <nav class="mt-6">
+          <%= link_to root_path, class: "flex items-center px-6 py-3 hover:bg-gray-100 transition-colors #{current_page?(root_path) ? 'bg-gray-100 border-r-4 border-blue-500' : ''}" do %>
+            <svg class="w-5 h-5 mr-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+            </svg>
+            <span class="text-gray-700">Home</span>
+          <% end %>
+          
+          <%= link_to documents_path, class: "flex items-center px-6 py-3 hover:bg-gray-100 transition-colors #{current_page?(documents_path) ? 'bg-gray-100 border-r-4 border-blue-500' : ''}" do %>
+            <svg class="w-5 h-5 mr-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <span class="text-gray-700">Documents</span>
+          <% end %>
+          
+          <%= link_to new_document_path, class: "flex items-center px-6 py-3 hover:bg-gray-100 transition-colors #{current_page?(new_document_path) ? 'bg-gray-100 border-r-4 border-blue-500' : ''}" do %>
+            <svg class="w-5 h-5 mr-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            <span class="text-gray-700">New Document</span>
+          <% end %>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="flex-1">
+        <!-- Top Bar -->
+        <header class="bg-white shadow-sm border-b border-gray-200">
+          <div class="px-8 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-semibold text-gray-800">
+              <%= content_for(:page_title) || "Welcome" %>
+            </h1>
+            
+            <!-- User info -->
+            <% if authenticated? %>
+              <div class="flex items-center space-x-4">
+                <span class="text-sm text-gray-600"><%= Current.user.name %></span>
+                <div class="relative group">
+                  <%= link_to profile_path, class: "block" do %>
+                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-semibold hover:bg-blue-600 transition-colors">
+                      <%= Current.user.name.first.upcase %>
+                    </div>
+                  <% end %>
+                  
+                  <!-- Dropdown menu -->
+                  <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                    <%= link_to "Profile", profile_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
+                    <%= link_to "Edit Profile", edit_profile_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
+                    <hr class="my-1">
+                    <%= link_to "Sign out", session_path, 
+                        data: { turbo_method: :delete },
+                        class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
+                  </div>
+                </div>
+              </div>
+            <% else %>
+              <div class="flex items-center space-x-4">
+                <%= link_to "Sign in", new_session_path, class: "text-sm text-blue-600 hover:text-blue-700 font-medium" %>
+                <%= link_to "Sign up", new_user_path, class: "text-sm rounded-md px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors" %>
+              </div>
+            <% end %>
+          </div>
+        </header>
+
+        <!-- Flash Messages -->
+        <% if flash.any? %>
+          <div class="px-8 py-4">
+            <% flash.each do |type, message| %>
+              <div class="mb-4 p-4 rounded-lg <%= type == 'notice' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' %>">
+                <%= message %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
+        <!-- Page Content -->
+        <div class="p-8">
+          <%= yield %>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
