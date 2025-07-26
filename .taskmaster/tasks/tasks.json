@@ -219,7 +219,7 @@
               "11.1"
             ],
             "details": "Create migration to add name (string), role (string with default 'user'), created_at, updated_at fields. Update User model with validations for name presence and role inclusion. Add enum for roles (user, admin, editor). Configure strong parameters in ApplicationController for additional fields.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test user creation with new fields, verify role enum works correctly, test validations for name and role fields"
           },
           {
@@ -330,7 +330,7 @@
     ],
     "metadata": {
       "created": "2025-07-20T19:39:17.985Z",
-      "updated": "2025-07-25T16:29:43.374Z",
+      "updated": "2025-07-26T17:41:19.824Z",
       "description": "Tasks for master context"
     }
   }
