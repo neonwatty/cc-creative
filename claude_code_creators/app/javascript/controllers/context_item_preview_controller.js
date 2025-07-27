@@ -24,6 +24,11 @@ export default class extends Controller {
     this.element.classList.add("hidden")
     this.restorePreviousFocus()
     this.dispatch("closed", { detail: { contextItemId: this.idValue } })
+    
+    // Also dispatch on document for global listeners
+    document.dispatchEvent(new CustomEvent('context-item-preview:closed', {
+      detail: { contextItemId: this.idValue }
+    }))
   }
 
   closeOnBackdrop(event) {
@@ -33,7 +38,7 @@ export default class extends Controller {
   }
 
   insertContent() {
-    const content = this.getPlainTextContent()
+    const content = this.getContentForInsertion()
     
     // Dispatch custom event with content for parent components to handle
     this.dispatch("insert", { 
@@ -44,6 +49,16 @@ export default class extends Controller {
         contentType: this.contentTypeValue
       } 
     })
+    
+    // Also dispatch on document for global listeners
+    document.dispatchEvent(new CustomEvent('context-item-preview:insert', {
+      detail: {
+        content: content,
+        contextItemId: this.idValue,
+        itemType: this.typeValue,
+        contentType: this.contentTypeValue
+      }
+    }))
     
     // Try to find Trix editor and insert content directly
     this.insertIntoTrixEditor(content)
@@ -84,14 +99,101 @@ export default class extends Controller {
       return contentElement.textContent.trim()
     }
   }
+  
+  getContentForInsertion() {
+    // Get content formatted appropriately for insertion
+    const rawContent = this.getPlainTextContent()
+    
+    // Format content based on type and context
+    switch (this.contentTypeValue) {
+      case 'code':
+        // Detect language and wrap in code block
+        const language = this.detectLanguageFromContent()
+        return `\n\`\`\`${language}\n${rawContent}\n\`\`\`\n`
+        
+      case 'snippet':
+        // Wrap in inline code
+        return `\`${rawContent}\``
+        
+      case 'note':
+      case 'reference':
+        // Add as blockquote for notes and references
+        return `\n> ${rawContent}\n`
+        
+      case 'text':
+      default:
+        // Insert as plain text with line breaks
+        return `\n${rawContent}\n`
+    }
+  }
+  
+  detectLanguageFromContent() {
+    // Try to detect language from the context item
+    const contentElement = this.contentTarget
+    const codeElement = contentElement.querySelector('code')
+    
+    if (codeElement) {
+      // Check for language class
+      const classList = Array.from(codeElement.classList)
+      for (const className of classList) {
+        if (className.startsWith('language-')) {
+          return className.replace('language-', '')
+        }
+      }
+      
+      // Check data attributes
+      const dataLang = codeElement.getAttribute('data-language')
+      if (dataLang) {
+        return dataLang
+      }
+    }
+    
+    // Check the item type for hints
+    if (this.typeValue) {
+      const typeHints = {
+        'javascript': 'javascript',
+        'ruby': 'ruby',
+        'python': 'python',
+        'html': 'html',
+        'css': 'css',
+        'sql': 'sql'
+      }
+      
+      for (const [hint, lang] of Object.entries(typeHints)) {
+        if (this.typeValue.toLowerCase().includes(hint)) {
+          return lang
+        }
+      }
+    }
+    
+    // Default fallback
+    return ''
+  }
 
   insertIntoTrixEditor(content) {
     // Look for active Trix editor
     const trixEditor = document.querySelector('trix-editor')
     if (trixEditor && trixEditor.editor) {
-      const position = trixEditor.editor.getPosition()
+      // Store the current state for undo functionality
+      const currentPosition = trixEditor.editor.getPosition()
+      
+      // Create an undo entry before making changes
+      trixEditor.editor.recordUndoEntry('Insert Context Item')
+      
+      // Insert the content
       trixEditor.editor.insertString(content)
-      trixEditor.editor.setSelectedRange([position, position + content.length])
+      
+      // Set selection to the inserted content
+      trixEditor.editor.setSelectedRange([currentPosition, currentPosition + content.length])
+      
+      // Trigger change event to notify other controllers
+      trixEditor.dispatchEvent(new CustomEvent('trix-change', {
+        bubbles: true,
+        detail: { insertedContent: content, insertedFrom: 'context-item' }
+      }))
+      
+      // Focus the editor
+      trixEditor.focus()
     }
   }
 
@@ -146,6 +248,12 @@ export default class extends Controller {
       this.close()
     }
     
+    // Handle Cmd/Ctrl+Shift+I for insert
+    if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key === 'I') {
+      event.preventDefault()
+      this.insertContent()
+    }
+    
     // Handle Tab key for focus trapping
     if (event.key === 'Tab') {
       this.trapFocus(event)
@@ -189,17 +297,56 @@ export default class extends Controller {
   }
 
   highlightCodeIfNeeded() {
-    if (this.contentTypeValue === 'code') {
-      // If you have a syntax highlighting library like Prism.js or highlight.js
-      // you can trigger highlighting here
+    if (this.contentTypeValue === 'code' && window.Prism) {
+      // Use Prism.js for syntax highlighting
       const codeBlocks = this.contentTarget.querySelectorAll('pre code')
       codeBlocks.forEach(block => {
-        // Example for Prism.js: Prism.highlightElement(block)
-        // Example for highlight.js: hljs.highlightElement(block)
+        // Detect language from class or data attribute
+        const language = this.detectLanguage(block)
+        if (language) {
+          block.className = `language-${language}`
+        }
         
-        // For now, just add a class to indicate it's ready for highlighting
-        block.classList.add('syntax-ready')
+        // Apply Prism highlighting
+        try {
+          window.Prism.highlightElement(block)
+        } catch (error) {
+          console.warn('Prism highlighting failed:', error)
+          block.classList.add('syntax-ready')
+        }
       })
     }
+  }
+  
+  detectLanguage(codeElement) {
+    // Try to detect language from various sources
+    const classList = Array.from(codeElement.classList)
+    
+    // Look for language- prefixed classes
+    for (const className of classList) {
+      if (className.startsWith('language-')) {
+        return className.replace('language-', '')
+      }
+    }
+    
+    // Look for data-language attribute
+    const dataLang = codeElement.getAttribute('data-language')
+    if (dataLang) {
+      return dataLang
+    }
+    
+    // Look for parent pre element with language class
+    const parent = codeElement.closest('pre')
+    if (parent) {
+      const parentClasses = Array.from(parent.classList)
+      for (const className of parentClasses) {
+        if (className.startsWith('language-')) {
+          return className.replace('language-', '')
+        }
+      }
+    }
+    
+    // Default fallback
+    return 'javascript'
   }
 }

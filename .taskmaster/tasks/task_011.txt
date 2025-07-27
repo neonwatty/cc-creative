@@ -1,0 +1,92 @@
+# Task ID: 11
+# Title: Implement User Authentication and Authorization
+# Status: done
+# Dependencies: 1
+# Priority: high
+# Description: Create a secure authentication system with user registration, login, and role-based permissions for document access and collaboration.
+# Details:
+1. Set up authentication using Devise or a similar gem:
+   ```ruby
+   # Add to Gemfile
+   gem 'devise'
+
+   # Run installer
+   rails generate devise:install
+   rails generate devise User
+   ```
+2. Customize user model with additional fields:
+   ```ruby
+   # db/migrate/YYYYMMDDHHMMSS_add_fields_to_users.rb
+   class AddFieldsToUsers < ActiveRecord::Migration[8.0]
+     def change
+       add_column :users, :name, :string
+       add_column :users, :role, :string, default: 'user'
+       # Other fields
+     end
+   end
+   ```
+3. Create authorization system using Pundit:
+   ```ruby
+   # Add to Gemfile
+   gem 'pundit'
+
+   # app/policies/document_policy.rb
+   class DocumentPolicy < ApplicationPolicy
+     def show?
+       record.user_id == user.id || record.collaborators.include?(user)
+     end
+
+     def update?
+       show?
+     end
+
+     # Other permissions
+   end
+   ```
+4. Implement user profile management
+5. Create UI for user registration and login
+6. Add password reset functionality
+7. Implement email verification
+8. Create user roles and permissions
+9. Add OAuth login options (Google, GitHub, etc.)
+
+# Test Strategy:
+1. Test user registration and login flows
+2. Verify authorization controls access correctly
+3. Test password reset functionality
+4. Verify email verification works
+5. Test user profile management
+6. Ensure OAuth login works correctly
+7. Test role-based permissions
+
+# Subtasks:
+## 1. Set up Devise authentication gem and generate User model [done]
+### Dependencies: None
+### Description: Install and configure Devise gem, generate User model with basic authentication fields, and run initial setup
+### Details:
+Add Devise gem to Gemfile, run bundle install, execute rails generate devise:install to create initializer and views, then rails generate devise User to create User model with email, encrypted_password, and basic Devise fields. Run rails db:migrate to create users table.
+
+## 2. Customize User model with additional fields and roles [done]
+### Dependencies: 11.1
+### Description: Extend the User model with name, role, and other necessary fields for the application
+### Details:
+Create migration to add name (string), role (string with default 'user'), created_at, updated_at fields. Update User model with validations for name presence and role inclusion. Add enum for roles (user, admin, editor). Configure strong parameters in ApplicationController for additional fields.
+
+## 3. Implement Pundit authorization system with policies [done]
+### Dependencies: 11.2
+### Description: Install Pundit gem and create authorization policies for document access and collaboration permissions
+### Details:
+Add Pundit gem to Gemfile, include Pundit in ApplicationController, generate application policy, create DocumentPolicy with methods for show?, update?, destroy?, and collaborate? permissions. Implement role-based authorization logic checking user roles and document ownership/collaboration status.
+
+## 4. Create authentication UI and user registration/login flows [done]
+### Dependencies: 11.2
+### Description: Generate and customize Devise views for user registration, login, and profile management
+### Details:
+Run rails generate devise:views to create customizable views, style registration and login forms to match application design, create user profile page with editable name and email fields, implement password change functionality, add flash messages for authentication actions.
+
+## 5. Implement password reset, email verification, and OAuth integration [done]
+### Dependencies: 11.3, 11.4
+### Description: Configure email functionality for password reset and verification, and add OAuth login options
+### Details:
+Configure Action Mailer for password reset emails, enable Devise confirmable module for email verification, set up SMTP settings for production, add OmniAuth gems for Google and GitHub, configure OAuth providers in Devise initializer, create user association methods for OAuth accounts, handle OAuth callback and user creation/linking.
+

@@ -68,3 +68,16 @@ Closes #234
 ```
 
 Remember: Your goal is to maintain a clean, informative git history that helps developers understand the evolution of the codebase. Every commit should tell a story about what changed and why.
+
+## Automatic Handoff Protocol
+
+### Completion Requirements:
+- All changes must be successfully committed and pushed
+- Commit message should reference relevant task IDs
+- Update Task Master status: `mcp__task-master-ai__set_task_status`
+- Report completion with: commit hash, files committed, push status
+
+### Final Agent Status:
+- This agent typically concludes the workflow
+- Report overall feature/task completion
+- Tag `project-orchestrator` if additional coordination needed

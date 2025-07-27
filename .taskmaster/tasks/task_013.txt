@@ -1,0 +1,61 @@
+# Task ID: 13
+# Title: Implement Export and Sharing Features
+# Status: pending
+# Dependencies: 3, 11
+# Priority: medium
+# Description: Create functionality to export documents in various formats and share them with others through links or direct invitations.
+# Details:
+1. Implement document export in multiple formats:
+   ```ruby
+   # app/services/document_export_service.rb
+   class DocumentExportService
+     def initialize(document)
+       @document = document
+     end
+
+     def to_pdf
+       # Implementation using a PDF generation library
+     end
+
+     def to_markdown
+       # Implementation
+     end
+
+     def to_html
+       # Implementation
+     end
+
+     def to_docx
+       # Implementation using a DOCX generation library
+     end
+   end
+   ```
+2. Create sharing functionality:
+   ```ruby
+   # app/models/share_link.rb
+   class ShareLink < ApplicationRecord
+     belongs_to :document
+     before_create :generate_token
+
+     private
+
+     def generate_token
+       self.token = SecureRandom.urlsafe_base64(10)
+     end
+   end
+   ```
+3. Implement share link controller and views
+4. Add email invitation functionality
+5. Create UI for export options
+6. Implement permission settings for shared documents
+7. Add expiration options for share links
+8. Create public/private visibility controls
+
+# Test Strategy:
+1. Test document export in each format
+2. Verify share link generation and access
+3. Test email invitation functionality
+4. Verify permission settings work correctly
+5. Test expiration of share links
+6. Ensure public/private visibility controls work
+7. Test accessing shared documents as different users

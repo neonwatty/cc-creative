@@ -104,7 +104,71 @@
           3
         ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create ContextItem model and migration",
+            "description": "Create the ContextItem ActiveRecord model with associations to Document and User, and generate the database migration",
+            "details": "1. Generate model: rails generate model ContextItem document:references user:references content:text item_type:string title:string metadata:jsonb\\n2. Add validations for content presence and item_type inclusion\\n3. Add indexes for performance\\n4. Set up associations in Document and User models",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 4
+          },
+          {
+            "id": 2,
+            "title": "Create ContextItems controller with CRUD actions",
+            "description": "Implement a RESTful controller for managing context items with proper authorization",
+            "details": "1. Generate controller: rails generate controller ContextItems\\n2. Implement CRUD actions (index, show, create, update, destroy)\\n3. Add strong parameters for security\\n4. Implement Pundit policies for authorization\\n5. Add JSON responses for AJAX operations",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 4
+          },
+          {
+            "id": 3,
+            "title": "Implement ContextSidebarComponent using ViewComponent",
+            "description": "Create a ViewComponent for the context sidebar that displays and manages snippets, drafts, and versions",
+            "details": "1. Generate component: rails generate component ContextSidebar document current_user\\n2. Design the sidebar UI with tabs for snippets/drafts/versions\\n3. Implement filtering and sorting functionality\\n4. Add collapsible sections for better organization\\n5. Style with Tailwind CSS following existing design patterns",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 4
+          },
+          {
+            "id": 4,
+            "title": "Add drag-and-drop functionality with Stimulus",
+            "description": "Implement drag-and-drop for context items using Stimulus controllers and Sortable.js",
+            "details": "1. Install Sortable.js: yarn add sortablejs\\n2. Create Stimulus controller for drag-and-drop\\n3. Implement dragging from sidebar to editor\\n4. Add visual feedback during drag operations\\n5. Handle drop events and insert content at cursor position\\n6. Save new order when items are reordered",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 4
+          },
+          {
+            "id": 5,
+            "title": "Implement context item preview and insertion",
+            "description": "Add preview functionality for context items and implement insertion into the document editor",
+            "details": "1. Create preview modal/popover component\\n2. Implement syntax highlighting for code snippets\\n3. Add insert button and keyboard shortcuts\\n4. Integrate with Trix editor API for content insertion\\n5. Handle different content types (plain text, markdown, code)\\n6. Add undo/redo support for insertions",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 4
+          },
+          {
+            "id": 6,
+            "title": "Create document versioning system",
+            "description": "Implement automatic versioning for documents with the ability to restore previous versions",
+            "details": "1. Add version tracking to Document model\\n2. Create DocumentVersion model with content snapshots\\n3. Implement automatic version creation on significant changes\\n4. Add version comparison/diff functionality\\n5. Create UI for browsing and restoring versions\\n6. Add version naming and tagging features",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 4
+          },
+          {
+            "id": 7,
+            "title": "Add search functionality for context items",
+            "description": "Implement full-text search across all context items with filtering options",
+            "details": "1. Add search input to context sidebar\\n2. Implement database search using PostgreSQL full-text search\\n3. Add filters for item type, date range, and tags\\n4. Implement search highlighting in results\\n5. Add search history/recent searches\\n6. Optimize search performance with proper indexing",
+            "status": "in-progress",
+            "dependencies": [],
+            "parentTaskId": 4
+          }
+        ]
       },
       {
         "id": 5,
@@ -200,7 +264,7 @@
         "dependencies": [
           1
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -330,7 +394,7 @@
     ],
     "metadata": {
       "created": "2025-07-20T19:39:17.985Z",
-      "updated": "2025-07-26T18:46:55.724Z",
+      "updated": "2025-07-27T23:07:26.663Z",
       "description": "Tasks for master context"
     }
   }

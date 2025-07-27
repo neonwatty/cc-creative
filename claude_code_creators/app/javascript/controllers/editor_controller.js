@@ -18,15 +18,26 @@ export default class extends Controller {
       // Setup autosave
       this.setupAutosave()
       this.lastContent = this.editor.value
+      
+      // Listen for context item insertions
+      this.setupContextItemListeners()
     }
   }
 
-  handleChange() {
+  handleChange(event) {
     this.updateWordCount()
     this.updateStatus("editing")
     
     // Mark as changed for autosave
     this.contentChanged = true
+    
+    // Handle context item insertions
+    if (event && event.detail && event.detail.insertedFrom === 'context-item') {
+      console.log('Context item inserted:', event.detail.insertedContent)
+      
+      // You could add additional logic here for context item tracking
+      // For example, tracking which context items have been used
+    }
   }
 
   updateWordCount() {
@@ -150,11 +161,60 @@ export default class extends Controller {
     }
   }
   
+  setupContextItemListeners() {
+    // Listen for context item preview events
+    document.addEventListener('context-item-preview:insert', this.handleContextItemInsert.bind(this))
+    document.addEventListener('context-item-preview:closed', this.handleContextItemClosed.bind(this))
+  }
+  
+  handleContextItemInsert(event) {
+    const { content, contextItemId, itemType, contentType } = event.detail
+    
+    // Format content based on type before insertion
+    let formattedContent = content
+    
+    if (contentType === 'code') {
+      // Wrap code in appropriate formatting
+      formattedContent = `\n\`\`\`\n${content}\n\`\`\`\n`
+    } else if (itemType === 'note') {
+      // Add some context for notes
+      formattedContent = `\n> ${content}\n`
+    }
+    
+    // Insert at current cursor position
+    if (this.editor && this.editor.editor) {
+      this.editor.editor.recordUndoEntry('Insert Context Item')
+      
+      const position = this.editor.editor.getPosition()
+      this.editor.editor.insertString(formattedContent)
+      
+      // Move cursor to end of inserted content
+      const newPosition = position + formattedContent.length
+      this.editor.editor.setSelectedRange([newPosition, newPosition])
+      
+      // Focus the editor
+      this.editor.focus()
+    }
+  }
+  
+  handleContextItemClosed(event) {
+    // Return focus to editor when context item preview is closed
+    if (this.editor) {
+      setTimeout(() => {
+        this.editor.focus()
+      }, 100)
+    }
+  }
+  
   disconnect() {
     if (this.editor) {
       this.editor.removeEventListener("trix-change", this.handleChange.bind(this))
       this.editor.removeEventListener("trix-attachment-add", this.handleAttachment.bind(this))
     }
+    
+    // Remove context item listeners
+    document.removeEventListener('context-item-preview:insert', this.handleContextItemInsert.bind(this))
+    document.removeEventListener('context-item-preview:closed', this.handleContextItemClosed.bind(this))
     
     if (this.autosaveTimer) {
       clearInterval(this.autosaveTimer)

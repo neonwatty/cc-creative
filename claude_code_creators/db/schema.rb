@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_26_184334) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_27_230349) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.string "name", null: false
     t.text "body"
@@ -84,6 +84,47 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_26_184334) do
     t.index ["session_id"], name: "index_claude_sessions_on_session_id", unique: true
   end
 
+  create_table "context_items", force: :cascade do |t|
+    t.integer "document_id", null: false
+    t.integer "user_id", null: false
+    t.text "content"
+    t.string "item_type"
+    t.string "title"
+    t.json "metadata", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "position"
+    t.text "search_content"
+    t.index ["created_at"], name: "index_context_items_on_created_at"
+    t.index ["document_id", "item_type", "position"], name: "index_context_items_on_document_id_and_item_type_and_position"
+    t.index ["document_id", "user_id"], name: "index_context_items_on_document_id_and_user_id"
+    t.index ["document_id"], name: "index_context_items_on_document_id"
+    t.index ["item_type"], name: "index_context_items_on_item_type"
+    t.index ["search_content"], name: "index_context_items_on_search_content"
+    t.index ["user_id"], name: "index_context_items_on_user_id"
+  end
+
+  create_table "document_versions", force: :cascade do |t|
+    t.integer "document_id", null: false
+    t.integer "version_number", null: false
+    t.string "title", null: false
+    t.text "content_snapshot", null: false
+    t.text "description_snapshot"
+    t.json "tags_snapshot", default: []
+    t.string "version_name"
+    t.text "version_notes"
+    t.integer "created_by_user_id", null: false
+    t.boolean "is_auto_version", default: false, null: false
+    t.integer "word_count", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_user_id"], name: "index_document_versions_on_created_by_user_id"
+    t.index ["document_id", "created_at"], name: "index_document_versions_on_document_id_and_created_at"
+    t.index ["document_id", "version_number"], name: "index_document_versions_on_document_id_and_version_number", unique: true
+    t.index ["document_id"], name: "index_document_versions_on_document_id"
+    t.index ["is_auto_version"], name: "index_document_versions_on_is_auto_version"
+  end
+
   create_table "documents", force: :cascade do |t|
     t.string "title"
     t.text "description"
@@ -91,7 +132,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_26_184334) do
     t.integer "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "current_version_number", default: 0
     t.index ["created_at"], name: "index_documents_on_created_at"
+    t.index ["current_version_number"], name: "index_documents_on_current_version_number"
     t.index ["user_id"], name: "index_documents_on_user_id"
   end
 
@@ -130,6 +173,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_26_184334) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "context_items", "documents"
+  add_foreign_key "context_items", "users"
+  add_foreign_key "document_versions", "documents"
+  add_foreign_key "document_versions", "users", column: "created_by_user_id"
   add_foreign_key "documents", "users"
   add_foreign_key "identities", "users"
   add_foreign_key "sessions", "users"

@@ -5,7 +5,7 @@ require "application_system_test_case"
 class ContextItemPreviewComponentSystemTest < ApplicationSystemTestCase
   def setup
     @user = users(:john)
-    @document = documents(:sample_document)
+    @document = documents(:one)
     @context_item = context_items(:code_snippet)
     
     # Create a test page that includes the component
@@ -99,6 +99,28 @@ class ContextItemPreviewComponentSystemTest < ApplicationSystemTestCase
     assert_equal @context_item.item_type, event_detail["itemType"]
   end
 
+  test "keyboard shortcut cmd+shift+i triggers insert" do
+    show_modal
+    
+    # Listen for the custom event
+    page.evaluate_script(<<~JS)
+      window.insertEventFired = false;
+      document.addEventListener('context-item-preview:insert', function(event) {
+        window.insertEventFired = true;
+      });
+    JS
+    
+    # Simulate Cmd+Shift+I (or Ctrl+Shift+I on non-Mac)
+    find("body").send_keys([:command, :shift, "i"])
+    
+    # Check that event was fired
+    event_fired = page.evaluate_script("window.insertEventFired")
+    assert event_fired
+    
+    # Modal should be closed after insert
+    assert_selector ".context-item-preview-modal.hidden"
+  end
+
   test "focus management" do
     show_modal
     
@@ -150,8 +172,29 @@ class ContextItemPreviewComponentSystemTest < ApplicationSystemTestCase
     visit_test_page_with_component
     show_modal
     
-    # Check that code blocks are marked for syntax highlighting
-    assert_selector "code.syntax-ready"
+    # Check that code blocks are marked for syntax highlighting or have Prism classes
+    assert_selector "code.syntax-ready, code[class*='language-']"
+  end
+
+  test "content formatting for different types" do
+    # Test code content formatting
+    @context_item.update!(content: "console.log('hello')", item_type: "code")
+    visit_test_page_with_component
+    show_modal
+    
+    # Listen for formatted content
+    page.evaluate_script(<<~JS)
+      window.formattedContent = null;
+      document.addEventListener('context-item-preview:insert', function(event) {
+        window.formattedContent = event.detail.content;
+      });
+    JS
+    
+    click_button "Insert"
+    
+    formatted_content = page.evaluate_script("window.formattedContent")
+    assert_includes formatted_content, "```"
+    assert_includes formatted_content, "console.log('hello')"
   end
 
   private

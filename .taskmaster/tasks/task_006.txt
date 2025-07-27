@@ -1,0 +1,55 @@
+# Task ID: 6
+# Title: Implement File Integration with Cloud Services
+# Status: pending
+# Dependencies: 1, 3
+# Priority: medium
+# Description: Connect Google Drive, Dropbox, Notion, or manually upload files to import/export whole documents or folders into the workspace.
+# Details:
+1. Set up ActiveStorage for file handling:
+   ```ruby
+   # Run ActiveStorage installation
+   rails active_storage:install
+   ```
+2. Add necessary gems for cloud service integrations:
+   ```ruby
+   # Gemfile
+   gem 'google_drive'
+   gem 'dropbox_api'
+   gem 'notion-ruby-client'
+   ```
+3. Create service objects for each cloud provider:
+   ```ruby
+   # app/services/google_drive_service.rb
+   class GoogleDriveService
+     def initialize(user)
+       @user = user
+       # Setup authentication using user's credentials
+     end
+
+     def list_files
+       # Implementation
+     end
+
+     def import_file(file_id)
+       # Implementation
+     end
+
+     def export_document(document, folder_id = nil)
+       # Implementation
+     end
+   end
+   ```
+4. Create similar services for Dropbox and Notion
+5. Implement OAuth flow for each service
+6. Create UI for connecting accounts
+7. Implement file browser for each service
+8. Add import/export functionality
+9. Create background jobs for file operations
+
+# Test Strategy:
+1. Test OAuth authentication flow for each service
+2. Verify file listing functionality
+3. Test file import from each service
+4. Verify document export to each service
+5. Test error handling for API failures
+6. Ensure file operations work asynchronously

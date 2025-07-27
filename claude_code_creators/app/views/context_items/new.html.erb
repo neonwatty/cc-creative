@@ -1,0 +1,12 @@
+<div class="container mx-auto px-4 py-8 max-w-2xl">
+  <div class="mb-6">
+    <%= link_to "← Back to Context Items", document_context_items_path(@document), 
+                class: "text-blue-500 hover:text-blue-700" %>
+  </div>
+
+  <div class="bg-white rounded-lg shadow-lg p-8">
+    <h1 class="text-3xl font-bold mb-6">New Context Item</h1>
+    
+    <%= render "form", context_item: @context_item %>
+  </div>
+</div>

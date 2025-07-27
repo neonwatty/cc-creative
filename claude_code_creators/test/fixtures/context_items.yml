@@ -1,0 +1,51 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  document: one
+  user: one
+  content: |
+    def hello_world
+      puts "Hello, World!"
+    end
+  item_type: snippet
+  title: Hello World Function
+  metadata: { language: "ruby", line_count: 3 }
+
+two:
+  document: two
+  user: two
+  content: |
+    This is a draft introduction for my article about Ruby on Rails.
+    It covers the basics of getting started with Rails development.
+  item_type: draft
+  title: Article Introduction Draft
+
+code_snippet:
+  document: one
+  user: one
+  content: |
+    def hello_world
+      puts "Hello, World!"
+    end
+  item_type: snippet
+  title: Hello World Function
+  metadata: { language: "ruby", line_count: 3 }
+
+draft_introduction:
+  document: one
+  user: one
+  content: |
+    This is a draft introduction for my article about Ruby on Rails.
+    It covers the basics of getting started with Rails development.
+  item_type: draft
+  title: Article Introduction Draft
+
+version_v1:
+  document: two
+  user: two
+  content: |
+    Version 1.0 of the document content.
+    Initial release with basic functionality.
+  item_type: version
+  title: Version 1.0
+  metadata: { version_number: "1.0", release_date: "2024-01-01" }

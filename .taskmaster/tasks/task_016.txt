@@ -1,0 +1,66 @@
+# Task ID: 16
+# Title: Implement Custom Review Slash Commands
+# Status: pending
+# Dependencies: 7, 8
+# Priority: medium
+# Description: Create the four custom review slash commands: /review_for_clarity, /review_for_brand_alignment, /review_for_proof, and /review_for_concision. These should be user-definable prompts that can be built by users or provided as default examples.
+# Details:
+1. Extend the command parser service to handle review commands:
+   ```ruby
+   # app/services/command_parser_service.rb
+   class CommandParserService
+     REVIEW_COMMANDS = %w[review_for_clarity review_for_brand_alignment review_for_proof review_for_concision]
+
+     def process_review_command(command, document_content, args = [])
+       case command
+       when 'review_for_clarity'
+         review_for_clarity(document_content)
+       when 'review_for_brand_alignment'
+         review_for_brand_alignment(document_content, args.first)
+       when 'review_for_proof'
+         review_for_proof(document_content)
+       when 'review_for_concision'
+         review_for_concision(document_content)
+       end
+     end
+
+     private
+
+     def review_for_clarity(content)
+       prompt = "Review the following writing to ensure arguments are expressed clearly. Identify any unclear passages and suggest improvements:\n\n#{content}"
+       @claude_service.send_message(prompt)
+     end
+
+     def review_for_brand_alignment(content, brand_guidelines_path = nil)
+       guidelines = brand_guidelines_path ? load_brand_guidelines(brand_guidelines_path) : default_brand_guidelines
+       prompt = "Review the following writing for brand guideline compliance. Brand guidelines:\n#{guidelines}\n\nContent to review:\n#{content}"
+       @claude_service.send_message(prompt)
+     end
+
+     def review_for_proof(content)
+       prompt = "Review the following writing for evidence. Examine claims and associated data/hyperlinks to verify factual evidence. Point out where evidence is missing or could be improved:\n\n#{content}"
+       @claude_service.send_message(prompt)
+     end
+
+     def review_for_concision(content)
+       prompt = "Review the following writing for potential shortening and concision opportunities. Identify verbose passages and suggest more concise alternatives:\n\n#{content}"
+       @claude_service.send_message(prompt)
+     end
+   end
+   ```
+2. Create default prompt templates for each review command
+3. Implement brand guidelines loading functionality
+4. Add UI for customizing review command prompts
+5. Create review results display component
+6. Implement review history tracking
+7. Add review command suggestions in the editor
+8. Create review command wizard for user customization
+
+# Test Strategy:
+1. Test each review command with sample content
+2. Verify brand guidelines loading works correctly
+3. Test custom prompt creation and editing
+4. Verify review results display correctly
+5. Test review history tracking
+6. Ensure review commands integrate with existing slash command system
+7. Test review command wizard functionality

@@ -110,7 +110,7 @@
         <% end %>
 
         <!-- Page Content -->
-        <div class="p-8">
+        <div class="<%= content_for?(:full_height) ? 'h-[calc(100vh-5rem)]' : 'p-8' %>">
           <%= yield %>
         </div>
       </main>

@@ -1,5 +1,7 @@
 class Document < ApplicationRecord
   belongs_to :user
+  has_many :context_items, dependent: :destroy
+  has_many :document_versions, dependent: :destroy
   
   # Rich text association for content
   has_rich_text :content
@@ -71,10 +73,54 @@ class Document < ApplicationRecord
     new_document
   end
   
+  # Version management methods
+  def next_version_number
+    current_version_number.to_i + 1
+  end
+
+  def latest_version
+    document_versions.order(:version_number).last
+  end
+
+  def version_at(version_number)
+    document_versions.find_by(version_number: version_number)
+  end
+
+  def create_version(user, options = {})
+    DocumentVersion.create_from_document(self, user, options)
+  end
+
+  def create_auto_version(user)
+    create_version(user, is_auto_version: true)
+  end
+
+  def create_manual_version(user, version_name: nil, version_notes: nil)
+    create_version(user, {
+      is_auto_version: false,
+      version_name: version_name,
+      version_notes: version_notes
+    })
+  end
+
+  # Check if document content has changed since last version
+  def content_changed_since_last_version?
+    return true if document_versions.empty?
+    
+    latest = latest_version
+    return true if latest.nil?
+    
+    content.to_plain_text != latest.content_snapshot ||
+      title != latest.title ||
+      description != latest.description_snapshot ||
+      (tags || []).sort != (latest.tags_snapshot || []).sort
+  end
+
   # Track version metadata
   def version_info
     {
-      version: updated_at.to_i,
+      current_version: current_version_number,
+      total_versions: document_versions.count,
+      latest_version_created: latest_version&.created_at,
       created: created_at,
       updated: updated_at,
       word_count: word_count

@@ -1,13 +1,37 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
+one:
+  title: Rails Best Practices
+  description: An article about Ruby on Rails best practices
+  tags: '["ruby", "rails", "testing"]'
+  user: one
+
+two:
+  title: JavaScript Modern Patterns
+  description: Modern JavaScript patterns and techniques
+  tags: '["javascript", "react", "frontend"]'
+  user: two
+
 document_one:
-  title: First Document
-  description: Description of the first document
+  title: Rails Best Practices
+  description: An article about Ruby on Rails best practices
   tags: '["ruby", "rails", "testing"]'
   user: one
 
 document_two:
-  title: Second Document
-  description: Description of the second document
+  title: JavaScript Modern Patterns
+  description: Modern JavaScript patterns and techniques
   tags: '["javascript", "react", "frontend"]'
   user: two
+
+article_one:
+  title: Rails Best Practices
+  description: An article about Ruby on Rails best practices
+  tags: '["ruby", "rails", "testing"]'
+  user: john
+
+article_two:
+  title: JavaScript Modern Patterns
+  description: Modern JavaScript patterns and techniques
+  tags: '["javascript", "react", "frontend"]'
+  user: jane

@@ -1,0 +1,52 @@
+# Task ID: 8
+# Title: Implement Custom Tools & Widgets
+# Status: pending
+# Dependencies: 2, 3, 7
+# Priority: medium
+# Description: Create a wizard to define slash-driven tools and implement drag-dock widgets for outlines, research, and world-building using the Claude Code SDK.
+# Details:
+1. Create models for custom tools:
+   ```ruby
+   # app/models/custom_tool.rb
+   class CustomTool < ApplicationRecord
+     belongs_to :user
+     validates :name, presence: true
+     validates :command, presence: true, format: { with: /\A[a-z0-9\-]+\z/ }
+     validates :prompt_template, presence: true
+   end
+   ```
+2. Implement tool wizard UI using Stimulus and Tailwind:
+   ```javascript
+   // app/javascript/controllers/tool_wizard_controller.js
+   import { Controller } from "@hotwired/stimulus"
+
+   export default class extends Controller {
+     static targets = ["step", "nextButton", "prevButton", "form"]
+
+     // Wizard navigation and validation methods
+   }
+   ```
+3. Create widget components using ViewComponent:
+   ```ruby
+   # app/components/outline_widget_component.rb
+   class OutlineWidgetComponent < ViewComponent::Base
+     def initialize(document:)
+       @document = document
+     end
+   end
+   ```
+4. Implement drag-and-dock functionality using Stimulus
+5. Create controllers for widget data management
+6. Implement widget state persistence
+7. Add widget interaction with Claude SDK
+8. Create standard widgets (outline, research, world-building)
+9. Implement custom tool execution using Claude SDK
+
+# Test Strategy:
+1. Test custom tool creation and validation
+2. Verify tool wizard UI functionality
+3. Test widget rendering and interaction
+4. Verify drag-and-dock functionality
+5. Test widget state persistence
+6. Ensure widgets interact correctly with Claude SDK
+7. Test custom tool execution

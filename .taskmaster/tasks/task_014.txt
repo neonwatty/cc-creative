@@ -1,0 +1,82 @@
+# Task ID: 14
+# Title: Implement Deployment Configuration with Kamal
+# Status: pending
+# Dependencies: 1
+# Priority: low
+# Description: Set up deployment configuration using Kamal 2 for containerized Rails deployment with Docker and TLS support.
+# Details:
+1. Install Kamal:
+   ```bash
+   gem install kamal
+   ```
+2. Initialize Kamal configuration:
+   ```bash
+   kamal init
+   ```
+3. Configure deployment settings in `config/deploy.yml`:
+   ```yaml
+   # config/deploy.yml
+   service: claude-code-creators
+   image: your-registry/claude-code-creators
+
+   servers:
+     web:
+       hosts:
+         - your-server-ip
+       labels:
+         traefik.http.routers.claude-code-creators.rule: Host(`your-domain.com`)
+
+   registry:
+     username: your-username
+     password:
+       - KAMAL_REGISTRY_PASSWORD
+
+   env:
+     clear:
+       RAILS_ENV: production
+     secret:
+       - RAILS_MASTER_KEY
+       - CLAUDE_CODE_API_KEY
+   ```
+4. Create Dockerfile for the application:
+   ```dockerfile
+   # Dockerfile
+   FROM ruby:3.3-slim
+
+   # Install dependencies
+   RUN apt-get update -qq && \
+       apt-get install -y build-essential libpq-dev nodejs npm
+
+   # Set working directory
+   WORKDIR /app
+
+   # Install gems
+   COPY Gemfile Gemfile.lock ./
+   RUN bundle install --jobs 4
+
+   # Install npm packages
+   COPY package.json package-lock.json ./
+   RUN npm install
+
+   # Copy application code
+   COPY . .
+
+   # Precompile assets
+   RUN bundle exec rails assets:precompile
+
+   # Start the server
+   CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]
+   ```
+5. Configure database for production
+6. Set up SSL/TLS with Let's Encrypt
+7. Configure environment variables and secrets
+8. Set up CI/CD pipeline for automated deployment
+
+# Test Strategy:
+1. Test Docker build process locally
+2. Verify application runs correctly in Docker container
+3. Test deployment to staging environment
+4. Verify SSL/TLS configuration works correctly
+5. Test environment variable configuration
+6. Ensure database migrations run correctly during deployment
+7. Test rollback functionality

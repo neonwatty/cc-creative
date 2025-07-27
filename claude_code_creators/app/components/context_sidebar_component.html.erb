@@ -1,0 +1,279 @@
+<div class="h-full flex flex-col bg-gray-50 border-l border-gray-200" 
+     data-controller="context-sidebar drag-drop"
+     data-drag-drop-reorder-url-value="<%= reorder_document_context_items_path(document) %>"
+     data-drag-drop-document-id-value="<%= document.id %>"
+     data-drag-drop-editor-selector-value="trix-editor">
+  <!-- Header -->
+  <div class="px-4 py-3 border-b border-gray-200 bg-white" data-collapsible>
+    <h2 class="text-lg font-semibold text-gray-900">Context Manager</h2>
+    <p class="text-sm text-gray-600 mt-1">Manage your snippets, drafts, and versions</p>
+  </div>
+
+  <!-- Search and Filter Bar -->
+  <div class="px-4 py-3 bg-white border-b border-gray-200" data-collapsible>
+    <%= form_with url: document_context_items_path(document), method: :get, local: false, 
+                  data: { 
+                    turbo_frame: "context-sidebar-frame",
+                    controller: "search-filter",
+                    action: "turbo:submit-start->search-filter#formSubmitStart turbo:submit-end->search-filter#formSubmitEnd turbo:frame-render->search-filter#frameRendered",
+                    "search-filter-document-id-value": document.id
+                  },
+                  class: "space-y-3" do |f| %>
+      
+      <!-- Search Input -->
+      <div class="relative">
+        <%= f.text_field :query, 
+                         value: search_query,
+                         class: "w-full px-3 py-2 pl-10 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                         placeholder: "Search items... (⌘K)",
+                         "aria-label": "Search context items",
+                         data: { 
+                           "search-filter-target": "searchInput",
+                           action: "input->search-filter#debounceSearch"
+                         } %>
+        <svg class="absolute left-3 top-2.5 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        <% if search_active? %>
+          <button type="button"
+                  class="absolute right-2 top-2 text-gray-400 hover:text-gray-600"
+                  data-action="click->search-filter#clearSearch"
+                  title="Clear search">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        <% end %>
+      </div>
+      
+      <!-- Filters Row -->
+      <div class="flex gap-2">
+        <!-- Type Filter -->
+        <div class="flex-1">
+          <%= f.select :type, 
+                       options_for_select(type_filter_options, filter_type),
+                       {},
+                       class: "w-full text-xs border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                       data: { 
+                         "search-filter-target": "typeFilter",
+                         action: "change->search-filter#filterChanged"
+                       } %>
+        </div>
+        
+        <!-- Date Range Filter -->
+        <div class="flex-1">
+          <%= f.select :date_range, 
+                       options_for_select(date_range_options, ""),
+                       {},
+                       class: "w-full text-xs border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                       data: { 
+                         "search-filter-target": "dateFilter",
+                         action: "change->search-filter#filterChanged"
+                       } %>
+        </div>
+      </div>
+      
+      <!-- Search Results Info -->
+      <% if search_active? %>
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-gray-600" data-results-count>
+            Found <%= search_results_count %> <%= "item".pluralize(search_results_count) %>
+          </span>
+          <button type="button"
+                  class="text-blue-600 hover:text-blue-800 font-medium"
+                  data-action="click->search-filter#clearAllFilters"
+                  aria-label="Clear all filters">
+            Clear filters
+          </button>
+        </div>
+      <% end %>
+      
+      <!-- Sort Options -->
+      <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+        <label class="text-xs text-gray-600">Sort by:</label>
+        <%= f.select :sort_by,
+                     options_for_select([
+                       ["Most Recent", "recent"],
+                       ["Alphabetical", "alphabetical"],
+                       ["Last Modified", "modified"],
+                       ["Manual Order", "manual"]
+                     ], sort_by),
+                     {},
+                     class: "text-xs border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                     data: { 
+                       "search-filter-target": "sortSelect",
+                       action: "change->search-filter#sortChanged"
+                     } %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex border-b border-gray-200 bg-white px-4" role="tablist" data-collapsible>
+    <button class="<%= tab_classes('snippets') %>"
+            data-context-sidebar-target="tab"
+            data-tab="snippets"
+            data-action="click->context-sidebar#switchTab"
+            role="tab"
+            aria-selected="<%= active_tab == 'snippets' %>"
+            aria-controls="snippets-panel">
+      Snippets (<%= item_count(:snippets) %>)
+    </button>
+    <button class="<%= tab_classes('drafts') %> ml-2"
+            data-context-sidebar-target="tab"
+            data-tab="drafts"
+            data-action="click->context-sidebar#switchTab"
+            role="tab"
+            aria-selected="<%= active_tab == 'drafts' %>"
+            aria-controls="drafts-panel">
+      Drafts (<%= item_count(:drafts) %>)
+    </button>
+    <button class="<%= tab_classes('versions') %> ml-2"
+            data-context-sidebar-target="tab"
+            data-tab="versions"
+            data-action="click->context-sidebar#switchTab"
+            role="tab"
+            aria-selected="<%= active_tab == 'versions' %>"
+            aria-controls="versions-panel">
+      Versions (<%= item_count(:versions) %>)
+    </button>
+  </div>
+
+  <!-- Content Area -->
+  <div class="flex-1 overflow-y-auto" data-context-sidebar>
+    <!-- Snippets Panel -->
+    <div id="snippets-panel"
+         class="<%= active_tab == 'snippets' ? '' : 'hidden' %>"
+         data-context-sidebar-target="panel"
+         data-panel="snippets"
+         role="tabpanel">
+      <% if snippets.any? %>
+        <div class="divide-y divide-gray-200" data-drag-drop-target="list">
+          <% if search_active? && search_query.present? %>
+            <% highlighted_items(snippets).each do |result| %>
+              <%= render partial: 'context_items/sidebar_item', 
+                         locals: { 
+                           item: result[:item], 
+                           type: 'snippet',
+                           highlighted_title: result[:highlighted_title],
+                           highlighted_content: result[:highlighted_content]
+                         } %>
+            <% end %>
+          <% else %>
+            <% snippets.each do |snippet| %>
+              <%= render partial: 'context_items/sidebar_item', locals: { item: snippet, type: 'snippet' } %>
+            <% end %>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="p-6 text-center">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          <p class="mt-2 text-sm text-gray-600">No snippets yet</p>
+          <%= link_to "Create first snippet", new_document_context_item_path(document, type: 'snippet'), 
+                      class: "mt-3 inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700",
+                      data: { turbo_frame: "_top" } %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Drafts Panel -->
+    <div id="drafts-panel"
+         class="<%= active_tab == 'drafts' ? '' : 'hidden' %>"
+         data-context-sidebar-target="panel"
+         data-panel="drafts"
+         role="tabpanel">
+      <% if drafts.any? %>
+        <div class="divide-y divide-gray-200" data-drag-drop-target="list">
+          <% if search_active? && search_query.present? %>
+            <% highlighted_items(drafts).each do |result| %>
+              <%= render partial: 'context_items/sidebar_item', 
+                         locals: { 
+                           item: result[:item], 
+                           type: 'draft',
+                           highlighted_title: result[:highlighted_title],
+                           highlighted_content: result[:highlighted_content]
+                         } %>
+            <% end %>
+          <% else %>
+            <% drafts.each do |draft| %>
+              <%= render partial: 'context_items/sidebar_item', locals: { item: draft, type: 'draft' } %>
+            <% end %>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="p-6 text-center">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+          </svg>
+          <p class="mt-2 text-sm text-gray-600">No drafts yet</p>
+          <%= link_to "Create first draft", new_document_context_item_path(document, type: 'draft'), 
+                      class: "mt-3 inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700",
+                      data: { turbo_frame: "_top" } %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Versions Panel -->
+    <div id="versions-panel"
+         class="<%= active_tab == 'versions' ? '' : 'hidden' %>"
+         data-context-sidebar-target="panel"
+         data-panel="versions"
+         role="tabpanel">
+      <% if versions.any? %>
+        <div class="divide-y divide-gray-200" data-drag-drop-target="list">
+          <% if search_active? && search_query.present? %>
+            <% highlighted_items(versions).each do |result| %>
+              <%= render partial: 'context_items/sidebar_item', 
+                         locals: { 
+                           item: result[:item], 
+                           type: 'version',
+                           highlighted_title: result[:highlighted_title],
+                           highlighted_content: result[:highlighted_content]
+                         } %>
+            <% end %>
+          <% else %>
+            <% versions.each do |version| %>
+              <%= render partial: 'context_items/sidebar_item', locals: { item: version, type: 'version' } %>
+            <% end %>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="p-6 text-center">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <p class="mt-2 text-sm text-gray-600">No versions saved</p>
+          <%= link_to "Save first version", new_document_context_item_path(document, type: 'version'), 
+                      class: "mt-3 inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700",
+                      data: { turbo_frame: "_top" } %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Footer Actions -->
+  <div class="px-4 py-3 bg-white border-t border-gray-200">
+    <div class="flex justify-between items-center">
+      <button class="text-sm text-gray-600 hover:text-gray-900 flex items-center"
+              data-action="click->context-sidebar#toggleCollapse">
+        <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
+        </svg>
+        Collapse
+      </button>
+      
+      <div class="flex space-x-2">
+        <%= link_to new_document_context_item_path(document), 
+                    class: "inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50",
+                    data: { turbo_frame: "_top" } do %>
+          <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          Add Item
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

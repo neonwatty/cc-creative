@@ -178,7 +178,9 @@ class DocumentTest < ActiveSupport::TestCase
     @document.save!
     info = @document.version_info
     
-    assert info[:version].present?
+    assert_equal @document.current_version_number, info[:current_version]
+    assert_equal 0, info[:total_versions]
+    assert_nil info[:latest_version_created]
     assert_equal @document.created_at, info[:created]
     assert_equal @document.updated_at, info[:updated]
     assert_equal @document.word_count, info[:word_count]
@@ -235,5 +237,131 @@ class DocumentTest < ActiveSupport::TestCase
     excerpt = @document.excerpt(100)
     assert_equal "Short content", excerpt
     assert_not excerpt.ends_with?("...")
+  end
+  
+  # Tests for new versioning functionality
+  test "should have document_versions association" do
+    assert @document.respond_to?(:document_versions)
+    @document.save!
+    assert_equal [], @document.document_versions.to_a
+  end
+  
+  test "should calculate next_version_number" do
+    @document.current_version_number = 0
+    assert_equal 1, @document.next_version_number
+    
+    @document.current_version_number = 5
+    assert_equal 6, @document.next_version_number
+    
+    @document.current_version_number = nil
+    assert_equal 1, @document.next_version_number
+  end
+  
+  test "should get latest_version" do
+    @document.save!
+    assert_nil @document.latest_version
+    
+    version = @document.create_version(@user, version_name: "Test Version")
+    assert_equal version, @document.latest_version
+  end
+  
+  test "should get version_at specific number" do
+    @document.save!
+    version = @document.create_version(@user, version_name: "Test Version")
+    
+    assert_equal version, @document.version_at(1)
+    assert_nil @document.version_at(2)
+  end
+  
+  test "should create version" do
+    @document.save!
+    @document.update(current_version_number: 0)
+    
+    version = @document.create_version(@user, {
+      version_name: "Test Version",
+      version_notes: "Test notes",
+      is_auto_version: false
+    })
+    
+    assert version.persisted?
+    assert_equal 1, version.version_number
+    assert_equal @document.title, version.title
+    assert_equal @document.content.to_plain_text, version.content_snapshot
+    assert_equal "Test Version", version.version_name
+    assert_equal "Test notes", version.version_notes
+    assert_equal false, version.is_auto_version
+    assert_equal 1, @document.reload.current_version_number
+  end
+  
+  test "should create auto version" do
+    @document.save!
+    @document.update(current_version_number: 0)
+    
+    version = @document.create_auto_version(@user)
+    
+    assert version.persisted?
+    assert_equal true, version.is_auto_version
+    assert_nil version.version_name
+    assert_nil version.version_notes
+  end
+  
+  test "should create manual version" do
+    @document.save!
+    @document.update(current_version_number: 0)
+    
+    version = @document.create_manual_version(@user, 
+      version_name: "Manual Version", 
+      version_notes: "Manual notes"
+    )
+    
+    assert version.persisted?
+    assert_equal false, version.is_auto_version
+    assert_equal "Manual Version", version.version_name
+    assert_equal "Manual notes", version.version_notes
+  end
+  
+  test "should detect content_changed_since_last_version" do
+    @document.save!
+    
+    # No versions yet, should return true
+    assert @document.content_changed_since_last_version?
+    
+    # Create a version
+    @document.create_version(@user)
+    
+    # Content hasn't changed, should return false
+    assert_not @document.content_changed_since_last_version?
+    
+    # Change content
+    @document.update(content: "Updated content")
+    assert @document.content_changed_since_last_version?
+    
+    # Change title
+    @document.update(content: @document.latest_version.content_snapshot, title: "Updated Title")
+    assert @document.content_changed_since_last_version?
+    
+    # Change description
+    @document.update(title: @document.latest_version.title, description: "Updated description")
+    assert @document.content_changed_since_last_version?
+    
+    # Change tags
+    @document.update(description: @document.latest_version.description_snapshot, tags: ["new", "tags"])
+    assert @document.content_changed_since_last_version?
+  end
+  
+  test "should provide updated version_info" do
+    @document.save!
+    
+    # Create a version
+    version = @document.create_version(@user)
+    
+    info = @document.version_info
+    
+    assert_equal @document.current_version_number, info[:current_version]
+    assert_equal 1, info[:total_versions]
+    assert_equal version.created_at, info[:latest_version_created]
+    assert_equal @document.created_at, info[:created]
+    assert_equal @document.updated_at, info[:updated]
+    assert_equal @document.word_count, info[:word_count]
   end
 end

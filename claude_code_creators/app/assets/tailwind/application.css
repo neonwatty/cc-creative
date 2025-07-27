@@ -1,1 +1,6 @@
 @import "tailwindcss";
+
+/* Search highlighting */
+mark {
+  @apply bg-yellow-200 text-gray-900 px-0.5 rounded;
+}

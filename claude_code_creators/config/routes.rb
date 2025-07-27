@@ -23,6 +23,14 @@ Rails.application.routes.draw do
       post :duplicate
       patch :autosave
     end
+    
+    # Nested context items
+    resources :context_items do
+      collection do
+        post :reorder
+        get :search
+      end
+    end
   end
   
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

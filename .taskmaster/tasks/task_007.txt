@@ -1,0 +1,69 @@
+# Task ID: 7
+# Title: Implement Context Control Commands
+# Status: pending
+# Dependencies: 2, 3
+# Priority: medium
+# Description: Create slash commands like /compact, /clear, /include, /snippet to manage session context within the document editor.
+# Details:
+1. Create a command parser service:
+   ```ruby
+   # app/services/command_parser_service.rb
+   class CommandParserService
+     COMMANDS = %w[compact clear include snippet]
+
+     def initialize(document, user)
+       @document = document
+       @user = user
+       @claude_service = ClaudeService.new(@document.session_id)
+     end
+
+     def process_command(command_text)
+       command, *args = command_text.split
+       command = command.sub('/', '')
+
+       return { error: 'Unknown command' } unless COMMANDS.include?(command)
+
+       send("process_#{command}", *args)
+     end
+
+     private
+
+     def process_compact
+       # Implementation using Claude SDK
+     end
+
+     # Other command methods
+   end
+   ```
+2. Create a Stimulus controller for command detection and processing:
+   ```javascript
+   // app/javascript/controllers/slash_commands_controller.js
+   import { Controller } from "@hotwired/stimulus"
+
+   export default class extends Controller {
+     static targets = ["editor"]
+
+     connect() {
+       this.editorTarget.addEventListener('keydown', this.handleKeydown.bind(this))
+     }
+
+     handleKeydown(event) {
+       // Detect slash commands and process them
+     }
+
+     // Other methods
+   }
+   ```
+3. Implement command execution endpoints in controller
+4. Create UI for command suggestions
+5. Implement each command's functionality using Claude SDK
+6. Add visual feedback for command execution
+7. Create command history tracking
+
+# Test Strategy:
+1. Test command parsing and detection
+2. Verify each command functions correctly
+3. Test command suggestion UI
+4. Verify visual feedback for command execution
+5. Test error handling for invalid commands
+6. Ensure commands interact correctly with Claude SDK

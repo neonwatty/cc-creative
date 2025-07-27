@@ -1,0 +1,71 @@
+# Task ID: 10
+# Title: Implement Real-Time Collaboration Support
+# Status: pending
+# Dependencies: 3, 9
+# Priority: medium
+# Description: Enable real-time or async co-editing with shared rooms, live cursors, and optional voice chat—all backed by Claude Code's backend.
+# Details:
+1. Set up SolidCable for WebSocket communication:
+   ```ruby
+   # config/solid_cable.rb
+   SolidCable.configure do |config|
+     config.adapter = :postgresql
+     config.worker_pool_size = 5
+   end
+   ```
+2. Implement Yjs for collaborative editing:
+   ```javascript
+   // app/javascript/controllers/collaborative_editor_controller.js
+   import { Controller } from "@hotwired/stimulus"
+   import * as Y from 'yjs'
+   import { WebsocketProvider } from 'y-websocket'
+
+   export default class extends Controller {
+     static targets = ["editor"]
+
+     connect() {
+       const documentId = this.element.dataset.documentId
+       this.ydoc = new Y.Doc()
+       this.provider = new WebsocketProvider(
+         `/cable/document/${documentId}`,
+         documentId,
+         this.ydoc
+       )
+       // Setup editor binding
+     }
+
+     // Other methods
+   }
+   ```
+3. Create channels for document collaboration:
+   ```ruby
+   # app/channels/document_channel.rb
+   class DocumentChannel < ApplicationCable::Channel
+     def subscribed
+       document = Document.find(params[:id])
+       stream_for document
+     end
+
+     def cursor_moved(data)
+       document = Document.find(params[:id])
+       broadcast_to(document, { type: 'cursor_moved', user_id: current_user.id, position: data['position'] })
+     end
+
+     # Other methods
+   end
+   ```
+4. Implement presence tracking using SolidCable
+5. Create UI for showing active collaborators
+6. Implement live cursor tracking
+7. Add optional voice chat using WebRTC
+8. Create shared room functionality
+9. Implement permissions system for collaboration
+
+# Test Strategy:
+1. Test real-time document updates between multiple clients
+2. Verify cursor positions update correctly
+3. Test presence indicators for joining/leaving users
+4. Verify conflict resolution works correctly
+5. Test voice chat functionality
+6. Ensure collaboration features work across different browsers
+7. Test permission controls for document access

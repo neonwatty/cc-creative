@@ -1,0 +1,38 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+version_one:
+  document: one
+  version_number: 1
+  title: "Sample Document"
+  content_snapshot: "This is the first version of the sample document content."
+  description_snapshot: "A sample document for testing."
+  tags_snapshot: ["ruby", "rails"]
+  version_name: "Initial Version"
+  version_notes: "First version created manually"
+  created_by_user: one
+  is_auto_version: false
+  word_count: 10
+
+version_two:
+  document: one
+  version_number: 2
+  title: "Sample Document Updated"
+  content_snapshot: "This is the second version with updated content and more details."
+  description_snapshot: "An updated sample document for testing."
+  tags_snapshot: ["ruby", "rails", "testing"]
+  version_name: "Update Version"
+  version_notes: "Added more content and a new tag"
+  created_by_user: one
+  is_auto_version: false
+  word_count: 12
+
+auto_version:
+  document: two
+  version_number: 1
+  title: "Auto Version Document"
+  content_snapshot: "This version was created automatically."
+  description_snapshot: "Auto-generated version"
+  tags_snapshot: ["auto"]
+  created_by_user: one
+  is_auto_version: true
+  word_count: 6
