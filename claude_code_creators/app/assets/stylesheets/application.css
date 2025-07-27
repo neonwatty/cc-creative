@@ -10,3 +10,63 @@
  */
 
 @import "actiontext.css";
+@import "components/context_item_preview.css";
+
+/* Drag and Drop Styles */
+.sortable-ghost {
+  opacity: 0.4;
+  background-color: #f3f4f6;
+}
+
+.sortable-chosen {
+  background-color: #e5e7eb;
+}
+
+.sortable-drag {
+  background-color: white;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: rotate(2deg);
+}
+
+/* Drop zone styles */
+.drop-zone-active {
+  position: relative;
+}
+
+.drop-zone-active::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 2px dashed #3b82f6;
+  border-radius: 0.5rem;
+  pointer-events: none;
+  animation: pulse-border 2s infinite;
+}
+
+.drop-zone-hover::after {
+  border-color: #1d4ed8;
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+@keyframes pulse-border {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Dragging state */
+body.dragging-context-item trix-editor {
+  cursor: copy;
+}
+
+/* Drag handle styles */
+.drag-handle {
+  touch-action: none;
+}
+
+.drag-handle:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}

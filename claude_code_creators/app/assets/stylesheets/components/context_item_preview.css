@@ -1,0 +1,174 @@
+/* Context Item Preview Component Styles */
+
+.context-item-preview-modal {
+  /* Ensure modal is hidden by default - JavaScript will control visibility */
+}
+
+.context-item-preview-modal.hidden {
+  display: none;
+}
+
+/* Content type specific styling */
+.preview-content {
+  @apply font-mono text-sm leading-relaxed;
+}
+
+.preview-content.markdown-content {
+  @apply font-sans;
+}
+
+.preview-content.markdown-content h1,
+.preview-content.markdown-content h2,
+.preview-content.markdown-content h3,
+.preview-content.markdown-content h4,
+.preview-content.markdown-content h5,
+.preview-content.markdown-content h6 {
+  @apply font-semibold mb-2 mt-4 first:mt-0;
+}
+
+.preview-content.markdown-content h1 { @apply text-xl; }
+.preview-content.markdown-content h2 { @apply text-lg; }
+.preview-content.markdown-content h3 { @apply text-base; }
+.preview-content.markdown-content h4,
+.preview-content.markdown-content h5,
+.preview-content.markdown-content h6 { @apply text-sm; }
+
+.preview-content.markdown-content p {
+  @apply mb-3 last:mb-0;
+}
+
+.preview-content.markdown-content ul,
+.preview-content.markdown-content ol {
+  @apply mb-3 ml-4;
+}
+
+.preview-content.markdown-content li {
+  @apply mb-1;
+}
+
+.preview-content.markdown-content strong {
+  @apply font-semibold;
+}
+
+.preview-content.markdown-content em {
+  @apply italic;
+}
+
+.preview-content.markdown-content code {
+  @apply bg-gray-200 px-1 py-0.5 rounded text-xs font-mono;
+}
+
+.preview-content.markdown-content pre {
+  @apply bg-gray-100 p-3 rounded-md overflow-x-auto text-xs;
+}
+
+.preview-content.markdown-content pre code {
+  @apply bg-transparent p-0;
+}
+
+.preview-content.markdown-content blockquote {
+  @apply border-l-4 border-gray-300 pl-4 italic text-gray-600 mb-3;
+}
+
+.preview-content.markdown-content a {
+  @apply text-blue-600 hover:text-blue-800 underline;
+}
+
+.preview-content.markdown-content table {
+  @apply w-full border-collapse mb-3;
+}
+
+.preview-content.markdown-content th,
+.preview-content.markdown-content td {
+  @apply border border-gray-300 px-2 py-1 text-xs;
+}
+
+.preview-content.markdown-content th {
+  @apply bg-gray-100 font-semibold;
+}
+
+/* Code content styling */
+.preview-content.code-content {
+  @apply bg-gray-900 text-gray-100 p-0 rounded-lg overflow-hidden;
+}
+
+.preview-content.code-content pre {
+  @apply bg-transparent p-4 m-0 overflow-x-auto;
+}
+
+.preview-content.code-content code {
+  @apply bg-transparent p-0 text-xs leading-relaxed;
+}
+
+/* Plain text content styling */
+.preview-content.plain-text-content {
+  @apply font-sans whitespace-pre-wrap;
+}
+
+/* Syntax highlighting placeholders - customize based on your highlighting library */
+.preview-content .language-ruby .token.keyword { @apply text-purple-400; }
+.preview-content .language-ruby .token.string { @apply text-green-400; }
+.preview-content .language-ruby .token.comment { @apply text-gray-500 italic; }
+
+.preview-content .language-javascript .token.keyword { @apply text-blue-400; }
+.preview-content .language-javascript .token.string { @apply text-yellow-400; }
+.preview-content .language-javascript .token.function { @apply text-green-400; }
+
+.preview-content .language-css .token.property { @apply text-blue-400; }
+.preview-content .language-css .token.string { @apply text-green-400; }
+.preview-content .language-css .token.selector { @apply text-yellow-400; }
+
+.preview-content .language-html .token.tag { @apply text-red-400; }
+.preview-content .language-html .token.attr-name { @apply text-yellow-400; }
+.preview-content .language-html .token.attr-value { @apply text-green-400; }
+
+/* Modal animations */
+.context-item-preview-modal {
+  transition: opacity 0.25s ease-out;
+}
+
+.context-item-preview-modal[data-state="entering"] {
+  animation: modalFadeIn 0.25s ease-out;
+}
+
+.context-item-preview-modal[data-state="leaving"] {
+  animation: modalFadeOut 0.25s ease-in;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Focus styles for accessibility */
+.context-item-preview-modal button:focus {
+  @apply outline-none ring-2 ring-indigo-500 ring-offset-2;
+}
+
+.context-item-preview-modal [data-context-item-preview-target="panel"]:focus {
+  @apply outline-none;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+  .preview-content {
+    @apply text-xs;
+  }
+  
+  .context-item-preview-modal [data-context-item-preview-target="panel"] {
+    @apply mx-2 max-w-none;
+  }
+}

@@ -1,0 +1,124 @@
+<%# Example usage of ContextItemPreviewComponent %>
+
+<%# Basic usage %>
+<%= context_item_preview_modal(@context_item) %>
+
+<%# Usage with custom action buttons via slots %>
+<%= context_item_preview_modal(@context_item) do |component| %>
+  <% component.with_content(:primary_action) do %>
+    <button type="button"
+            class="inline-flex w-full justify-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 sm:ml-3 sm:w-auto"
+            data-action="click->context-item-preview#insertContent">
+      <svg class="mr-2 -ml-0.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+        <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+      </svg>
+      Insert into Editor
+    </button>
+  <% end %>
+
+  <% component.with_content(:secondary_actions) do %>
+    <button type="button"
+            class="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto"
+            data-action="click->context-item-preview#copyContent">
+      <svg class="mr-2 -ml-0.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+        <path d="M7 3.5A1.5 1.5 0 018.5 2h3.879a1.5 1.5 0 011.06.44l3.122 3.12A1.5 1.5 0 0117 6.622V12.5a1.5 1.5 0 01-1.5 1.5h-1v-3.379a3 3 0 00-.879-2.121L10.5 5.379A3 3 0 008.379 4.5H7v-1z" />
+        <path d="M4.5 6A1.5 1.5 0 003 7.5v9A1.5 1.5 0 004.5 18h7a1.5 1.5 0 001.5-1.5v-5.879a1.5 1.5 0 00-.44-1.06L9.44 6.439A1.5 1.5 0 008.378 6H4.5z" />
+      </svg>
+      Copy to Clipboard
+    </button>
+    
+    <button type="button"
+            class="inline-flex w-full justify-center rounded-md bg-yellow-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-yellow-500 sm:ml-3 sm:w-auto"
+            data-action="click->custom-handler#editItem"
+            data-context-item-id="<%= @context_item.id %>">
+      <svg class="mr-2 -ml-0.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+        <path d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
+        <path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0010 3H4.75A2.75 2.75 0 002 5.75v9.5A2.75 2.75 0 004.75 18h9.5A2.75 2.75 0 0017 15.25V10a.75.75 0 00-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5z" />
+      </svg>
+      Edit
+    </button>
+    
+    <button type="button"
+            class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+            data-action="click->context-item-preview#close">
+      Cancel
+    </button>
+  <% end %>
+<% end %>
+
+<%# Using helper methods to create context item cards %>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+  <% @document.context_items.recent.each do |context_item| %>
+    <%= context_item_card(context_item) %>
+  <% end %>
+</div>
+
+<%# JavaScript to show the modal %>
+<script>
+  // Example of how to show the modal programmatically
+  function showContextItemPreview(contextItemId) {
+    const modal = document.querySelector(`[data-context-item-preview-id-value="${contextItemId}"]`);
+    if (modal) {
+      modal.classList.remove('hidden');
+    }
+  }
+
+  // Listen for custom events from the component
+  document.addEventListener('context-item-preview:insert', function(event) {
+    const { content, contextItemId, itemType, contentType } = event.detail;
+    console.log('Insert event:', { content, contextItemId, itemType, contentType });
+    
+    // Custom logic for handling insert
+    // For example, you might want to format code differently based on contentType
+    if (contentType === 'code') {
+      // Handle code insertion with special formatting
+      insertCodeIntoEditor(content);
+    } else {
+      // Handle regular text insertion
+      insertTextIntoEditor(content);
+    }
+  });
+
+  document.addEventListener('context-item-preview:copied', function(event) {
+    const { contextItemId } = event.detail;
+    console.log('Content copied from context item:', contextItemId);
+    
+    // Show a toast notification or other feedback
+    showToast('Content copied to clipboard!');
+  });
+
+  document.addEventListener('context-item-preview:closed', function(event) {
+    const { contextItemId } = event.detail;
+    console.log('Preview modal closed for context item:', contextItemId);
+  });
+
+  // Example helper functions
+  function insertCodeIntoEditor(content) {
+    // Find Trix editor and insert with code formatting
+    const trixEditor = document.querySelector('trix-editor');
+    if (trixEditor && trixEditor.editor) {
+      // You might want to wrap code in <code> tags or apply special formatting
+      trixEditor.editor.insertHTML(`<pre><code>${content}</code></pre>`);
+    }
+  }
+
+  function insertTextIntoEditor(content) {
+    // Standard text insertion
+    const trixEditor = document.querySelector('trix-editor');
+    if (trixEditor && trixEditor.editor) {
+      trixEditor.editor.insertString(content);
+    }
+  }
+
+  function showToast(message) {
+    // Simple toast implementation
+    const toast = document.createElement('div');
+    toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.remove();
+    }, 3000);
+  }
+</script>
