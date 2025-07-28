@@ -1,0 +1,293 @@
+<% content_for :title, "#{@cloud_integration.provider_name} Files" %>
+
+<div class="cloud-files-page">
+  
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header__breadcrumb">
+      <%= link_to "Cloud Integrations", cloud_integrations_path, class: "breadcrumb-link" %>
+      <i class="icon icon--chevron-right"></i>
+      <span class="breadcrumb-current"><%= @cloud_integration.provider_name %> Files</span>
+    </div>
+    
+    <div class="page-header__content">
+      <div class="page-header__title">
+        <i class="provider-icon provider-icon--<%= @cloud_integration.provider %>"></i>
+        <h1 class="page-title"><%= @cloud_integration.provider_name %> Files</h1>
+      </div>
+      <p class="page-description">
+        Browse and import files from your <%= @cloud_integration.provider_name %> account.
+      </p>
+    </div>
+  </div>
+
+  <!-- File Browser Component -->
+  <%= render CloudFileBrowserComponent.new(
+        integration: @cloud_integration,
+        files: @cloud_files,
+        view_mode: params[:view] || 'grid',
+        pagination: {
+          current_page: @cloud_files.respond_to?(:current_page) ? @cloud_files.current_page : 1,
+          total_pages: @cloud_files.respond_to?(:total_pages) ? @cloud_files.total_pages : 1,
+          total_count: @cloud_files.respond_to?(:total_count) ? @cloud_files.total_count : @cloud_files.count,
+          per_page: 20,
+          prev_page: @cloud_files.respond_to?(:prev_page) ? @cloud_files.prev_page : nil,
+          next_page: @cloud_files.respond_to?(:next_page) ? @cloud_files.next_page : nil
+        },
+        search_query: params[:search],
+        filter: params[:importable] == 'true' ? 'importable' : 'all'
+      ) %>
+
+  <!-- File Upload Section (if supported) -->
+  <% if @cloud_integration.provider != 'notion' %>
+    <div class="file-upload-section" style="margin-top: 2rem;">
+      <h3>Upload Files to <%= @cloud_integration.provider_name %></h3>
+      <div data-controller="cloud-file-uploader"
+           data-cloud-file-uploader-integration-id-value="<%= @cloud_integration.id %>"
+           data-cloud-file-uploader-upload-url-value="<%= cloud_integration_cloud_files_path(@cloud_integration) %>/upload"
+           data-cloud-file-uploader-max-file-size-value="<%= 50.megabytes %>"
+           data-cloud-file-uploader-multiple-value="true">
+        
+        <!-- Drop Zone -->
+        <div class="upload-drop-zone" data-cloud-file-uploader-target="dropZone">
+          <div class="drop-zone__content">
+            <i class="icon icon--upload"></i>
+            <h4>Drop files here or click to select</h4>
+            <p>Upload files directly to your <%= @cloud_integration.provider_name %> account</p>
+            <input type="file" 
+                   multiple 
+                   class="file-input" 
+                   data-action="change->cloud-file-uploader#handleFileSelect"
+                   data-cloud-file-uploader-target="fileInput">
+            <button class="btn btn--primary" 
+                    onclick="this.previousElementSibling.click()">
+              Select Files
+            </button>
+          </div>
+        </div>
+        
+        <!-- Upload Progress -->
+        <div class="upload-progress" 
+             data-cloud-file-uploader-target="progressContainer" 
+             style="display: none;">
+          <div class="progress-bar">
+            <div class="progress-bar__fill" data-cloud-file-uploader-target="progressBar"></div>
+          </div>
+          <div class="progress-text" data-cloud-file-uploader-target="progressText">0%</div>
+        </div>
+        
+        <!-- File List -->
+        <div class="upload-file-list" 
+             data-cloud-file-uploader-target="fileList" 
+             style="display: none;"></div>
+        
+        <!-- Upload Actions -->
+        <div class="upload-actions" style="display: none;">
+          <button class="btn btn--primary" 
+                  data-action="click->cloud-file-uploader#upload"
+                  data-cloud-file-uploader-target="uploadButton">
+            Start Upload
+          </button>
+          <button class="btn btn--secondary" 
+                  data-action="click->cloud-file-uploader#clearAll">
+            Clear All
+          </button>
+        </div>
+        
+        <!-- Upload Status -->
+        <div class="upload-status" 
+             data-cloud-file-uploader-target="status" 
+             style="display: none;"></div>
+        
+        <!-- Error Container -->
+        <div class="upload-error" 
+             data-cloud-file-uploader-target="errorContainer" 
+             style="display: none;"></div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Connection Status -->
+  <div class="connection-status-section" style="margin-top: 2rem;">
+    <%= render CloudProviderComponent.new(
+          provider: @cloud_integration.provider,
+          integration: @cloud_integration,
+          show_stats: true,
+          show_actions: false
+        ) %>
+  </div>
+</div>
+
+<!-- File Preview Modal (placeholder) -->
+<div id="file-preview-modal" class="modal" style="display: none;">
+  <div class="modal__backdrop" data-action="click->modal#close"></div>
+  <div class="modal__content">
+    <div class="modal__header">
+      <h3 class="modal__title">File Preview</h3>
+      <button class="modal__close" data-action="click->modal#close">
+        <i class="icon icon--close"></i>
+      </button>
+    </div>
+    <div class="modal__body">
+      <div class="file-preview-container">
+        <!-- Preview content will be loaded here -->
+      </div>
+    </div>
+    <div class="modal__footer">
+      <button class="btn btn--secondary" data-action="click->modal#close">Close</button>
+      <button class="btn btn--primary" id="preview-import-btn">Import File</button>
+    </div>
+  </div>
+</div>
+
+<% content_for :javascript do %>
+  <script>
+    // Listen for file preview events
+    document.addEventListener('file:preview', function(event) {
+      const { fileId } = event.detail;
+      openFilePreview(fileId);
+    });
+    
+    // Listen for file operation events
+    document.addEventListener('file:imported', function(event) {
+      const { fileId } = event.detail;
+      showNotification('File import started', 'success');
+      // Optionally refresh the file list
+      location.reload();
+    });
+    
+    // Listen for upload completion
+    document.addEventListener('upload:complete', function(event) {
+      const { completed, errors } = event.detail;
+      if (errors > 0) {
+        showNotification(`Upload completed with ${errors} errors`, 'warning');
+      } else {
+        showNotification(`Successfully uploaded ${completed} files`, 'success');
+      }
+      
+      // Refresh file list after upload
+      setTimeout(() => {
+        location.reload();
+      }, 2000);
+    });
+    
+    function openFilePreview(fileId) {
+      const modal = document.getElementById('file-preview-modal');
+      const previewContainer = modal.querySelector('.file-preview-container');
+      const importBtn = modal.querySelector('#preview-import-btn');
+      
+      // Show loading state
+      previewContainer.innerHTML = '<div class="loading-spinner"><i class="icon icon--spinner icon--spin"></i> Loading preview...</div>';
+      modal.style.display = 'block';
+      
+      // Load file preview
+      fetch(`<%= cloud_integration_cloud_files_path(@cloud_integration) %>/${fileId}`, {
+        headers: { 'Accept': 'application/json' }
+      })
+      .then(response => response.json())
+      .then(data => {
+        renderFilePreview(data, previewContainer);
+        importBtn.onclick = () => importFile(fileId);
+      })
+      .catch(error => {
+        previewContainer.innerHTML = `<div class="error-message">Failed to load preview: ${error.message}</div>`;
+      });
+    }
+    
+    function renderFilePreview(fileData, container) {
+      const { name, size, mime_type, provider_url, importable } = fileData;
+      
+      container.innerHTML = `
+        <div class="file-preview">
+          <div class="file-preview__header">
+            <i class="file-icon file-icon--${getFileType(mime_type)}"></i>
+            <div class="file-info">
+              <h4>${name}</h4>
+              <p>${formatFileSize(size)} • ${mime_type}</p>
+              ${importable ? '<span class="badge badge--importable">Can be imported</span>' : ''}
+            </div>
+          </div>
+          <div class="file-preview__body">
+            <p>Preview functionality will be implemented based on file type.</p>
+            ${provider_url ? `<a href="${provider_url}" target="_blank" class="btn btn--secondary">Open in ${getProviderName()}</a>` : ''}
+          </div>
+        </div>
+      `;
+      
+      // Update import button visibility
+      const importBtn = document.getElementById('preview-import-btn');
+      importBtn.style.display = importable ? 'inline-block' : 'none';
+    }
+    
+    function importFile(fileId) {
+      fetch(`<%= cloud_integration_cloud_files_path(@cloud_integration) %>/${fileId}/import`, {
+        method: 'POST',
+        headers: {
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content,
+          'Accept': 'application/json'
+        }
+      })
+      .then(response => {
+        if (response.ok) {
+          showNotification('File import started', 'success');
+          document.getElementById('file-preview-modal').style.display = 'none';
+        } else {
+          throw new Error('Import failed');
+        }
+      })
+      .catch(error => {
+        showNotification(`Import failed: ${error.message}`, 'error');
+      });
+    }
+    
+    function getFileType(mimeType) {
+      if (mimeType.includes('google-apps.document')) return 'document';
+      if (mimeType.includes('pdf')) return 'pdf';
+      if (mimeType.startsWith('text/')) return 'text';
+      if (mimeType.startsWith('image/')) return 'image';
+      return 'file';
+    }
+    
+    function formatFileSize(bytes) {
+      if (!bytes) return 'Unknown';
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(1024));
+      return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
+    }
+    
+    function getProviderName() {
+      return '<%= @cloud_integration.provider_name %>';
+    }
+    
+    function showNotification(message, type = 'info') {
+      // Implementation from main integrations page
+      const container = document.getElementById('notifications') || document.body;
+      const notification = document.createElement('div');
+      notification.className = `notification notification--${type}`;
+      notification.innerHTML = `
+        <i class="icon icon--${getNotificationIcon(type)}"></i>
+        <span>${message}</span>
+        <button class="notification__close" onclick="this.parentElement.remove()">
+          <i class="icon icon--close"></i>
+        </button>
+      `;
+      
+      container.appendChild(notification);
+      
+      setTimeout(() => {
+        if (notification.parentElement) {
+          notification.remove();
+        }
+      }, 5000);
+    }
+    
+    function getNotificationIcon(type) {
+      switch (type) {
+        case 'success': return 'check';
+        case 'error': return 'error';
+        case 'warning': return 'warning';
+        default: return 'info';
+      }
+    }
+  </script>
+<% end %>

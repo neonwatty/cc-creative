@@ -1,0 +1,101 @@
+<div class="<%= card_css_classes %>" 
+     data-provider="<%= provider %>"
+     data-integration-id="<%= integration&.id %>"
+     <%= tag.attributes(oauth_controller_data) unless connected? %>>
+  
+  <div class="provider-card__header">
+    <div class="provider-card__icon">
+      <i class="<%= provider_icon_class %>"></i>
+    </div>
+    <div class="provider-card__info">
+      <h3 class="provider-card__name"><%= provider_name %></h3>
+      <div class="provider-card__status">
+        <span class="<%= status_badge_class %>"><%= status_text %></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="provider-card__body">
+    <% if connected? %>
+      <% if show_stats %>
+        <div class="provider-card__stats">
+          <div class="stat">
+            <span class="stat__label">Files</span>
+            <span class="stat__value"><%= file_count %></span>
+          </div>
+          <div class="stat">
+            <span class="stat__label">Last Sync</span>
+            <span class="stat__value"><%= last_sync_text %></span>
+          </div>
+        </div>
+      <% end %>
+      
+      <div class="provider-card__sync-status" <%= tag.attributes(sync_status_data) %>>
+        <span class="sync-indicator"></span>
+        <span class="sync-text">Ready</span>
+      </div>
+      
+      <% if integration.expired? %>
+        <div class="provider-card__warning">
+          <i class="icon icon--warning"></i>
+          <span>Connection expired. Please reconnect to continue syncing.</span>
+        </div>
+      <% elsif integration.needs_refresh? %>
+        <div class="provider-card__info-message">
+          <i class="icon icon--info"></i>
+          <span>Connection will expire soon. It will be refreshed automatically.</span>
+        </div>
+      <% end %>
+    <% else %>
+      <div class="provider-card__description">
+        <%= provider_description %>
+      </div>
+    <% end %>
+  </div>
+
+  <% if show_actions %>
+    <div class="provider-card__actions">
+      <% if connected? %>
+        <% unless integration.expired? %>
+          <button class="btn btn--secondary btn--sm" 
+                  data-action="click->cloud-integration-manager#syncIntegration" 
+                  data-integration-id="<%= integration.id %>"
+                  title="Sync files with <%= provider_name %>">
+            <i class="icon icon--sync"></i> Sync
+          </button>
+        <% end %>
+        
+        <% if files_url %>
+          <%= link_to files_url, 
+                      class: "btn btn--secondary btn--sm",
+                      title: "Browse files from #{provider_name}" do %>
+            <i class="icon icon--files"></i> Browse Files
+          <% end %>
+        <% end %>
+        
+        <% if integration.expired? %>
+          <button class="btn btn--primary btn--sm" 
+                  data-action="click->cloud-oauth#authorize"
+                  <%= tag.attributes(oauth_controller_data) %>
+                  title="Reconnect to <%= provider_name %>">
+            <i class="icon icon--connect"></i> Reconnect
+          </button>
+        <% end %>
+        
+        <button class="btn btn--danger btn--sm" 
+                data-action="click->cloud-integration-manager#disconnectProvider" 
+                data-integration-id="<%= integration.id %>"
+                data-confirm="Are you sure you want to disconnect from <%= provider_name %>? This will remove access to your files."
+                title="Disconnect from <%= provider_name %>">
+          <i class="icon icon--disconnect"></i> Disconnect
+        </button>
+      <% else %>
+        <button class="btn btn--primary" 
+                data-action="click->cloud-oauth#authorize"
+                title="Connect to <%= provider_name %>">
+          <i class="icon icon--connect"></i> Connect <%= provider_name %>
+        </button>
+      <% end %>
+    </div>
+  <% end %>
+</div>

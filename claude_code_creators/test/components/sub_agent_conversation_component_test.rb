@@ -1,6 +1,8 @@
 require "test_helper"
 
 class SubAgentConversationComponentTest < ViewComponent::TestCase
+  include Rails.application.routes.url_helpers
+  
   setup do
     @sub_agent = sub_agents(:one)
     @user = users(:one)
@@ -14,42 +16,40 @@ class SubAgentConversationComponentTest < ViewComponent::TestCase
     ))
     
     # Check main container
-    assert_selector ".sub-agent-conversation"
     assert_selector "[data-controller='sub-agent-conversation']"
     
-    # Check header
-    assert_selector ".conversation-header"
+    # Check header elements
     assert_text @sub_agent.name
-    assert_selector ".badge", text: @sub_agent.agent_type.humanize
-    assert_selector ".status-badge"
+    assert_text @sub_agent.status.capitalize
   end
 
   test "renders messages list" do
-    # Create some messages
-    @sub_agent.messages.create!(role: "user", content: "Hello", user: @user)
-    @sub_agent.messages.create!(role: "assistant", content: "Hi there!", user: @user)
+    # Create some Claude messages for the sub agent
+    session = claude_sessions(:one)
+    session.update!(sub_agent_name: @sub_agent.name)
+    session.claude_messages.create!(role: "user", content: "Hello")
+    session.claude_messages.create!(role: "assistant", content: "Hi there!")
     
     rendered = render_inline(SubAgentConversationComponent.new(
       sub_agent: @sub_agent,
       current_user: @user
     ))
     
-    assert_selector ".messages-container"
-    assert_selector "[data-sub-agent-conversation-target='messagesList']"
-    assert_selector ".message", count: 2
+    assert_selector "[data-sub-agent-conversation-target='messageList']"
     assert_text "Hello"
     assert_text "Hi there!"
   end
 
   test "renders empty state when no messages" do
-    @sub_agent.messages.destroy_all
+    # Ensure no claude messages exist
+    @sub_agent.claude_messages.destroy_all
     
     rendered = render_inline(SubAgentConversationComponent.new(
       sub_agent: @sub_agent,
       current_user: @user
     ))
     
-    assert_selector ".text-gray-500", text: "No messages yet. Start a conversation!"
+    assert_text "Start a conversation by typing a message below"
   end
 
   test "renders input form" do

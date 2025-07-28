@@ -2,6 +2,7 @@
 import "@hotwired/turbo-rails"
 import "controllers"
 import "./channels/sub_agent_channel"
+import "./channels/cloud_sync_channel"
 
 import "trix"
 import "@rails/actiontext"

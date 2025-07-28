@@ -8,6 +8,25 @@ Rails.application.routes.draw do
   get "auth/:provider/callback", to: "sessions#omniauth"
   get "auth/failure", to: "sessions#omniauth_failure"
   
+  # Cloud integrations
+  resources :cloud_integrations, only: [:index, :new, :destroy] do
+    collection do
+      get 'google/callback', to: 'cloud_integrations#google_callback'
+      get 'dropbox/callback', to: 'cloud_integrations#dropbox_callback'
+      get 'notion/callback', to: 'cloud_integrations#notion_callback'
+    end
+    
+    resources :cloud_files, only: [:index, :show] do
+      member do
+        post :import
+      end
+      
+      collection do
+        post :export
+      end
+    end
+  end
+  
   # User profile routes (authenticated users only)
   resource :profile, only: [:show, :edit, :update] do
     member do

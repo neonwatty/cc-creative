@@ -1,0 +1,142 @@
+<div class="<%= browser_css_classes %>" <%= tag.attributes(controller_data) %>>
+  
+  <!-- Browser Header -->
+  <div class="file-browser__header">
+    <div class="file-browser__title">
+      <h2><%= integration.provider_name %> Files</h2>
+      <div class="file-browser__sync-status" data-cloud-file-browser-target="syncStatus">
+        <%= sync_status_text %>
+      </div>
+    </div>
+    
+    <div class="file-browser__actions">
+      <button class="btn btn--secondary btn--sm" 
+              data-action="click->cloud-file-browser#syncFiles"
+              data-cloud-file-browser-target="syncButton">
+        <i class="icon icon--sync"></i> Sync
+      </button>
+    </div>
+  </div>
+
+  <!-- Search and Filters -->
+  <div class="file-browser__controls">
+    <div class="file-browser__search">
+      <input type="search" 
+             placeholder="Search files..." 
+             class="search-input"
+             value="<%= search_query %>"
+             data-action="input->cloud-file-browser#search"
+             data-cloud-file-browser-target="searchInput">
+    </div>
+    
+    <div class="file-browser__filters">
+      <select class="filter-select" 
+              data-action="change->cloud-file-browser#changeFilter"
+              data-cloud-file-browser-target="filterSelect">
+        <% filter_options.each do |option| %>
+          <option value="<%= option[:value] %>" 
+                  <%= 'selected' if option[:value] == filter %>>
+            <%= option[:label] %> (<%= option[:count] %>)
+          </option>
+        <% end %>
+      </select>
+      
+      <select class="sort-select" 
+              data-action="change->cloud-file-browser#changeSort"
+              data-cloud-file-browser-target="sortSelect">
+        <% sort_options.each do |option| %>
+          <option value="<%= option[:value] %>"><%= option[:label] %></option>
+        <% end %>
+      </select>
+    </div>
+    
+    <div class="file-browser__view-toggle" data-cloud-file-browser-target="viewToggle">
+      <% view_toggle_options.each do |option| %>
+        <button class="view-toggle__btn <%= 'active' if option[:mode] == view_mode %>" 
+                data-action="click->cloud-file-browser#toggleView"
+                data-view-mode="<%= option[:mode] %>"
+                title="<%= option[:label] %>">
+          <i class="icon icon--<%= option[:icon] %>"></i>
+        </button>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Selection and Batch Actions -->
+  <div class="file-browser__selection" 
+       data-cloud-file-browser-target="batchActions" 
+       style="display: none;">
+    <div class="selection-info">
+      <span data-cloud-file-browser-target="selectedCount"><%= selected_count_display %></span>
+    </div>
+    <div class="batch-actions">
+      <% batch_actions.each do |action| %>
+        <button class="<%= action[:class] %>" 
+                data-action="click->cloud-file-browser#<%= action[:action] %>">
+          <i class="icon icon--<%= action[:icon] %>"></i> <%= action[:text] %>
+        </button>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div class="file-browser__loading" 
+       data-cloud-file-browser-target="loadingSpinner" 
+       style="display: none;">
+    <div class="loading-spinner">
+      <i class="icon icon--spinner icon--spin"></i>
+      <span>Loading files...</span>
+    </div>
+  </div>
+
+  <!-- File List -->
+  <div class="file-browser__content">
+    <% if has_files? %>
+      <div class="file-browser__stats">
+        <span class="file-count"><%= pluralize(files.count, 'file') %></span>
+        <span class="total-size"><%= formatted_total_size %> total</span>
+      </div>
+      
+      <div class="<%= file_list_container_class %>" data-cloud-file-browser-target="fileList">
+        <%= render_file_list %>
+      </div>
+      
+      <%= render_pagination %>
+    <% else %>
+      <div class="file-browser__empty" data-cloud-file-browser-target="emptyState">
+        <div class="empty-state">
+          <div class="empty-state__icon">
+            <i class="icon icon--folder-empty"></i>
+          </div>
+          <h3 class="empty-state__title">No Files Found</h3>
+          <p class="empty-state__message"><%= empty_state_message %></p>
+          
+          <div class="empty-state__actions">
+            <% empty_state_actions.each do |action| %>
+              <button class="<%= action[:class] %>" data-action="<%= action[:action] %>">
+                <%= action[:text] %>
+              </button>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Pagination -->
+  <% if pagination && pagination[:total_pages] > 1 %>
+    <div class="file-browser__pagination" data-cloud-file-browser-target="pagination">
+      <%= render_pagination %>
+    </div>
+  <% end %>
+
+  <!-- Error Container -->
+  <div class="file-browser__error" 
+       data-cloud-file-browser-target="errorContainer" 
+       style="display: none;">
+    <div class="error-message">
+      <i class="icon icon--error"></i>
+      <span class="error-text"></span>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,76 @@
+<div class="<%= component_css_classes %>" <%= tag.attributes(component_data) %>>
+  
+  <% if has_integrations? %>
+    <% if show_global %>
+      <!-- Global Status Header -->
+      <div class="sync-status__header">
+        <div class="sync-status__global <%= status_color_class %>">
+          <div class="sync-status__icon">
+            <i class="icon icon--<%= global_status_icon %> <%= 'icon--spin' if global_status == 'syncing' %>"></i>
+          </div>
+          
+          <div class="sync-status__info">
+            <div class="sync-status__text"><%= global_status_text %></div>
+            <div class="sync-status__meta">
+              <%= pluralize(total_files_count, 'file') %> total • <%= last_sync_text %>
+            </div>
+          </div>
+        </div>
+        
+        <%= render_global_actions %>
+      </div>
+      
+      <!-- Sync Progress Bar (shown during active sync) -->
+      <%= render_sync_progress if syncing_integrations.any? %>
+    <% end %>
+    
+    <% if show_details %>
+      <!-- Individual Integration Status -->
+      <div class="sync-status__details">
+        <% if show_global %>
+          <h4 class="sync-status__section-title">Integration Status</h4>
+        <% end %>
+        
+        <div class="integration-status-list" data-cloud-sync-status-target="integrationList">
+          <% integration_status_list.each do |status| %>
+            <%= render_integration_status(status) %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+    
+    <!-- Auto-refresh indicator -->
+    <% if auto_refresh? %>
+      <div class="sync-status__refresh-indicator" 
+           data-cloud-sync-status-target="refreshIndicator"
+           data-cloud-sync-status-refresh-interval-value="<%= refresh_interval %>">
+        <i class="icon icon--refresh icon--spin"></i>
+        <span>Auto-updating...</span>
+      </div>
+    <% end %>
+    
+  <% else %>
+    <!-- Empty State -->
+    <%= render_empty_state %>
+  <% end %>
+  
+  <!-- Error Container -->
+  <div class="sync-status__error" 
+       data-cloud-sync-status-target="errorContainer" 
+       style="display: none;">
+    <div class="error-message">
+      <i class="icon icon--error"></i>
+      <span class="error-text"></span>
+    </div>
+  </div>
+  
+  <!-- Loading Overlay -->
+  <div class="sync-status__loading" 
+       data-cloud-sync-status-target="loadingOverlay" 
+       style="display: none;">
+    <div class="loading-spinner">
+      <i class="icon icon--spinner icon--spin"></i>
+      <span>Updating status...</span>
+    </div>
+  </div>
+</div>

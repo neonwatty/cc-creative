@@ -1,0 +1,249 @@
+<% content_for :title, "Cloud Integrations" %>
+
+<div class="cloud-integrations-page" 
+     data-controller="cloud-integration-manager"
+     data-cloud-integration-manager-user-id-value="<%= current_user.id %>">
+  
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header__content">
+      <h1 class="page-title">Cloud Integrations</h1>
+      <p class="page-description">
+        Connect your cloud storage accounts to import and export documents seamlessly.
+      </p>
+    </div>
+    
+    <div class="page-header__actions">
+      <button class="btn btn--secondary" 
+              data-action="click->cloud-integration-manager#syncAll"
+              data-cloud-integration-manager-target="syncAllButton">
+        <i class="icon icon--sync"></i> Sync All
+      </button>
+      
+      <button class="btn btn--secondary" 
+              data-action="click->cloud-integration-manager#refreshIntegrations">
+        <i class="icon icon--refresh"></i> Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Global Sync Status -->
+  <div class="sync-status-section">
+    <%= render CloudSyncStatusComponent.new(
+          integrations: @cloud_integrations,
+          current_user: current_user,
+          show_global: true,
+          show_details: false
+        ) %>
+  </div>
+
+  <!-- Provider Cards Grid -->
+  <div class="providers-section">
+    <h2 class="section-title">Available Providers</h2>
+    
+    <div class="provider-cards-grid" data-cloud-integration-manager-target="providerCards">
+      <% @available_providers.each do |provider| %>
+        <%= render CloudProviderComponent.new(
+              provider: provider[:name],
+              integration: provider[:integration],
+              show_stats: true,
+              show_actions: true
+            ) %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Integration Details -->
+  <% if @cloud_integrations.any? %>
+    <div class="integrations-section">
+      <h2 class="section-title">Integration Details</h2>
+      
+      <%= render CloudSyncStatusComponent.new(
+            integrations: @cloud_integrations,
+            current_user: current_user,
+            show_global: false,
+            show_details: true
+          ) %>
+      
+      <!-- Integration List -->
+      <div class="integration-list" data-cloud-integration-manager-target="integrationList">
+        <% @cloud_integrations.each do |integration| %>
+          <div class="integration-card" data-integration-id="<%= integration.id %>">
+            <div class="integration-card__header">
+              <div class="integration-card__provider">
+                <i class="provider-icon provider-icon--<%= integration.provider %>"></i>
+                <div class="integration-card__info">
+                  <h3><%= integration.provider_name %></h3>
+                  <div class="integration-card__status">
+                    <% if integration.active? %>
+                      <span class="status-badge status-badge--connected">Connected</span>
+                      <% if integration.needs_refresh? %>
+                        <span class="status-badge status-badge--warning">Expires Soon</span>
+                      <% end %>
+                    <% else %>
+                      <span class="status-badge status-badge--error">
+                        <%= integration.expired? ? 'Expired' : 'Disconnected' %>
+                      </span>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="integration-card__actions">
+                <%= link_to cloud_integration_cloud_files_path(integration), 
+                            class: "btn btn--secondary btn--sm" do %>
+                  <i class="icon icon--files"></i> 
+                  Files (<%= integration.cloud_files.count %>)
+                <% end %>
+              </div>
+            </div>
+            
+            <div class="integration-card__body">
+              <div class="integration-stats">
+                <div class="stat">
+                  <span class="stat__label">Files Synced</span>
+                  <span class="stat__value"><%= integration.cloud_files.count %></span>
+                </div>
+                <div class="stat">
+                  <span class="stat__label">Last Sync</span>
+                  <span class="stat__value">
+                    <% if integration.cloud_files.any? %>
+                      <% last_sync = integration.cloud_files.maximum(:last_synced_at) %>
+                      <%= last_sync ? time_ago_in_words(last_sync) + ' ago' : 'Never' %>
+                    <% else %>
+                      Never
+                    <% end %>
+                  </span>
+                </div>
+                <% if integration.expires_at %>
+                  <div class="stat">
+                    <span class="stat__label">Token Expires</span>
+                    <span class="stat__value">
+                      <%= integration.expires_at > Time.current ? 
+                          time_ago_in_words(integration.expires_at) + ' from now' : 
+                          'Expired' %>
+                    </span>
+                  </div>
+                <% end %>
+              </div>
+              
+              <% if integration.settings.present? %>
+                <div class="integration-details">
+                  <h4>Connection Details</h4>
+                  <dl class="details-list">
+                    <% case integration.provider %>
+                    <% when 'google_drive' %>
+                      <% if integration.get_setting('scope') %>
+                        <dt>Permissions</dt>
+                        <dd><%= integration.get_setting('scope') %></dd>
+                      <% end %>
+                    <% when 'dropbox' %>
+                      <% if integration.get_setting('account_id') %>
+                        <dt>Account ID</dt>
+                        <dd><%= integration.get_setting('account_id') %></dd>
+                      <% end %>
+                    <% when 'notion' %>
+                      <% if integration.get_setting('workspace_name') %>
+                        <dt>Workspace</dt>
+                        <dd><%= integration.get_setting('workspace_name') %></dd>
+                      <% end %>
+                    <% end %>
+                  </dl>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% else %>
+    <!-- Empty State -->
+    <div class="empty-state">
+      <div class="empty-state__icon">
+        <i class="icon icon--cloud-off"></i>
+      </div>
+      <h3 class="empty-state__title">No Cloud Integrations</h3>
+      <p class="empty-state__message">
+        Connect to your favorite cloud storage providers to start syncing files.
+      </p>
+      <div class="empty-state__actions">
+        <p class="empty-state__help">
+          Choose a provider above to get started.
+        </p>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" 
+       data-cloud-integration-manager-target="loadingSpinner" 
+       style="display: none;">
+    <div class="loading-spinner">
+      <i class="icon icon--spinner icon--spin"></i>
+      <span>Loading...</span>
+    </div>
+  </div>
+
+  <!-- Error Container -->
+  <div class="error-container" 
+       data-cloud-integration-manager-target="errorContainer" 
+       style="display: none;">
+    <div class="error-message">
+      <i class="icon icon--error"></i>
+      <span class="error-text"></span>
+      <button class="error-dismiss" data-action="click->cloud-integration-manager#dismissError">
+        <i class="icon icon--close"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Global Sync Status Footer -->
+  <div class="sync-status-footer" data-cloud-integration-manager-target="syncStatusGlobal">
+    <%= pluralize(@cloud_integrations.select(&:active?).count, 'integration') %> connected
+  </div>
+</div>
+
+<!-- Notification Area -->
+<div id="notifications" class="notifications-container"></div>
+
+<% content_for :javascript do %>
+  <script>
+    // Listen for global notification events
+    document.addEventListener('notification', function(event) {
+      const { message, type } = event.detail;
+      showNotification(message, type);
+    });
+    
+    function showNotification(message, type = 'info') {
+      const container = document.getElementById('notifications');
+      const notification = document.createElement('div');
+      notification.className = `notification notification--${type}`;
+      notification.innerHTML = `
+        <i class="icon icon--${getNotificationIcon(type)}"></i>
+        <span>${message}</span>
+        <button class="notification__close" onclick="this.parentElement.remove()">
+          <i class="icon icon--close"></i>
+        </button>
+      `;
+      
+      container.appendChild(notification);
+      
+      // Auto-remove after 5 seconds for success/info, 8 seconds for errors
+      const timeout = type === 'error' ? 8000 : 5000;
+      setTimeout(() => {
+        if (notification.parentElement) {
+          notification.remove();
+        }
+      }, timeout);
+    }
+    
+    function getNotificationIcon(type) {
+      switch (type) {
+        case 'success': return 'check';
+        case 'error': return 'error';
+        case 'warning': return 'warning';
+        default: return 'info';
+      }
+    }
+  </script>
+<% end %>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_28_153339) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_28_211556) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.string "name", null: false
     t.text "body"
@@ -82,6 +82,34 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_28_153339) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["session_id"], name: "index_claude_sessions_on_session_id", unique: true
+  end
+
+  create_table "cloud_files", force: :cascade do |t|
+    t.integer "cloud_integration_id", null: false
+    t.string "provider"
+    t.string "file_id"
+    t.string "name"
+    t.string "mime_type"
+    t.integer "size"
+    t.text "metadata"
+    t.datetime "last_synced_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "document_id"
+    t.index ["cloud_integration_id"], name: "index_cloud_files_on_cloud_integration_id"
+    t.index ["document_id"], name: "index_cloud_files_on_document_id"
+  end
+
+  create_table "cloud_integrations", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "provider"
+    t.text "access_token"
+    t.text "refresh_token"
+    t.datetime "expires_at"
+    t.text "settings"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_cloud_integrations_on_user_id"
   end
 
   create_table "context_items", force: :cascade do |t|
@@ -206,6 +234,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_28_153339) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "cloud_files", "cloud_integrations"
+  add_foreign_key "cloud_files", "documents"
+  add_foreign_key "cloud_integrations", "users"
   add_foreign_key "context_items", "documents"
   add_foreign_key "context_items", "users"
   add_foreign_key "document_versions", "documents"

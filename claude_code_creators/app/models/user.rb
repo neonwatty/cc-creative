@@ -5,6 +5,7 @@ class User < ApplicationRecord
   has_many :identities, dependent: :destroy
   has_many :context_items, dependent: :destroy
   has_many :sub_agents, dependent: :destroy
+  has_many :cloud_integrations, dependent: :destroy
 
   enum :role, { user: "user", editor: "editor", admin: "admin" }, default: :user
 
