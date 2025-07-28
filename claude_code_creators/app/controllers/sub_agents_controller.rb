@@ -1,6 +1,6 @@
 class SubAgentsController < ApplicationController
   before_action :set_document
-  before_action :set_sub_agent, only: [:show, :edit, :update, :destroy, :activate, :complete, :pause]
+  before_action :set_sub_agent, only: [:show, :edit, :update, :destroy, :activate, :complete, :pause, :merge]
   
   # GET /documents/:document_id/sub_agents
   # GET /documents/:document_id/sub_agents.json
@@ -226,6 +226,46 @@ class SubAgentsController < ApplicationController
                               locals: { sub_agent: @sub_agent })
         ]
       }
+    end
+  end
+  
+  # POST /documents/:document_id/sub_agents/1/merge
+  def merge
+    authorize @sub_agent, :update?
+    
+    merge_params = params.permit(:merge_type, :position, :separator)
+    
+    service = SubAgentService.new(@sub_agent)
+    
+    if service.merge_to_document(merge_params)
+      respond_to do |format|
+        format.html { 
+          redirect_to document_path(@document), 
+          notice: 'Sub-agent content merged successfully.' 
+        }
+        format.json { render json: { success: true } }
+        format.turbo_stream { 
+          render turbo_stream: [
+            turbo_stream.replace(@sub_agent, 
+                                partial: 'sub_agents/sub_agent', 
+                                locals: { sub_agent: @sub_agent }),
+            turbo_stream.update("document_content", 
+                               partial: 'documents/content', 
+                               locals: { document: @document })
+          ]
+        }
+      end
+    else
+      respond_to do |format|
+        format.html { 
+          redirect_to document_sub_agent_path(@document, @sub_agent), 
+          alert: 'Failed to merge sub-agent content.' 
+        }
+        format.json { 
+          render json: { error: 'Failed to merge content' }, 
+          status: :unprocessable_entity 
+        }
+      end
     end
   end
   

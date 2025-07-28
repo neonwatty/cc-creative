@@ -1,0 +1,103 @@
+<div class="<%= drop_zone_class %>" 
+     <%= drop_zone_data_attributes.map { |k, v| "#{k}=\"#{ERB::Util.html_escape(v)}\"" }.join(" ").html_safe %>
+     data-widget-drop-zone-target="dropZone">
+  
+  <!-- Pulse Animation (hidden by default, shown during active drag) -->
+  <div class="<%= pulse_animation_class %>" 
+       data-widget-drop-zone-target="pulseAnimation" 
+       style="display: none;"></div>
+  
+  <!-- Drop Zone Content -->
+  <div class="relative z-10" data-widget-drop-zone-target="content">
+    <% if show_instructions %>
+      <div class="<%= instructions_class %>" data-widget-drop-zone-target="instructions">
+        <!-- Drop Icon -->
+        <div class="<%= icon_class %>" data-widget-drop-zone-target="icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-full h-full">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+          </svg>
+        </div>
+        
+        <!-- Title -->
+        <h3 class="<%= title_class %>" data-widget-drop-zone-target="title">
+          Drop items here
+        </h3>
+        
+        <!-- Description -->
+        <p class="<%= description_class %>" data-widget-drop-zone-target="description">
+          Drag and drop <%= accepted_types_list.downcase %> into this area
+          <%= allow_multiple ? " (multiple items supported)" : " (one item at a time)" %>
+        </p>
+        
+        <!-- Accepted Types Badges -->
+        <div class="flex flex-wrap justify-center gap-2 mt-3">
+          <% accepted_types.each do |type| %>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-creative-neutral-100 text-creative-neutral-800 dark:bg-creative-neutral-700 dark:text-creative-neutral-200">
+              <%= type.humanize %>
+            </span>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+    
+    <!-- Custom Content Slot -->
+    <% if content.present? %>
+      <div class="mt-4">
+        <%= content %>
+      </div>
+    <% end %>
+  </div>
+  
+  <!-- Active Drop Overlay -->
+  <div class="<%= overlay_class %>" 
+       data-widget-drop-zone-target="overlay">
+    <div class="text-center space-y-3">
+      <!-- Enhanced Drop Icon -->
+      <div class="w-16 h-16 mx-auto text-creative-primary-500 dark:text-creative-primary-400">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-full h-full animate-bounce-gentle">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+        </svg>
+      </div>
+      
+      <!-- Drop Message -->
+      <div class="text-creative-primary-700 dark:text-creative-primary-300">
+        <p class="text-lg font-semibold">Release to drop</p>
+        <p class="text-sm opacity-75" data-widget-drop-zone-target="dropMessage">
+          Drop your items here
+        </p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Success Feedback (temporary) -->
+  <div class="absolute inset-0 bg-creative-secondary-50 dark:bg-creative-secondary-900/20 border-2 border-creative-secondary-300 dark:border-creative-secondary-600 rounded-xl opacity-0 invisible transition-all duration-500 flex items-center justify-center"
+       data-widget-drop-zone-target="successFeedback">
+    <div class="text-center space-y-2">
+      <div class="w-12 h-12 mx-auto text-creative-secondary-600 dark:text-creative-secondary-400">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-full h-full">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        </svg>
+      </div>
+      <p class="text-creative-secondary-700 dark:text-creative-secondary-300 font-medium">
+        Successfully dropped!
+      </p>
+    </div>
+  </div>
+  
+  <!-- Error Feedback (temporary) -->
+  <div class="absolute inset-0 bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-600 rounded-xl opacity-0 invisible transition-all duration-500 flex items-center justify-center"
+       data-widget-drop-zone-target="errorFeedback">
+    <div class="text-center space-y-2">
+      <div class="w-12 h-12 mx-auto text-red-600 dark:text-red-400">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-full h-full">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </div>
+      <p class="text-red-700 dark:text-red-300 font-medium" data-widget-drop-zone-target="errorMessage">
+        Drop failed
+      </p>
+    </div>
+  </div>
+</div>

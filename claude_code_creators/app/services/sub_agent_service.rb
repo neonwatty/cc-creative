@@ -73,13 +73,15 @@ class SubAgentService
   end
   
   # Merge content to document
-  def merge_to_document
+  def merge_to_document(options = {})
     content = merge_content
     return false if content.blank?
     
     # Append content to document
     current_content = sub_agent.document.content.to_s
-    new_content = "#{current_content}\n\n## Content from #{sub_agent.name}\n\n#{content}"
+    separator = options[:separator] || "\n\n"
+    heading = "## Content from #{sub_agent.name}"
+    new_content = "#{current_content}#{separator}#{heading}#{separator}#{content}"
     
     sub_agent.document.update!(content: new_content)
     true

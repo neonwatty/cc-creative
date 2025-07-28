@@ -11,6 +11,7 @@
 
 @import "actiontext.css";
 @import "components/context_item_preview.css";
+@import "responsive-patterns.css";
 
 /* Drag and Drop Styles */
 .sortable-ghost {

@@ -38,6 +38,14 @@ Rails.application.routes.draw do
         post :activate
         post :complete
         post :pause
+        post :merge
+      end
+      
+      # Nested sub agent messages
+      resources :messages, controller: 'sub_agent_messages', as: 'sub_agent_messages' do
+        collection do
+          post :create
+        end
       end
     end
   end

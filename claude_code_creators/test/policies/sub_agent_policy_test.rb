@@ -81,6 +81,7 @@ class SubAgentPolicyTest < ActiveSupport::TestCase
     shared_agent = SubAgent.create!(
       document: @document,
       user: @other_user,
+      name: 'Shared Error Debugger',
       agent_type: 'error-debugger'
     )
     

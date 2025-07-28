@@ -8,10 +8,8 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
   end
 
   test "renders sidebar with sub agents" do
-    sub_agents = [@sub_agent]
     rendered = render_inline(SubAgentSidebarComponent.new(
       document: @document,
-      sub_agents: sub_agents,
       current_user: @user
     ))
     
@@ -32,7 +30,6 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
   test "renders empty state when no sub agents" do
     rendered = render_inline(SubAgentSidebarComponent.new(
       document: @document,
-      sub_agents: [],
       current_user: @user
     ))
     
@@ -43,7 +40,6 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
     @sub_agent.update!(status: "active")
     rendered = render_inline(SubAgentSidebarComponent.new(
       document: @document,
-      sub_agents: [@sub_agent],
       current_user: @user
     ))
     
@@ -55,7 +51,6 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
     @sub_agent.update!(status: "idle")
     rendered = render_inline(SubAgentSidebarComponent.new(
       document: @document,
-      sub_agents: [@sub_agent],
       current_user: @user
     ))
     
@@ -67,7 +62,6 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
     @sub_agent.update!(status: "completed")
     rendered = render_inline(SubAgentSidebarComponent.new(
       document: @document,
-      sub_agents: [@sub_agent],
       current_user: @user
     ))
     
@@ -81,7 +75,6 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
     
     rendered = render_inline(SubAgentSidebarComponent.new(
       document: @document,
-      sub_agents: [@sub_agent],
       current_user: @user
     ))
     
@@ -93,7 +86,6 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
     
     rendered = render_inline(SubAgentSidebarComponent.new(
       document: @document,
-      sub_agents: [@sub_agent],
       current_user: @user
     ))
     
@@ -103,7 +95,6 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
   test "renders drag handle for reordering" do
     rendered = render_inline(SubAgentSidebarComponent.new(
       document: @document,
-      sub_agents: [@sub_agent],
       current_user: @user
     ))
     
@@ -121,7 +112,6 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
     
     rendered = render_inline(SubAgentSidebarComponent.new(
       document: @document,
-      sub_agents: [agent1, agent2],
       current_user: @user
     ))
     
@@ -133,7 +123,6 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
   test "includes stimulus controller and targets" do
     rendered = render_inline(SubAgentSidebarComponent.new(
       document: @document,
-      sub_agents: [@sub_agent],
       current_user: @user
     ))
     
@@ -145,7 +134,6 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
   test "renders sortable container with correct attributes" do
     rendered = render_inline(SubAgentSidebarComponent.new(
       document: @document,
-      sub_agents: [@sub_agent],
       current_user: @user
     ))
     
@@ -155,7 +143,6 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
   test "includes click action to select agent" do
     rendered = render_inline(SubAgentSidebarComponent.new(
       document: @document,
-      sub_agents: [@sub_agent],
       current_user: @user
     ))
     
@@ -186,7 +173,6 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
     
     rendered = render_inline(SubAgentSidebarComponent.new(
       document: @document,
-      sub_agents: agents,
       current_user: @user
     ))
     

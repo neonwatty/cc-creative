@@ -1,0 +1,63 @@
+<div class="<%= wrapper_classes %>" data-<%= controller_data.to_a.map { |k, v| "#{k}=\"#{v}\"" }.join(" data-") %>>
+  <button 
+    type="button"
+    class="<%= toggle_classes %>"
+    data-theme-target="toggle"
+    data-action="click->theme#toggle"
+    aria-label="Toggle theme"
+    title="Switch between light and dark mode"
+  >
+    <!-- Theme icon container -->
+    <span data-theme-icon class="transition-transform duration-300 ease-creative">
+      <!-- Default sun icon (light mode) -->
+      <svg class="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+      </svg>
+    </span>
+    
+    <!-- Screen reader text -->
+    <span class="sr-only" data-theme-text>Light</span>
+  </button>
+  
+  <% if position.to_s.start_with?('fixed') %>
+    <!-- Subtle backdrop for fixed positioning -->
+    <div class="absolute inset-0 -z-10 rounded-full bg-white/80 backdrop-blur-sm dark:bg-creative-neutral-800/80"></div>
+  <% end %>
+</div>
+
+<!-- Enhanced styles for smooth transitions -->
+<style>
+  .theme-toggle-wrapper button {
+    transform-origin: center;
+  }
+  
+  .theme-toggle-wrapper button:active {
+    transform: scale(0.95);
+  }
+  
+  .theme-toggle-wrapper [data-theme-icon] svg {
+    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Rotation animation when theme changes */
+  .theme-toggle-wrapper button[aria-pressed="true"] [data-theme-icon] svg {
+    transform: rotate(180deg);
+  }
+  
+  /* Subtle glow effect in dark mode */
+  .dark .theme-toggle-wrapper button:hover {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+  
+  /* Pulse animation on theme change */
+  @keyframes theme-change-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+  
+  .theme-toggle-wrapper button.changing {
+    animation: theme-change-pulse 0.3s ease-out;
+  }
+</style>

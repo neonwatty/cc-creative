@@ -1,0 +1,83 @@
+<div class="<%= presence_container_class %>" 
+     data-controller="presence-indicator"
+     data-presence-indicator-current-user-id-value="<%= current_user.id %>"
+     data-presence-indicator-show-cursors-value="<%= show_cursors %>">
+  
+  <!-- Active User Avatars -->
+  <div class="flex -space-x-1">
+    <% displayed_users.each_with_index do |user, index| %>
+      <div class="relative group" 
+           data-presence-indicator-target="userAvatar"
+           data-user-id="<%= user.id %>"
+           data-user-name="<%= user.name.presence || user.email %>"
+           data-animation-delay="<%= index * 100 %>">
+        
+        <!-- User Avatar -->
+        <div class="<%= avatar_base_class %> <%= user_avatar_color(user) %>"
+             data-presence-indicator-target="avatar"
+             style="animation-delay: <%= index * 50 %>ms;">
+          <%= user_initials(user) %>
+          
+          <!-- Typing Indicator (shown when user is actively typing) -->
+          <div class="<%= typing_indicator_class %>"
+               data-presence-indicator-target="typingIndicator"
+               style="display: none;"></div>
+        </div>
+        
+        <!-- Tooltip with User Info -->
+        <div class="<%= tooltip_class %>">
+          <% if show_names %>
+            <%= user.name.presence || user.email %>
+          <% else %>
+            Online
+          <% end %>
+          <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-2 h-2 bg-creative-neutral-900 dark:bg-creative-neutral-700 rotate-45"></div>
+        </div>
+      </div>
+    <% end %>
+    
+    <!-- Overflow Counter -->
+    <% if has_overflow? %>
+      <div class="relative group">
+        <div class="<%= overflow_avatar_class %>">
+          +<%= overflow_count %>
+        </div>
+        
+        <!-- Overflow Tooltip -->
+        <div class="<%= tooltip_class %>">
+          <%= overflow_count %> more user<%= overflow_count == 1 ? '' : 's' %> online
+          <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-2 h-2 bg-creative-neutral-900 dark:bg-creative-neutral-700 rotate-45"></div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  
+  <!-- Live Cursors (if enabled) -->
+  <% if show_cursors %>
+    <div class="absolute inset-0 pointer-events-none" 
+         data-presence-indicator-target="cursorsContainer">
+      <!-- Cursor elements will be dynamically inserted here -->
+    </div>
+  <% end %>
+  
+  <!-- Real-time Status Updates -->
+  <div class="hidden" data-presence-indicator-target="statusUpdates">
+    <!-- Status messages like "John started typing" will appear here -->
+  </div>
+</div>
+
+<!-- Cursor Template (hidden, used for cloning) -->
+<template data-presence-indicator-target="cursorTemplate">
+  <div class="absolute pointer-events-none z-50 transition-all duration-150 ease-out"
+       data-cursor-user-id="">
+    <!-- Cursor SVG -->
+    <svg class="w-4 h-4 text-creative-primary-500" fill="currentColor" viewBox="0 0 20 20">
+      <path d="M2 2l16 6-6 2-2 6L2 2z"/>
+    </svg>
+    
+    <!-- User Name Label -->
+    <div class="absolute top-5 left-2 px-2 py-1 text-xs font-medium text-white bg-creative-primary-500 rounded shadow-lg whitespace-nowrap">
+      <span class="cursor-user-name"></span>
+    </div>
+  </div>
+</template>

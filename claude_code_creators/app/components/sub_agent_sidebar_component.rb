@@ -40,17 +40,17 @@ class SubAgentSidebarComponent < ViewComponent::Base
   end
 
   def status_badge_classes(status)
-    base_classes = "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+    base_classes = "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium badge"
     
     case status
     when "active"
-      "#{base_classes} bg-green-100 text-green-800 animate-pulse"
+      "#{base_classes} bg-green-500 text-white"
     when "completed"
-      "#{base_classes} bg-blue-100 text-blue-800"
+      "#{base_classes} bg-gray-500 text-white"
     when "failed"
-      "#{base_classes} bg-red-100 text-red-800"
-    when "paused"
-      "#{base_classes} bg-yellow-100 text-yellow-800"
+      "#{base_classes} bg-red-500 text-white"
+    when "idle"
+      "#{base_classes} bg-yellow-500 text-white"
     when "pending"
       "#{base_classes} bg-gray-100 text-gray-800"
     else

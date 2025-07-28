@@ -1,0 +1,242 @@
+<div class="<%= layout_class %>" <%= layout_data_attributes.map { |k, v| "#{k}=\"#{v}\"" }.join(" ").html_safe %>>
+  <!-- Mobile Menu Overlay -->
+  <div class="<%= mobile_overlay_class %>" 
+       data-document-layout-target="mobileOverlay"
+       data-action="click->document-layout#closeMobileMenu"></div>
+
+  <!-- Sidebar (Desktop) -->
+  <% if should_show_sidebar? %>
+    <div class="fixed inset-y-0 left-0 z-30 hidden lg:block">
+      <%= render SidebarNavigationComponent.new(
+            current_user: current_user,
+            current_document: current_document,
+            options: {
+              collapsed: @sidebar_collapsed,
+              show_presence: collaboration_enabled?
+            }
+          ) %>
+    </div>
+  <% end %>
+
+  <!-- Mobile Menu -->
+  <div class="<%= mobile_menu_class %>" 
+       data-document-layout-target="mobileMenu">
+    <%= render SidebarNavigationComponent.new(
+          current_user: current_user,
+          current_document: current_document,
+          options: {
+            collapsed: false,
+            show_presence: collaboration_enabled?
+          }
+        ) %>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="<%= container_class %>">
+    <main class="<%= main_content_class %>" data-document-layout-target="mainContent">
+      <!-- Top Toolbar -->
+      <div class="<%= toolbar_class %>">
+        <!-- Left Section -->
+        <div class="flex items-center space-x-4">
+          <!-- Mobile Menu Button -->
+          <% unless should_show_sidebar? %>
+            <button class="p-2 text-creative-neutral-600 dark:text-creative-neutral-400 hover:bg-creative-neutral-100 dark:hover:bg-creative-neutral-700 rounded-lg lg:hidden"
+                    data-action="click->document-layout#openMobileMenu"
+                    title="Open menu">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+              </svg>
+            </button>
+          <% end %>
+
+          <!-- Breadcrumbs -->
+          <nav class="<%= breadcrumb_class %>">
+            <% breadcrumbs.each_with_index do |crumb, index| %>
+              <% unless index == 0 %>
+                <svg class="w-4 h-4 text-creative-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+              <% end %>
+              
+              <% if crumb[:active] %>
+                <span class="font-medium text-creative-neutral-900 dark:text-creative-neutral-100">
+                  <%= crumb[:label] %>
+                </span>
+              <% else %>
+                <%= link_to crumb[:path], 
+                            class: "hover:text-creative-neutral-900 dark:hover:text-creative-neutral-100 transition-colors duration-150" do %>
+                  <%= crumb[:label] %>
+                <% end %>
+              <% end %>
+            <% end %>
+          </nav>
+
+          <!-- Document Title (if editing) -->
+          <% if current_document %>
+            <div class="flex items-center space-x-2">
+              <div class="w-1 h-6 bg-creative-primary-500 rounded-full"></div>
+              <h1 class="text-lg font-semibold text-creative-neutral-900 dark:text-creative-neutral-100">
+                <%= toolbar_title %>
+              </h1>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Center Section (Status) -->
+        <div class="flex items-center space-x-2">
+          <% status = status_indicator %>
+          <div class="flex items-center space-x-2 px-3 py-1.5 bg-<%= status[:color] %>/10 rounded-full">
+            <div class="w-2 h-2 bg-<%= status[:color] %> rounded-full <%= status[:pulse] ? 'animate-pulse-gentle' : '' %>"></div>
+            <span class="text-sm font-medium text-<%= status[:color] %>">
+              <%= status[:text] %>
+            </span>
+          </div>
+
+          <!-- Collaboration Indicators -->
+          <% if collaboration_enabled? && current_document %>
+            <div data-controller="presence-indicator" 
+                 data-presence-indicator-document-id-value="<%= current_document.id %>"
+                 data-presence-indicator-current-user-id-value="<%= current_user.id %>">
+              <%= render PresenceIndicatorComponent.new(
+                    users: [], # This would be populated dynamically
+                    current_user: current_user,
+                    options: { 
+                      show_names: false, 
+                      show_cursors: true,
+                      size: :small,
+                      max_display: 3
+                    }
+                  ) %>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Right Section (Actions) -->
+        <div class="<%= toolbar_actions_class %>">
+          <!-- Theme Toggle -->
+          <%= render ThemeToggleComponent.new %>
+
+          <!-- Layout Toggle -->
+          <button class="btn-ghost !p-2 !text-creative-neutral-600 dark:!text-creative-neutral-400"
+                  data-action="click->document-layout#toggleLayoutType"
+                  data-document-layout-target="layoutToggle"
+                  title="Toggle layout">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+            </svg>
+          </button>
+
+          <!-- User Actions -->
+          <% if current_document %>
+            <div class="flex items-center space-x-2">
+              <!-- Share Button -->
+              <button class="btn-outline"
+                      data-action="click->document-layout#shareDocument"
+                      title="Share document">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"/>
+                </svg>
+                Share
+              </button>
+
+              <!-- Export Button -->
+              <button class="btn-ghost"
+                      data-action="click->document-layout#exportDocument"
+                      title="Export document">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+              </button>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="<%= content_area_class %>" data-document-layout-target="contentArea">
+        <%= content %>
+      </div>
+    </main>
+  </div>
+
+  <!-- Floating Action Button (New Document) -->
+  <% unless current_document %>
+    <%= link_to new_document_path, 
+                class: floating_action_button_class,
+                title: "Create new document",
+                data: { turbo_frame: "_top" } do %>
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+      </svg>
+    <% end %>
+  <% end %>
+
+  <!-- Onboarding Modal -->
+  <% if should_show_onboarding? %>
+    <%= render OnboardingModalComponent.new(
+          current_user: current_user,
+          options: { show_modal: true }
+        ) %>
+  <% end %>
+
+  <!-- Drop Zones for Global Drag & Drop -->
+  <div class="hidden" data-document-layout-target="dropZones">
+    <!-- These will be populated dynamically based on the current view -->
+  </div>
+</div>
+
+<!-- Keyboard Shortcuts Help (Hidden by default) -->
+<div class="fixed inset-0 bg-creative-neutral-900/75 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 invisible transition-all duration-300"
+     data-document-layout-target="shortcutsModal">
+  <div class="bg-white dark:bg-creative-neutral-800 rounded-2xl shadow-creative-2xl max-w-2xl w-full mx-4 p-8">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-2xl font-bold text-creative-neutral-900 dark:text-creative-neutral-100">
+        Keyboard Shortcuts
+      </h2>
+      <button class="p-2 text-creative-neutral-400 hover:text-creative-neutral-600 dark:hover:text-creative-neutral-200 rounded-lg"
+              data-action="click->document-layout#hideShortcuts">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <h3 class="font-semibold text-creative-neutral-900 dark:text-creative-neutral-100 mb-3">General</h3>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-creative-neutral-600 dark:text-creative-neutral-400">Toggle sidebar</span>
+            <kbd class="bg-creative-neutral-100 dark:bg-creative-neutral-700 px-2 py-1 rounded">⌘B</kbd>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-creative-neutral-600 dark:text-creative-neutral-400">New document</span>
+            <kbd class="bg-creative-neutral-100 dark:bg-creative-neutral-700 px-2 py-1 rounded">⌘N</kbd>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-creative-neutral-600 dark:text-creative-neutral-400">Show shortcuts</span>
+            <kbd class="bg-creative-neutral-100 dark:bg-creative-neutral-700 px-2 py-1 rounded">?</kbd>
+          </div>
+        </div>
+      </div>
+      
+      <div>
+        <h3 class="font-semibold text-creative-neutral-900 dark:text-creative-neutral-100 mb-3">Editor</h3>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-creative-neutral-600 dark:text-creative-neutral-400">Bold text</span>
+            <kbd class="bg-creative-neutral-100 dark:bg-creative-neutral-700 px-2 py-1 rounded">⌘B</kbd>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-creative-neutral-600 dark:text-creative-neutral-400">Italic text</span>
+            <kbd class="bg-creative-neutral-100 dark:bg-creative-neutral-700 px-2 py-1 rounded">⌘I</kbd>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-creative-neutral-600 dark:text-creative-neutral-400">Add link</span>
+            <kbd class="bg-creative-neutral-100 dark:bg-creative-neutral-700 px-2 py-1 rounded">⌘K</kbd>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

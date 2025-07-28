@@ -1,0 +1,254 @@
+<div class="<%= sidebar_class %>" 
+     data-controller="sidebar-navigation"
+     data-sidebar-navigation-collapsed-value="<%= collapsed? %>">
+  
+  <!-- Sidebar Header -->
+  <div class="<%= header_class %>">
+    <% if show_labels? %>
+      <div class="flex items-center space-x-3">
+        <!-- Logo/Brand -->
+        <div class="w-8 h-8 bg-creative-primary-500 rounded-lg flex items-center justify-center">
+          <span class="text-white font-bold text-sm">CC</span>
+        </div>
+        <h1 class="text-lg font-semibold text-creative-neutral-900 dark:text-creative-neutral-100">
+          Claude Code
+        </h1>
+      </div>
+    <% else %>
+      <div class="w-8 h-8 bg-creative-primary-500 rounded-lg flex items-center justify-center mx-auto">
+        <span class="text-white font-bold text-sm">CC</span>
+      </div>
+    <% end %>
+    
+    <!-- Collapse Toggle -->
+    <button class="<%= toggle_button_class %>" 
+            data-action="click->sidebar-navigation#toggle"
+            data-sidebar-navigation-target="toggleButton"
+            title="<%= collapsed? ? 'Expand sidebar' : 'Collapse sidebar' %>">
+      <svg class="w-4 h-4 transition-transform duration-200 <%= collapsed? ? 'rotate-180' : '' %>" 
+           fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+              d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Sidebar Content -->
+  <div class="<%= content_class %>">
+    <!-- Main Navigation -->
+    <div class="<%= section_class %>">
+      <% if show_labels? %>
+        <div class="<%= section_header_class %>">
+          <span>Navigation</span>
+        </div>
+      <% end %>
+      
+      <nav class="space-y-1">
+        <% navigation_items.each do |item| %>
+          <%= link_to item[:path], 
+                      class: nav_item_class(active: item[:active]),
+                      data: { turbo_frame: "_top" } do %>
+            <svg class="<%= icon_class %>" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <%= render "shared/sidebar_icon", icon: item[:icon] %>
+            </svg>
+            <% if show_labels? %>
+              <span class="flex-1 truncate"><%= item[:label] %></span>
+              <% if item[:badge] %>
+                <span class="<%= badge_class %>"><%= item[:badge] %></span>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+      </nav>
+    </div>
+
+    <!-- Recent Documents -->
+    <% if @show_recent_documents && show_labels? %>
+      <div class="<%= section_class %>">
+        <div class="<%= section_header_class %>">
+          <span>Recent Documents</span>
+          <%= link_to documents_path, 
+                      class: "text-creative-primary-600 dark:text-creative-primary-400 hover:text-creative-primary-700 dark:hover:text-creative-primary-300 text-xs font-normal normal-case tracking-normal",
+                      data: { turbo_frame: "_top" } do %>
+            View All
+          <% end %>
+        </div>
+        
+        <div class="space-y-1">
+          <% if recent_documents.any? %>
+            <% recent_documents.each do |document| %>
+              <%= link_to document_path(document), 
+                          class: document_item_class(document),
+                          data: { turbo_frame: "_top" } do %>
+                <svg class="w-3 h-3 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                </svg>
+                <span class="flex-1 truncate"><%= document.title %></span>
+                <span class="text-xs text-creative-neutral-400 ml-2">
+                  <%= time_ago_in_words(document.updated_at) %>
+                </span>
+              <% end %>
+            <% end %>
+          <% else %>
+            <div class="px-3 py-2 text-sm text-creative-neutral-500 dark:text-creative-neutral-400">
+              No recent documents
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Context Items (if viewing a document) -->
+    <% if @show_context_items && current_document && show_labels? %>
+      <div class="<%= section_class %>">
+        <div class="<%= section_header_class %>">
+          <span>Context Items</span>
+          <%= link_to document_context_items_path(current_document), 
+                      class: "text-creative-primary-600 dark:text-creative-primary-400 hover:text-creative-primary-700 dark:hover:text-creative-primary-300 text-xs font-normal normal-case tracking-normal",
+                      data: { turbo_frame: "_top" } do %>
+            Manage
+          <% end %>
+        </div>
+        
+        <div class="space-y-1">
+          <% if recent_context_items.any? %>
+            <% recent_context_items.each do |item| %>
+              <div class="flex items-center px-3 py-1.5 text-sm text-creative-neutral-600 dark:text-creative-neutral-400 hover:bg-creative-neutral-50 dark:hover:bg-creative-neutral-800 rounded-md cursor-pointer group"
+                   data-action="click->sidebar-navigation#selectContextItem"
+                   data-context-item-id="<%= item.id %>">
+                <div class="w-2 h-2 bg-creative-secondary-500 rounded-full mr-2 flex-shrink-0"></div>
+                <span class="flex-1 truncate"><%= item.title %></span>
+                <button class="opacity-0 group-hover:opacity-100 p-1 hover:bg-creative-neutral-200 dark:hover:bg-creative-neutral-700 rounded transition-opacity"
+                        data-action="click->sidebar-navigation#insertContextItem"
+                        data-context-item-id="<%= item.id %>"
+                        title="Insert into document">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                  </svg>
+                </button>
+              </div>
+            <% end %>
+          <% else %>
+            <div class="px-3 py-2 text-sm text-creative-neutral-500 dark:text-creative-neutral-400">
+              No context items
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Sub-Agents (if viewing a document) -->
+    <% if @show_sub_agents && current_document && show_labels? %>
+      <div class="<%= section_class %>">
+        <div class="<%= section_header_class %>">
+          <span>Sub-Agents</span>
+          <%= link_to document_sub_agents_path(current_document), 
+                      class: "text-creative-primary-600 dark:text-creative-primary-400 hover:text-creative-primary-700 dark:hover:text-creative-primary-300 text-xs font-normal normal-case tracking-normal",
+                      data: { turbo_frame: "_top" } do %>
+            Manage
+          <% end %>
+        </div>
+        
+        <div class="space-y-1">
+          <% if active_sub_agents.any? %>
+            <% active_sub_agents.each do |agent| %>
+              <%= link_to document_sub_agent_path(current_document, agent), 
+                          class: "flex items-center px-3 py-1.5 text-sm text-creative-neutral-600 dark:text-creative-neutral-400 hover:bg-creative-neutral-50 dark:hover:bg-creative-neutral-800 rounded-md group",
+                          data: { turbo_frame: "_top" } do %>
+                <div class="flex items-center justify-center w-4 h-4 bg-creative-accent-purple rounded mr-2 flex-shrink-0">
+                  <span class="text-white text-xs font-medium"><%= agent.name.first.upcase %></span>
+                </div>
+                <span class="flex-1 truncate"><%= agent.name %></span>
+                <span class="<%= badge_class %>"><%= agent.status.capitalize %></span>
+              <% end %>
+            <% end %>
+          <% else %>
+            <div class="px-3 py-2 text-sm text-creative-neutral-500 dark:text-creative-neutral-400">
+              No active agents
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Presence Indicators (if collaboration enabled) -->
+    <% if @show_presence && current_document && show_labels? %>
+      <div class="<%= section_class %>">
+        <div class="<%= section_header_class %>">
+          <span>Online Now</span>
+        </div>
+        
+        <div data-controller="presence-indicator"
+             data-presence-indicator-document-id-value="<%= current_document.id %>"
+             data-presence-indicator-current-user-id-value="<%= current_user.id %>">
+          <!-- Presence indicators will be populated via Stimulus -->
+          <div data-presence-indicator-target="container" class="px-3 py-2">
+            <p class="text-sm text-creative-neutral-500 dark:text-creative-neutral-400">
+              Loading presence...
+            </p>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Sidebar Footer -->
+  <div class="<%= sidebar_footer_class %>">
+    <!-- User Menu -->
+    <div class="<%= user_menu_class %>" data-controller="dropdown">
+      <div class="flex items-center flex-1 min-w-0">
+        <!-- User Avatar -->
+        <div class="w-8 h-8 bg-creative-primary-500 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+          <span class="text-white font-medium text-sm">
+            <%= current_user.name.present? ? current_user.name.first.upcase : current_user.email.first.upcase %>
+          </span>
+        </div>
+        
+        <!-- User Info -->
+        <% if show_labels? %>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-creative-neutral-900 dark:text-creative-neutral-100 truncate">
+              <%= current_user.name.presence || current_user.email.split('@').first %>
+            </p>
+            <p class="text-xs text-creative-neutral-500 dark:text-creative-neutral-400 truncate">
+              <%= current_user.email %>
+            </p>
+          </div>
+          
+          <!-- Dropdown Arrow -->
+          <svg class="w-4 h-4 text-creative-neutral-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        <% end %>
+      </div>
+      
+      <!-- Dropdown Menu (hidden by default) -->
+      <% if show_labels? %>
+        <div class="absolute bottom-full left-4 right-4 mb-2 bg-white dark:bg-creative-neutral-800 rounded-lg shadow-creative-lg border border-creative-neutral-200 dark:border-creative-neutral-700 opacity-0 invisible transition-all duration-200 z-50"
+             data-dropdown-target="menu">
+          <div class="py-1">
+            <%= link_to edit_user_registration_path, 
+                        class: "flex items-center px-4 py-2 text-sm text-creative-neutral-700 dark:text-creative-neutral-300 hover:bg-creative-neutral-100 dark:hover:bg-creative-neutral-700" do %>
+              <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+              </svg>
+              Profile Settings
+            <% end %>
+            
+            <div class="border-t border-creative-neutral-200 dark:border-creative-neutral-600"></div>
+            
+            <%= link_to destroy_user_session_path, 
+                        method: :delete,
+                        class: "flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20" do %>
+              <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+              </svg>
+              Sign Out
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
