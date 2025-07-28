@@ -70,3 +70,61 @@ body.dragging-context-item trix-editor {
 .drag-handle:hover {
   background-color: rgba(0, 0, 0, 0.05);
 }
+
+/* Sub-Agent Animation Styles */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
+/* Sub-Agent Message Styles */
+.message-item {
+  transition: all 0.3s ease-out;
+}
+
+/* Sub-Agent Dialog Styles */
+.dialog-content {
+  transition: all 0.3s ease-out;
+}
+
+.backdrop {
+  transition: opacity 0.3s ease-out;
+}
+
+/* Loading animations */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Typing indicator */
+@keyframes bounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-bounce {
+  animation: bounce 1.4s infinite ease-in-out;
+}

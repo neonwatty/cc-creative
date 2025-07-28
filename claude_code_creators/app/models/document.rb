@@ -2,6 +2,7 @@ class Document < ApplicationRecord
   belongs_to :user
   has_many :context_items, dependent: :destroy
   has_many :document_versions, dependent: :destroy
+  has_many :sub_agents, dependent: :destroy
   
   # Rich text association for content
   has_rich_text :content

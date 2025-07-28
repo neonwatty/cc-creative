@@ -1,0 +1,59 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  document: one
+  user: one
+  name: Rails Expert Agent
+  agent_type: ruby-rails-expert
+  status: active
+  system_prompt: You are a Ruby on Rails expert assistant.
+  context: { "preference": "concise", "expertise_level": "advanced" }
+
+two:
+  document: two
+  user: two
+  name: JavaScript Helper
+  agent_type: javascript-package-expert
+  status: idle
+  system_prompt: You are a JavaScript and npm package expert.
+  context: {}
+
+rails_expert:
+  document: one
+  user: one
+  name: rails_expert_1
+  agent_type: ruby-rails-expert
+  status: active
+  context: { initialized_at: "2025-01-27 10:00:00" }
+
+js_expert:
+  document: one
+  user: one
+  name: js_expert_1
+  agent_type: javascript-package-expert
+  status: idle
+  context: {}
+
+css_expert:
+  document: two
+  user: two
+  name: css_expert_1
+  agent_type: tailwind-css-expert
+  status: completed
+  context: { completed_at: "2025-01-27 12:00:00" }
+
+test_runner:
+  document: one
+  user: one
+  name: test_runner_1
+  agent_type: test-runner-fixer
+  status: active
+  context: { paused_at: "2025-01-27 11:30:00" }
+
+orchestrator:
+  document: two
+  user: two
+  name: orchestrator_1
+  agent_type: project-orchestrator
+  status: active
+  context: { current_task: "Coordinating backend implementation" }

@@ -1,0 +1,13 @@
+<div class="border rounded-lg p-4" id="<%= dom_id(sub_agent) %>">
+  <h3 class="text-lg font-semibold"><%= sub_agent.display_name %></h3>
+  <div class="flex gap-4 mt-2">
+    <span class="badge <%= sub_agent.status_badge_color %>"><%= sub_agent.status %></span>
+    <span class="text-sm text-gray-600">Messages: <%= sub_agent.message_count %></span>
+  </div>
+  <div class="mt-4 flex gap-2">
+    <%= link_to "View", document_sub_agent_path(sub_agent.document, sub_agent), class: "btn btn-sm" %>
+    <%= link_to "Edit", edit_document_sub_agent_path(sub_agent.document, sub_agent), class: "btn btn-sm" %>
+    <%= button_to "Delete", document_sub_agent_path(sub_agent.document, sub_agent), method: :delete, 
+                  data: { confirm: "Are you sure?" }, class: "btn btn-sm btn-danger" %>
+  </div>
+</div>

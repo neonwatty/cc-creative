@@ -2,6 +2,17 @@
 <% content_for :full_height, true %>
 
 <div class="flex h-full">
+  <!-- Sub-Agent Sidebar (Left) -->
+  <aside class="w-80 h-full flex-shrink-0" id="sub-agent-sidebar">
+    <%= turbo_frame_tag "sub-agent-sidebar-frame" do %>
+      <%= render SubAgentSidebarComponent.new(
+        document: @document,
+        current_user: current_user,
+        active_agent: @active_sub_agent
+      ) %>
+    <% end %>
+  </aside>
+
   <!-- Main Content Area -->
   <div class="flex-1 overflow-y-auto">
     <div class="max-w-4xl mx-auto p-6">
@@ -130,4 +141,14 @@
       ) %>
     <% end %>
   </aside>
+</div>
+
+<!-- Sub-Agent Conversation Modal/Panel -->
+<div id="sub-agent-conversation-container" class="hidden">
+  <%= turbo_frame_tag "sub-agent-conversation-frame" %>
+</div>
+
+<!-- Sub-Agent Merge Dialog -->
+<div id="sub-agent-merge-container" class="hidden">
+  <%= turbo_frame_tag "sub-agent-merge-frame" %>
 </div>

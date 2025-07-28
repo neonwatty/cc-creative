@@ -31,6 +31,15 @@ Rails.application.routes.draw do
         get :search
       end
     end
+    
+    # Nested sub agents
+    resources :sub_agents do
+      member do
+        post :activate
+        post :complete
+        post :pause
+      end
+    end
   end
   
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

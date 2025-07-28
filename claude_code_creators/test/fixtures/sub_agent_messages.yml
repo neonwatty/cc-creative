@@ -1,0 +1,29 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one_user_message:
+  sub_agent: one
+  user: one
+  role: user
+  content: "Can you help me with a Rails routing issue?"
+  created_at: <%= 2.hours.ago %>
+
+one_assistant_message:
+  sub_agent: one
+  user: one
+  role: assistant
+  content: "Of course! I'd be happy to help with your Rails routing issue. What specific problem are you encountering?"
+  created_at: <%= 1.hour.ago %>
+
+two_user_message:
+  sub_agent: two
+  user: two
+  role: user
+  content: "How do I install a npm package?"
+  created_at: <%= 3.hours.ago %>
+
+two_assistant_message:
+  sub_agent: two
+  user: two
+  role: assistant
+  content: "To install an npm package, use the command: npm install package-name"
+  created_at: <%= 2.5.hours.ago %>

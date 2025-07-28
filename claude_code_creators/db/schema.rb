@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_27_230349) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_28_153339) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.string "name", null: false
     t.text "body"
@@ -159,6 +159,39 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_27_230349) do
     t.index ["user_id"], name: "index_sessions_on_user_id"
   end
 
+  create_table "sub_agent_messages", force: :cascade do |t|
+    t.integer "sub_agent_id", null: false
+    t.integer "user_id", null: false
+    t.string "role"
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["sub_agent_id"], name: "index_sub_agent_messages_on_sub_agent_id"
+    t.index ["user_id"], name: "index_sub_agent_messages_on_user_id"
+  end
+
+  create_table "sub_agents", force: :cascade do |t|
+    t.integer "document_id", null: false
+    t.integer "user_id", null: false
+    t.string "name", null: false
+    t.string "agent_type", null: false
+    t.string "status", default: "active"
+    t.string "external_id"
+    t.json "metadata", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.json "context", default: {}
+    t.text "system_prompt"
+    t.index ["agent_type"], name: "index_sub_agents_on_agent_type"
+    t.index ["created_at"], name: "index_sub_agents_on_created_at"
+    t.index ["document_id", "agent_type"], name: "index_sub_agents_on_document_id_and_agent_type"
+    t.index ["document_id", "user_id"], name: "index_sub_agents_on_document_id_and_user_id"
+    t.index ["document_id"], name: "index_sub_agents_on_document_id"
+    t.index ["external_id"], name: "index_sub_agents_on_external_id"
+    t.index ["status"], name: "index_sub_agents_on_status"
+    t.index ["user_id"], name: "index_sub_agents_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "name", null: false
     t.string "email_address", null: false
@@ -180,4 +213,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_27_230349) do
   add_foreign_key "documents", "users"
   add_foreign_key "identities", "users"
   add_foreign_key "sessions", "users"
+  add_foreign_key "sub_agent_messages", "sub_agents"
+  add_foreign_key "sub_agent_messages", "users"
+  add_foreign_key "sub_agents", "documents"
+  add_foreign_key "sub_agents", "users"
 end

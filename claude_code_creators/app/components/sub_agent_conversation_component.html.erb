@@ -1,0 +1,173 @@
+<div class="<%= conversation_container_classes %>" 
+     data-controller="sub-agent-conversation"
+     data-sub-agent-conversation-sub-agent-id-value="<%= sub_agent.id %>"
+     data-sub-agent-conversation-document-id-value="<%= document.id %>">
+
+  <!-- Agent Header with Status -->
+  <div class="border-b border-gray-200">
+    <div class="px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="text-2xl"><%= agent_icon(sub_agent.agent_type) %></span>
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900"><%= sub_agent.agent_type_label %></h3>
+          <p class="text-sm text-gray-500"><%= sub_agent.name %></p>
+        </div>
+      </div>
+      
+      <div class="flex items-center space-x-3">
+        <% if can_merge_content? %>
+          <button type="button"
+                  class="<%= merge_button_classes %>"
+                  data-action="click->sub-agent-conversation#openMergeDialog"
+                  aria-label="Merge content to document">
+            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+            </svg>
+            Merge to Document
+          </button>
+        <% end %>
+        
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-<%= sub_agent.status_badge_color %>-100 text-<%= sub_agent.status_badge_color %>-800">
+          <%= sub_agent.status.capitalize %>
+        </span>
+      </div>
+    </div>
+    
+    <% if sub_agent.active? %>
+      <div class="<%= agent_status_banner_classes %>">
+        <div class="flex items-center">
+          <svg class="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Agent is currently processing...
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Messages Container -->
+  <div class="<%= message_list_classes %>" data-sub-agent-conversation-target="messageList">
+    <% if empty_conversation? %>
+      <!-- Empty State -->
+      <div class="flex flex-col items-center justify-center h-full text-center">
+        <svg class="h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+        </svg>
+        <p class="text-gray-600 mb-2"><%= agent_introduction %></p>
+        <p class="text-sm text-gray-500">Start a conversation by typing a message below.</p>
+      </div>
+    <% else %>
+      <!-- Message List -->
+      <% messages.each do |message| %>
+        <div class="<%= message_wrapper_classes(message) %>" data-message-id="<%= message.id %>">
+          <div class="<%= message_bubble_classes(message) %>">
+            <% if message.assistant? %>
+              <div class="flex items-start space-x-2 mb-1">
+                <span class="text-xs font-medium text-gray-600"><%= sub_agent.agent_type_label %></span>
+                <span class="text-xs text-gray-500">• <%= format_message_time(message.created_at) %></span>
+              </div>
+            <% end %>
+            
+            <div class="message-content">
+              <%= format_message_content(message) %>
+            </div>
+            
+            <% if message.user? %>
+              <div class="text-xs text-blue-100 mt-1 text-right">
+                <%= format_message_time(message.created_at) %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+      
+      <!-- Loading Indicator -->
+      <% if loading_indicator_visible? %>
+        <div class="flex justify-start" data-sub-agent-conversation-target="loadingIndicator">
+          <div class="bg-gray-100 rounded-lg px-4 py-3 max-w-3xl">
+            <div class="flex items-center space-x-2">
+              <div class="flex space-x-1">
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0ms"></div>
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 150ms"></div>
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 300ms"></div>
+              </div>
+              <span class="text-sm text-gray-600"><%= sub_agent.agent_type_label %> is thinking...</span>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+
+  <!-- Input Form -->
+  <div class="<%= input_form_classes %>">
+    <%= form_with url: document_sub_agent_messages_path(document, sub_agent),
+                  method: :post,
+                  local: false,
+                  data: { 
+                    controller: "sub-agent-message-form",
+                    action: "turbo:submit-end->sub-agent-message-form#handleSubmitEnd",
+                    turbo_frame: "_top"
+                  },
+                  class: "flex items-end space-x-3" do |form| %>
+      
+      <div class="flex-1">
+        <%= form.text_area :content,
+                           class: input_field_classes,
+                           placeholder: "Type your message...",
+                           rows: 2,
+                           data: {
+                             "sub-agent-message-form-target": "input",
+                             action: "keydown.enter->sub-agent-message-form#handleEnterKey"
+                           },
+                           disabled: !sub_agent.active? %>
+      </div>
+      
+      <%= form.submit "Send",
+                      class: send_button_classes(disabled: !sub_agent.active?),
+                      data: { "sub-agent-message-form-target": "submitButton" },
+                      disabled: !sub_agent.active? %>
+    <% end %>
+    
+    <% unless sub_agent.active? %>
+      <p class="text-xs text-gray-500 mt-2">
+        <% case sub_agent.status %>
+        <% when "completed" %>
+          This conversation has been completed.
+        <% when "failed" %>
+          This agent encountered an error. <%= sub_agent.metadata["error_message"] %>
+        <% when "paused" %>
+          This conversation is paused.
+        <% else %>
+          This agent is not currently active.
+        <% end %>
+      </p>
+    <% end %>
+  </div>
+
+  <!-- Message Template for Dynamic Updates -->
+  <template data-sub-agent-conversation-target="messageTemplate">
+    <div class="flex justify-end" data-message-id="">
+      <div class="max-w-3xl rounded-lg px-4 py-3 ml-auto bg-blue-600 text-white">
+        <div class="message-content"></div>
+        <div class="text-xs text-blue-100 mt-1 text-right">
+          Just now
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- Assistant Message Template -->
+  <template data-sub-agent-conversation-target="assistantMessageTemplate">
+    <div class="flex justify-start" data-message-id="">
+      <div class="max-w-3xl rounded-lg px-4 py-3 bg-gray-100 text-gray-900">
+        <div class="flex items-start space-x-2 mb-1">
+          <span class="text-xs font-medium text-gray-600"><%= sub_agent.agent_type_label %></span>
+          <span class="text-xs text-gray-500">• Just now</span>
+        </div>
+        <div class="message-content whitespace-pre-wrap"></div>
+      </div>
+    </div>
+  </template>
+</div>
