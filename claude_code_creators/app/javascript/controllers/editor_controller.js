@@ -18,6 +18,9 @@ export default class extends Controller {
       // Setup autosave
       this.setupAutosave()
       this.lastContent = this.editor.value
+      
+      // Listen for context item insertion events
+      document.addEventListener("context-item:insert", this.handleContextItemInsert.bind(this))
     }
   }
 
@@ -150,6 +153,45 @@ export default class extends Controller {
     }
   }
   
+  async handleContextItemInsert(event) {
+    const contextItemId = event.detail.contextItemId
+    
+    try {
+      // Fetch the context item content
+      const response = await fetch(`/documents/${this.getDocumentId()}/context_items/${contextItemId}.json`, {
+        headers: {
+          'Accept': 'application/json',
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+        }
+      })
+      
+      if (response.ok) {
+        const contextItem = await response.json()
+        this.insertContent(contextItem.content)
+      }
+    } catch (error) {
+      console.error('Error fetching context item:', error)
+    }
+  }
+  
+  insertContent(content) {
+    if (!this.editor) return
+    
+    // Insert at current cursor position
+    const position = this.editor.editor.getPosition()
+    this.editor.editor.insertString(content)
+    
+    // Mark as changed
+    this.contentChanged = true
+    this.updateStatus("editing")
+  }
+  
+  getDocumentId() {
+    // Extract from the autosave URL or data attribute
+    const match = this.autosaveUrlValue?.match(/documents\/(\d+)/)
+    return match ? match[1] : null
+  }
+  
   disconnect() {
     if (this.editor) {
       this.editor.removeEventListener("trix-change", this.handleChange.bind(this))
@@ -159,5 +201,7 @@ export default class extends Controller {
     if (this.autosaveTimer) {
       clearInterval(this.autosaveTimer)
     }
+    
+    document.removeEventListener("context-item:insert", this.handleContextItemInsert.bind(this))
   }
 }

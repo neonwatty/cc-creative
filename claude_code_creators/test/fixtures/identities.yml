@@ -1,15 +1,15 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
-  user: one
-  provider: MyString
-  uid: MyString
-  email: MyString
-  name: MyString
+alice_google:
+  user: alice
+  provider: google_oauth2
+  uid: google_12345
+  email: alice@example.com
+  name: Alice Smith
 
-two:
-  user: two
-  provider: MyString
-  uid: MyString
-  email: MyString
-  name: MyString
+bob_github:
+  user: bob
+  provider: github
+  uid: github_67890
+  email: bob@example.com
+  name: Bob Jones

@@ -1,0 +1,25 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+snippet_one:
+  document: one
+  user: alice
+  content: "This is a test snippet that can be reused"
+  item_type: snippet
+  title: "Test Snippet"
+  position: 1
+
+draft_one:
+  document: one
+  user: alice
+  content: "This is a draft version of some content"
+  item_type: draft
+  title: "Draft Content"
+  position: 2
+
+version_one:
+  document: one
+  user: alice
+  content: "<p>Original document content</p>"
+  item_type: version
+  title: "Version from January 1, 2024"
+  position: 3

@@ -1,13 +1,13 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-document_one:
+one:
   title: First Document
   description: Description of the first document
   tags: '["ruby", "rails", "testing"]'
-  user: one
+  user: alice
 
-document_two:
+two:
   title: Second Document
   description: Description of the second document
   tags: '["javascript", "react", "frontend"]'
-  user: two
+  user: bob

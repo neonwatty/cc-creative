@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_26_184334) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_29_014639) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.string "name", null: false
     t.text "body"
@@ -84,6 +84,20 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_26_184334) do
     t.index ["session_id"], name: "index_claude_sessions_on_session_id", unique: true
   end
 
+  create_table "context_items", force: :cascade do |t|
+    t.integer "document_id", null: false
+    t.integer "user_id", null: false
+    t.text "content"
+    t.string "item_type"
+    t.string "title"
+    t.json "metadata"
+    t.integer "position"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["document_id"], name: "index_context_items_on_document_id"
+    t.index ["user_id"], name: "index_context_items_on_user_id"
+  end
+
   create_table "documents", force: :cascade do |t|
     t.string "title"
     t.text "description"
@@ -130,6 +144,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_26_184334) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "context_items", "documents"
+  add_foreign_key "context_items", "users"
   add_foreign_key "documents", "users"
   add_foreign_key "identities", "users"
   add_foreign_key "sessions", "users"

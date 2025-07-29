@@ -21,3 +21,17 @@ editor:
   email_address: editor@example.com
   password_digest: <%= password_digest %>
   role: editor
+
+alice:
+  name: Alice Smith
+  email_address: alice@example.com
+  password_digest: <%= password_digest %>
+  email_confirmed: true
+  email_confirmed_at: <%= 1.day.ago %>
+
+bob:
+  name: Bob Jones
+  email_address: bob@example.com
+  password_digest: <%= password_digest %>
+  email_confirmed: true
+  email_confirmed_at: <%= 1.day.ago %>

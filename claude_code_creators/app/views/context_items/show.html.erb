@@ -1,0 +1,5 @@
+<%= turbo_frame_tag "modal" do %>
+  <div class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50" data-controller="modal context-item-preview">
+    <%= render ContextItemPreviewComponent.new(context_item: @context_item) %>
+  </div>
+<% end %>

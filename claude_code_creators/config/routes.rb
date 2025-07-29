@@ -23,6 +23,15 @@ Rails.application.routes.draw do
       post :duplicate
       patch :autosave
     end
+    
+    resources :context_items do
+      collection do
+        patch :reorder
+      end
+      member do
+        post :restore
+      end
+    end
   end
   
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

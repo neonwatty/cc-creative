@@ -3,6 +3,7 @@ class User < ApplicationRecord
   has_many :sessions, dependent: :destroy
   has_many :documents, dependent: :destroy
   has_many :identities, dependent: :destroy
+  has_many :context_items, dependent: :destroy
 
   enum :role, { user: "user", editor: "editor", admin: "admin" }, default: :user
 

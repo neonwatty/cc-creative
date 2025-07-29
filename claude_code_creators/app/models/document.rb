@@ -1,5 +1,6 @@
 class Document < ApplicationRecord
   belongs_to :user
+  has_many :context_items, dependent: :destroy
   
   # Rich text association for content
   has_rich_text :content
