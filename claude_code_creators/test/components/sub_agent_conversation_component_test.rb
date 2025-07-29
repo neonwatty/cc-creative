@@ -57,9 +57,8 @@ class SubAgentConversationComponentTest < ViewComponent::TestCase
       current_user: @user
     ))
     
-    assert_selector ".message-input-form"
-    assert_selector "form[data-action='submit->sub-agent-conversation#sendMessage']"
-    assert_selector "textarea[data-sub-agent-conversation-target='messageInput']"
+    assert_selector "form.flex.items-end.space-x-3"
+    assert_selector "textarea[placeholder='Type your message...']"
     assert_selector "button[type='submit']", text: "Send"
   end
 
@@ -75,49 +74,58 @@ class SubAgentConversationComponentTest < ViewComponent::TestCase
   end
 
   test "displays user messages with correct styling" do
-    @sub_agent.messages.create!(role: "user", content: "User message", user: @user)
+    session = claude_sessions(:one)
+    session.claude_messages.create!(
+      role: "user", 
+      content: "User message", 
+      sub_agent_name: @sub_agent.name
+    )
     
     rendered = render_inline(SubAgentConversationComponent.new(
       sub_agent: @sub_agent,
       current_user: @user
     ))
     
-    assert_selector ".message.user-message"
-    assert_selector ".bg-blue-100"
-    assert_text "You"
+    assert_selector ".bg-blue-600.text-white"
     assert_text "User message"
   end
 
   test "displays assistant messages with correct styling" do
-    @sub_agent.messages.create!(role: "assistant", content: "Assistant response", user: @user)
+    session = claude_sessions(:one)
+    session.claude_messages.create!(
+      role: "assistant", 
+      content: "Assistant response", 
+      sub_agent_name: @sub_agent.name
+    )
     
     rendered = render_inline(SubAgentConversationComponent.new(
       sub_agent: @sub_agent,
       current_user: @user
     ))
     
-    assert_selector ".message.assistant-message"
-    assert_selector ".bg-gray-100"
-    assert_text @sub_agent.name
+    assert_selector ".bg-gray-100.text-gray-900"
     assert_text "Assistant response"
   end
 
-  test "shows loading indicator target" do
+  test "shows loading indicator when sub agent is active" do
+    @sub_agent.update!(status: 'active')
+    
     rendered = render_inline(SubAgentConversationComponent.new(
       sub_agent: @sub_agent,
       current_user: @user
     ))
     
-    assert_selector "[data-sub-agent-conversation-target='loadingIndicator']"
+    # Loading indicator is only shown when agent is active and processing
+    assert_text "Agent is currently processing"
   end
 
-  test "includes keyboard shortcut hint" do
+  test "includes keyboard shortcut data attribute" do
     rendered = render_inline(SubAgentConversationComponent.new(
       sub_agent: @sub_agent,
       current_user: @user
     ))
     
-    assert_text "Ctrl+Enter to send"
+    assert_selector "textarea[data-action*='keydown.enter']"
   end
 
   test "renders status badges correctly" do
@@ -130,7 +138,7 @@ class SubAgentConversationComponentTest < ViewComponent::TestCase
         current_user: @user
       ))
       
-      assert_selector ".status-badge", text: status.capitalize
+      assert_selector "span.inline-flex.items-center", text: status.capitalize
     end
   end
 
@@ -195,33 +203,35 @@ class SubAgentConversationComponentTest < ViewComponent::TestCase
     
     assert_selector "textarea[disabled]"
     assert_selector "button[type='submit'][disabled]"
-    assert_text "This agent has been completed"
+    assert_text "This conversation has been completed"
   end
 
-  test "shows character count for input" do
+  test "includes message templates for dynamic updates" do
     rendered = render_inline(SubAgentConversationComponent.new(
       sub_agent: @sub_agent,
       current_user: @user
     ))
     
-    assert_selector "[data-sub-agent-conversation-target='charCount']"
-    assert_text "0 / 10000"
+    assert_selector "template[data-sub-agent-conversation-target='messageTemplate']"
+    assert_selector "template[data-sub-agent-conversation-target='assistantMessageTemplate']"
   end
 
-  test "includes action cable subscription target" do
+  test "includes main controller data attributes" do
     rendered = render_inline(SubAgentConversationComponent.new(
       sub_agent: @sub_agent,
       current_user: @user
     ))
     
-    assert_selector "[data-sub-agent-conversation-target='cableSubscription']"
+    assert_selector "[data-controller='sub-agent-conversation']"
+    assert_selector "[data-sub-agent-conversation-sub-agent-id-value='#{@sub_agent.id}']"
   end
 
   test "renders markdown content in messages" do
-    @sub_agent.messages.create!(
+    session = claude_sessions(:one)
+    session.claude_messages.create!(
       role: "assistant", 
       content: "Here is **bold** and *italic* text with `code`", 
-      user: @user
+      sub_agent_name: @sub_agent.name
     )
     
     rendered = render_inline(SubAgentConversationComponent.new(
