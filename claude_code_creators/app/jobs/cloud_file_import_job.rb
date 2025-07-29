@@ -60,6 +60,9 @@ class CloudFileImportJob < ApplicationJob
   end
   
   def sanitize_title(title)
+    # Handle nil or empty title
+    return "Imported Document" if title.blank?
+    
     # Remove file extension and clean up title
     title = File.basename(title, File.extname(title))
     title = title.gsub(/[^\w\s\-_]/, '').strip

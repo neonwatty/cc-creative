@@ -26,9 +26,8 @@ class SubAgentConversationComponentTest < ViewComponent::TestCase
   test "renders messages list" do
     # Create some Claude messages for the sub agent
     session = claude_sessions(:one)
-    session.update!(sub_agent_name: @sub_agent.name)
-    session.claude_messages.create!(role: "user", content: "Hello")
-    session.claude_messages.create!(role: "assistant", content: "Hi there!")
+    session.claude_messages.create!(role: "user", content: "Hello", sub_agent_name: @sub_agent.name)
+    session.claude_messages.create!(role: "assistant", content: "Hi there!", sub_agent_name: @sub_agent.name)
     
     rendered = render_inline(SubAgentConversationComponent.new(
       sub_agent: @sub_agent,
