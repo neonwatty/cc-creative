@@ -75,7 +75,7 @@ class CloudFileImportJob < ApplicationJob
           }
         )
         
-        Rails.logger.info "Successfully imported #{cloud_file.name} as document #{document.id} for user #{user.email_address || user.id}"
+        Rails.logger.info "Successfully imported #{cloud_file.name} as document #{document.id} for user #{user.id}"
       end
       
     rescue CloudServices::AuthenticationError, CloudServices::AuthorizationError => e
@@ -91,8 +91,33 @@ class CloudFileImportJob < ApplicationJob
       )
       Rails.logger.error "Import error for cloud file #{cloud_file.id}: #{e.message}"
       # Don't retry auth errors - they're discarded
+    rescue CloudServices::ApiError, CloudServices::NotFoundError => e
+      # Handle service errors without re-raising
+      ActionCable.server.broadcast(
+        "cloud_import_#{user.id}",
+        {
+          type: 'import_failed',
+          file_id: cloud_file.id,
+          file_name: cloud_file.name,
+          error: e.message
+        }
+      )
+      Rails.logger.error "Import error for cloud file #{cloud_file.id}: #{e.message}"
+      # Don't re-raise service errors
+    rescue ActiveRecord::RecordInvalid => e
+      # Handle database validation errors
+      ActionCable.server.broadcast(
+        "cloud_import_#{user.id}",
+        {
+          type: 'import_failed',
+          file_id: cloud_file.id,
+          file_name: cloud_file.name,
+          error: e.message
+        }
+      )
+      Rails.logger.error "Import error for cloud file #{cloud_file.id}: #{e.message}"
     rescue => e
-      # Broadcast generic failure
+      # Broadcast generic failure and re-raise for retry
       ActionCable.server.broadcast(
         "cloud_import_#{user.id}",
         {
