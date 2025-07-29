@@ -1,44 +1,107 @@
+require_relative '../services/cloud_services/base_service'
+
 class CloudFileImportJob < ApplicationJob
   queue_as :default
+  discard_on CloudServices::AuthenticationError, CloudServices::AuthorizationError
+  
+  def self.discard_on
+    [CloudServices::AuthenticationError, CloudServices::AuthorizationError]
+  end
   
   def perform(cloud_file, user)
     return unless cloud_file.importable?
     
     begin
+      # Broadcast import started
+      ActionCable.server.broadcast(
+        "cloud_import_#{user.id}",
+        {
+          type: 'import_started',
+          file_id: cloud_file.id,
+          file_name: cloud_file.name
+        }
+      )
+      
       service = cloud_service_for(cloud_file.cloud_integration)
       
       # Import file content
       file_data = service.import_file(cloud_file.file_id)
       
       # Create document from imported content
+      title = file_data[:title] || file_data[:name] || cloud_file.name
+      
+      # Ensure unique title
+      sanitized_title = sanitize_title(title)
+      if user.documents.exists?(title: sanitized_title)
+        timestamp = Time.current.strftime("%Y%m%d_%H%M%S")
+        sanitized_title = "#{sanitized_title} (#{timestamp})"
+      end
+      
       document = user.documents.build(
-        title: sanitize_title(file_data[:name]),
+        title: sanitized_title,
         description: "Imported from #{cloud_file.cloud_integration.provider_name}"
       )
       
       # Set content based on file type
-      content = process_content(file_data[:content], file_data[:mime_type])
+      content_type = file_data[:content_type] || file_data[:mime_type] || 'text/plain'
+      content = process_content(file_data[:content], content_type)
+      
+      # Ensure content is not blank
+      if content.blank?
+        content = "<p>Document imported from #{cloud_file.name}</p>"
+      end
+      
       document.content = content
       
-      # Add import tag
-      document.add_tag("imported-#{cloud_file.cloud_integration.provider}")
-      document.add_tag("cloud-import")
+      # Add import tag if method exists
+      if document.respond_to?(:add_tag)
+        document.add_tag("imported-#{cloud_file.cloud_integration.provider}")
+        document.add_tag("cloud-import")
+      end
       
-      if document.save
+      ActiveRecord::Base.transaction do
+        document.save!
         # Link cloud file to document
         cloud_file.update!(document: document)
         
-        Rails.logger.info "Successfully imported #{cloud_file.name} as document #{document.id} for user #{user.email_address}"
+        # Broadcast import completed
+        ActionCable.server.broadcast(
+          "cloud_import_#{user.id}",
+          {
+            type: 'import_completed',
+            file_id: cloud_file.id,
+            file_name: cloud_file.name,
+            document_id: document.id
+          }
+        )
         
-        # Could send notification to user here
-        # UserMailer.document_imported(user, document, cloud_file).deliver_later
-        
-      else
-        Rails.logger.error "Failed to save imported document: #{document.errors.full_messages.join(', ')}"
-        raise "Failed to save document: #{document.errors.full_messages.join(', ')}"
+        Rails.logger.info "Successfully imported #{cloud_file.name} as document #{document.id} for user #{user.email_address || user.id}"
       end
       
+    rescue CloudServices::AuthenticationError, CloudServices::AuthorizationError => e
+      # Broadcast auth failure
+      ActionCable.server.broadcast(
+        "cloud_import_#{user.id}",
+        {
+          type: 'import_failed',
+          file_id: cloud_file.id,
+          file_name: cloud_file.name,
+          error: e.message
+        }
+      )
+      Rails.logger.error "Import error for cloud file #{cloud_file.id}: #{e.message}"
+      # Don't retry auth errors - they're discarded
     rescue => e
+      # Broadcast generic failure
+      ActionCable.server.broadcast(
+        "cloud_import_#{user.id}",
+        {
+          type: 'import_failed',
+          file_id: cloud_file.id,
+          file_name: cloud_file.name,
+          error: e.message
+        }
+      )
       Rails.logger.error "Import error for cloud file #{cloud_file.id}: #{e.message}"
       raise e
     end

@@ -162,6 +162,9 @@ class CloudFileImportJobTest < ActiveJob::TestCase
     }
     
     providers_and_services.each do |provider, service_class|
+      # Clean up any existing integrations for this provider
+      CloudIntegration.where(user: @user, provider: provider).destroy_all
+      
       integration = CloudIntegration.create!(
         user: @user,
         provider: provider,
@@ -266,7 +269,7 @@ class CloudFileImportJobTest < ActiveJob::TestCase
 
   test "should generate unique document titles for duplicates" do
     # Create existing document with same title
-    Document.create!(title: 'Test Document', user: @user)
+    Document.create!(title: 'Test Document', user: @user, content: 'Existing content')
     
     imported_content = {
       content: "Content",
@@ -286,7 +289,7 @@ class CloudFileImportJobTest < ActiveJob::TestCase
     
     new_document = Document.last
     assert_not_equal 'Test Document', new_document.title
-    assert_includes new_document.title, 'Test Document'
+    assert_match(/Test Document \(\d{8}_\d{6}\)/, new_document.title)
   end
 
   test "should handle empty or missing content gracefully" do
@@ -328,8 +331,8 @@ class CloudFileImportJobTest < ActiveJob::TestCase
     end
     
     document = Document.last
-    # Should fall back to cloud file name
-    assert_equal @cloud_file.name, document.title
+    # Should fall back to cloud file name without extension
+    assert_equal 'Test Document', document.title
   end
 
   test "should broadcast to correct user channel" do
@@ -405,7 +408,7 @@ class CloudFileImportJobTest < ActiveJob::TestCase
   end
 
   test "should use correct queue" do
-    assert_equal :default, CloudFileImportJob.queue_name
+    assert_equal "default", CloudFileImportJob.queue_name
   end
 
   test "should log import activity" do
@@ -421,8 +424,9 @@ class CloudFileImportJobTest < ActiveJob::TestCase
     CloudServices::GoogleDriveService.expects(:new).with(@cloud_integration).returns(service_mock)
     
     Rails.logger.expects(:info).with(regexp_matches(/Successfully imported .* as document .* for user/))
+    ActionCable.server.expects(:broadcast).twice
     
-    assert_nothing_raised do
+    assert_difference('Document.count', 1) do
       CloudFileImportJob.perform_now(@cloud_file, @user)
     end
   end
