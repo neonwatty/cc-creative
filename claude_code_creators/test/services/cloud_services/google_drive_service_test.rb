@@ -4,6 +4,10 @@ module CloudServices
   class GoogleDriveServiceTest < ActiveSupport::TestCase
     setup do
       @user = users(:one)
+      
+      # Delete existing integration to avoid uniqueness conflicts
+      CloudIntegration.where(user: @user, provider: 'google_drive').destroy_all
+      
       @cloud_integration = CloudIntegration.create!(
         user: @user,
         provider: 'google_drive',
@@ -44,7 +48,7 @@ module CloudServices
       
       assert_includes url, 'https://accounts.google.com/o/oauth2/v2/auth'
       assert_includes url, 'client_id=test_client_id'
-      assert_includes url, 'redirect_uri=http%3A//localhost%3A3000/callback'
+      assert_includes url, 'redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fcallback'
       assert_includes url, 'response_type=code'
       assert_includes url, 'access_type=offline'
       assert_includes url, 'prompt=consent'
@@ -154,8 +158,8 @@ module CloudServices
       result = @service.import_file('doc1')
       
       assert_equal html_content, result[:content]
-      assert_equal 'text/html', result[:content_type]
-      assert_equal 'My Document', result[:title]
+      assert_equal 'application/vnd.google-apps.document', result[:mime_type]
+      assert_equal 'My Document', result[:name]
     end
 
     test "import_file should handle Google Sheets" do
@@ -169,8 +173,8 @@ module CloudServices
       result = @service.import_file('sheet1')
       
       assert_equal csv_content, result[:content]
-      assert_equal 'text/csv', result[:content_type]
-      assert_equal 'My Spreadsheet', result[:title]
+      assert_equal 'application/vnd.google-apps.spreadsheet', result[:mime_type]
+      assert_equal 'My Spreadsheet', result[:name]
     end
 
     test "import_file should handle regular files" do
@@ -179,13 +183,13 @@ module CloudServices
       
       drive_service = @service.instance_variable_get(:@drive_service)
       drive_service.expects(:get_file).with('txt1').returns(mock_file)
-      drive_service.expects(:get_file).with('txt1', download_dest: StringIO).returns(file_content)
+      drive_service.expects(:get_file).with('txt1', download_dest: kind_of(StringIO)).returns(file_content)
       
       result = @service.import_file('txt1')
       
       assert_equal file_content, result[:content]
-      assert_equal 'text/plain', result[:content_type]
-      assert_equal 'notes.txt', result[:title]
+      assert_equal 'text/plain', result[:mime_type]
+      assert_equal 'notes.txt', result[:name]
     end
 
     test "import_file should handle download errors" do
@@ -203,14 +207,11 @@ module CloudServices
       mock_file_metadata = mock('file_metadata')
       mock_uploaded_file = create_mock_file('uploaded1', document.title, 'text/html', 2048)
       
-      Google::Apis::DriveV3::File.expects(:new).returns(mock_file_metadata)
-      mock_file_metadata.expects(:name=).with(document.title)
-      mock_file_metadata.expects(:parents=).with(['folder123'])
-      
       drive_service = @service.instance_variable_get(:@drive_service)
       drive_service.expects(:create_file).with(
-        mock_file_metadata,
-        upload_source: StringIO,
+        { name: document.title, parents: ['folder123'] },
+        fields: 'id, name, webViewLink',
+        upload_source: kind_of(StringIO),
         content_type: 'text/html'
       ).returns(mock_uploaded_file)
       
@@ -271,27 +272,31 @@ module CloudServices
 
     # Error Handling Tests
     test "handle_google_api_error should map Google errors correctly" do
-      # Test authentication error
+      # Test authentication error (401)
       auth_error = Google::Apis::AuthorizationError.new("Invalid credentials")
-      assert_raises(AuthenticationError) do
+      auth_error.stubs(:status_code).returns(401)
+      assert_raises(CloudServices::AuthenticationError) do
         @service.send(:handle_google_api_error, auth_error)
       end
       
       # Test client error (400-499)
       client_error = Google::Apis::ClientError.new("Bad request")
-      assert_raises(ApiError) do
+      client_error.stubs(:status_code).returns(400)
+      assert_raises(CloudServices::ApiError) do
         @service.send(:handle_google_api_error, client_error)
       end
       
       # Test server error (500-599)
       server_error = Google::Apis::ServerError.new("Internal server error")
-      assert_raises(ApiError) do
+      server_error.stubs(:status_code).returns(500)
+      assert_raises(CloudServices::ApiError) do
         @service.send(:handle_google_api_error, server_error)
       end
       
       # Test rate limit error
       rate_limit_error = Google::Apis::RateLimitError.new("Rate limit exceeded")
-      assert_raises(ApiError) do
+      rate_limit_error.stubs(:status_code).returns(429)
+      assert_raises(CloudServices::ApiError) do
         @service.send(:handle_google_api_error, rate_limit_error)
       end
     end

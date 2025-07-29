@@ -4,9 +4,13 @@ module CloudServices
   class BaseServiceTest < ActiveSupport::TestCase
     setup do
       @user = users(:one)
+      
+      # Delete existing integrations to avoid conflicts
+      CloudIntegration.where(user: @user, provider: 'google_drive').destroy_all
+      
       @cloud_integration = CloudIntegration.create!(
         user: @user,
-        provider: 'test_provider',
+        provider: 'google_drive',  # Use a valid provider
         access_token: 'test_token',
         refresh_token: 'test_refresh_token',
         expires_at: 1.hour.from_now,

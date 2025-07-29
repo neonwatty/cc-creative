@@ -3,13 +3,25 @@ require "test_helper"
 class CloudIntegrationTest < ActiveSupport::TestCase
   setup do
     @user = users(:one)
-    @cloud_integration = cloud_integrations(:one)
+    
+    # Clean up existing integrations to avoid conflicts
+    CloudIntegration.destroy_all
+    
+    # Create a fresh integration instead of using fixtures to avoid encryption issues
+    @cloud_integration = CloudIntegration.create!(
+      user: @user,
+      provider: 'google_drive',
+      access_token: 'test_token',
+      refresh_token: 'test_refresh_token',
+      expires_at: 1.hour.from_now,
+      settings: { scope: 'drive.readonly' }
+    )
   end
 
   # Validation Tests
   test "should be valid with valid attributes" do
     integration = CloudIntegration.new(
-      user: @user,
+      user: users(:two),  # Use a different user to avoid conflicts
       provider: 'google_drive',
       access_token: 'test_token'
     )
@@ -35,9 +47,12 @@ class CloudIntegrationTest < ActiveSupport::TestCase
   end
 
   test "should allow all supported providers" do
-    CloudIntegration::PROVIDERS.each do |provider|
+    CloudIntegration::PROVIDERS.each_with_index do |provider, index|
+      # Use different users or destroy existing to avoid conflicts
+      CloudIntegration.where(provider: provider).destroy_all
+      
       integration = CloudIntegration.new(
-        user: users(:two),
+        user: @user,
         provider: provider,
         access_token: 'test_token'
       )
@@ -90,6 +105,9 @@ class CloudIntegrationTest < ActiveSupport::TestCase
   end
 
   test "should destroy dependent cloud files" do
+    # Ensure clean state
+    CloudFile.destroy_all
+    
     cloud_file = @cloud_integration.cloud_files.create!(
       provider: 'google_drive',
       file_id: 'test_file_id',
@@ -251,9 +269,10 @@ class CloudIntegrationTest < ActiveSupport::TestCase
 
   # Encryption Tests
   test "should encrypt access token" do
+    # Use a different provider to avoid conflicts
     integration = CloudIntegration.create!(
       user: @user,
-      provider: 'google_drive',
+      provider: 'dropbox',
       access_token: 'secret_token'
     )
     
@@ -266,9 +285,10 @@ class CloudIntegrationTest < ActiveSupport::TestCase
   end
 
   test "should encrypt refresh token" do
+    # Use a different provider to avoid conflicts
     integration = CloudIntegration.create!(
       user: @user,
-      provider: 'google_drive',
+      provider: 'notion',
       access_token: 'access_token',
       refresh_token: 'secret_refresh'
     )

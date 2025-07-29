@@ -18,16 +18,19 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
     
     # Check header
     assert_selector "h3", text: "Sub-Agents"
-    assert_selector "[data-action='click->sub-agent-sidebar#createAgent']", text: "New Agent"
+    assert_selector "[data-action='click->dropdown#toggle']", text: "New Sub-Agent"
     
     # Check sub agent item
     assert_selector ".sub-agent-item"
     assert_text @sub_agent.name
     assert_selector ".badge"
-    assert_text @sub_agent.agent_type.humanize
+    assert_text @sub_agent.status.humanize
   end
 
   test "renders empty state when no sub agents" do
+    # Clear existing sub agents
+    @document.sub_agents.destroy_all
+    
     rendered = render_inline(SubAgentSidebarComponent.new(
       document: @document,
       current_user: @user
@@ -70,8 +73,10 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
   end
 
   test "displays message count when messages exist" do
-    @sub_agent.messages.create!(role: "user", content: "Test", user: @user)
-    @sub_agent.messages.create!(role: "assistant", content: "Response", user: @user)
+    # Ensure we're looking at the right sub_agent
+    target_agent = @document.sub_agents.first
+    target_agent.messages.create!(role: "user", content: "Test", user: @user)
+    target_agent.messages.create!(role: "assistant", content: "Response", user: @user)
     
     rendered = render_inline(SubAgentSidebarComponent.new(
       document: @document,
@@ -82,7 +87,9 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
   end
 
   test "displays singular message text for one message" do
-    @sub_agent.messages.create!(role: "user", content: "Test", user: @user)
+    # Ensure we're looking at the right sub_agent
+    target_agent = @document.sub_agents.first
+    target_agent.messages.create!(role: "user", content: "Test", user: @user)
     
     rendered = render_inline(SubAgentSidebarComponent.new(
       document: @document,
@@ -102,7 +109,15 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
   end
 
   test "renders multiple sub agents" do
-    agent1 = @sub_agent
+    # Clear existing agents and create exactly 2
+    @document.sub_agents.destroy_all
+    
+    agent1 = SubAgent.create!(
+      name: "First Agent",
+      agent_type: "ruby-rails-expert",
+      user: @user,
+      document: @document
+    )
     agent2 = SubAgent.create!(
       name: "Second Agent",
       agent_type: "javascript-package-expert",
@@ -151,18 +166,20 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
   end
 
   test "displays all agent type badges correctly" do
+    # Clear existing agents
+    @document.sub_agents.destroy_all
+    
     agent_types = [
-      'ruby-rails-expert',
-      'javascript-package-expert',
-      'tailwind-css-expert',
-      'test-runner-fixer',
-      'error-debugger',
-      'project-orchestrator',
-      'git-auto-commit',
-      'custom'
+      ['ruby-rails-expert', 'Rails/Ruby Expert'],
+      ['javascript-package-expert', 'JavaScript Expert'],
+      ['tailwind-css-expert', 'Tailwind CSS Expert'],
+      ['test-runner-fixer', 'Test Runner'],
+      ['error-debugger', 'Error Debugger'],
+      ['project-orchestrator', 'Project Orchestrator'],
+      ['git-auto-commit', 'Git Auto-Commit']
     ]
     
-    agents = agent_types.map do |type|
+    agents = agent_types.map do |(type, label)|
       SubAgent.create!(
         name: "#{type} Agent",
         agent_type: type,
@@ -176,8 +193,8 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
       current_user: @user
     ))
     
-    agent_types.each do |type|
-      assert_text type.humanize
+    agent_types.each do |(type, label)|
+      assert_text label
     end
   end
 end

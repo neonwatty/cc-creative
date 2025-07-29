@@ -4,6 +4,9 @@ class CloudIntegrationsControllerTest < ActionDispatch::IntegrationTest
   setup do
     @user = users(:one)
     sign_in_as(@user)
+    
+    # Clean up any existing integrations to avoid conflicts
+    CloudIntegration.destroy_all
   end
 
   # Index Action Tests

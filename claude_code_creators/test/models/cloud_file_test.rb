@@ -93,6 +93,9 @@ class CloudFileTest < ActiveSupport::TestCase
 
   # Scope Tests
   test "recent scope should order by created_at desc" do
+    # Delete existing fixtures to ensure clean test
+    CloudFile.destroy_all
+    
     old_file = CloudFile.create!(
       cloud_integration: @cloud_integration,
       provider: 'google_drive',

@@ -51,7 +51,8 @@ module CloudServices
     def sync_files
       refresh_token! if integration.needs_refresh?
       
-      files = list_files
+      result = list_files
+      files = result.is_a?(Hash) ? result[:files] : result
       
       files.each do |file_data|
         cloud_file = integration.cloud_files.find_or_initialize_by(

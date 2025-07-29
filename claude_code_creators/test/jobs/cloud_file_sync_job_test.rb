@@ -3,6 +3,10 @@ require "test_helper"
 class CloudFileSyncJobTest < ActiveJob::TestCase
   setup do
     @user = users(:one)
+    
+    # Delete existing integration to avoid uniqueness conflicts
+    CloudIntegration.where(user: @user, provider: 'google_drive').destroy_all
+    
     @cloud_integration = CloudIntegration.create!(
       user: @user,
       provider: 'google_drive',
