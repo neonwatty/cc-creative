@@ -1,0 +1,86 @@
+<div class="max-w-4xl mx-auto p-6">
+  <div class="bg-white shadow rounded-lg overflow-hidden">
+    <!-- Header -->
+    <div class="px-6 py-4 border-b border-gray-200">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-xl font-semibold text-gray-900"><%= @cloud_file.name %></h1>
+          <p class="text-sm text-gray-500">From <%= @cloud_integration.provider_name %></p>
+        </div>
+        
+        <div class="flex items-center space-x-3">
+          <% if @cloud_file.importable? %>
+            <%= link_to "Import", 
+                        import_cloud_integration_cloud_file_path(@cloud_integration, @cloud_file),
+                        method: :post,
+                        class: "bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors",
+                        data: { confirm: "Import this file as a new document?" } %>
+          <% else %>
+            <span class="bg-gray-100 text-gray-600 px-4 py-2 rounded-lg">Not Importable</span>
+          <% end %>
+          
+          <%= link_to "Back to Files", 
+                      cloud_integration_cloud_files_path(@cloud_integration),
+                      class: "bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors" %>
+        </div>
+      </div>
+    </div>
+
+    <!-- File Details -->
+    <div class="px-6 py-4">
+      <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+        <div>
+          <dt class="text-sm font-medium text-gray-500">File Name</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @cloud_file.name %></dd>
+        </div>
+        
+        <div>
+          <dt class="text-sm font-medium text-gray-500">File Type</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @cloud_file.mime_type %></dd>
+        </div>
+        
+        <div>
+          <dt class="text-sm font-medium text-gray-500">File Size</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @cloud_file.human_size %></dd>
+        </div>
+        
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Last Synced</dt>
+          <dd class="mt-1 text-sm text-gray-900">
+            <% if @cloud_file.last_synced_at %>
+              <%= time_ago_in_words(@cloud_file.last_synced_at) %> ago
+            <% else %>
+              Never
+            <% end %>
+          </dd>
+        </div>
+        
+        <% if @cloud_file.metadata.present? %>
+          <div class="sm:col-span-2">
+            <dt class="text-sm font-medium text-gray-500">Metadata</dt>
+            <dd class="mt-1 text-sm text-gray-900">
+              <pre class="bg-gray-50 p-3 rounded text-xs overflow-x-auto"><%= JSON.pretty_generate(@cloud_file.metadata) %></pre>
+            </dd>
+          </div>
+        <% end %>
+      </dl>
+    </div>
+
+    <!-- Import Status -->
+    <% if @cloud_file.document.present? %>
+      <div class="px-6 py-4 bg-green-50 border-t border-green-200">
+        <div class="flex items-center">
+          <svg class="h-5 w-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          <span class="text-sm text-green-800">
+            Already imported as: 
+            <%= link_to @cloud_file.document.title, 
+                        document_path(@cloud_file.document),
+                        class: "font-medium underline hover:no-underline" %>
+          </span>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
