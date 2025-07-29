@@ -366,7 +366,7 @@ class CloudIntegrationsControllerTest < ActionDispatch::IntegrationTest
   # Error Handling Tests
   test "should handle network timeouts gracefully" do
     CloudServices::GoogleDriveService.stubs(:exchange_code)
-      .raises(Net::TimeoutError.new("Request timeout"))
+      .raises(Timeout::Error.new("Request timeout"))
     
     get '/cloud_integrations/google/callback', params: { code: 'test_code' }
     

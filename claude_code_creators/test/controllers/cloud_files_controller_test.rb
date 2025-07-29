@@ -4,8 +4,8 @@ class CloudFilesControllerTest < ActionDispatch::IntegrationTest
   setup do
     @user = users(:one)
     
-    # Delete existing integration to avoid uniqueness conflicts
-    CloudIntegration.where(user: @user, provider: 'google_drive').destroy_all
+    # Delete existing integrations to avoid uniqueness conflicts
+    CloudIntegration.destroy_all
     
     @cloud_integration = CloudIntegration.create!(
       user: @user,
@@ -261,6 +261,7 @@ class CloudFilesControllerTest < ActionDispatch::IntegrationTest
     other_user = users(:two)
     other_document = Document.create!(
       title: 'Other Document',
+      content: 'Other document content',
       user: other_user
     )
     

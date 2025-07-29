@@ -6,8 +6,7 @@ class CloudFilesController < ApplicationController
   def index
     @cloud_files = @cloud_integration.cloud_files
                                      .includes(:document)
-                                     .page(params[:page])
-                                     .per(20)
+                                     .limit(20)
     
     # Filter by importable status if requested
     if params[:importable] == 'true'
@@ -67,7 +66,7 @@ class CloudFilesController < ApplicationController
   
   def sync_needed?
     last_file = @cloud_integration.cloud_files.order(:last_synced_at).last
-    last_file.nil? || last_file.last_synced_at < 1.hour.ago
+    last_file.nil? || last_file.last_synced_at.nil? || last_file.last_synced_at < 1.hour.ago
   end
   
   def cloud_service_for(integration)
