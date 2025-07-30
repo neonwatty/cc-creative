@@ -13,10 +13,19 @@ class CloudFilesController < ApplicationController
       @cloud_files = @cloud_files.importable
     end
     
+    # Load the files into memory to avoid extra queries
+    files_array = @cloud_files.to_a
+    
     # Sync files if requested or if last sync was over an hour ago
-    if params[:sync] == 'true' || @cloud_integration.cloud_files.empty? || sync_needed?
-      CloudFileSyncJob.perform_later(@cloud_integration)
-      flash.now[:notice] = "Syncing files in the background..."
+    # Use the already loaded files to check sync status
+    if params[:sync] == 'true' || files_array.empty? || sync_needed_for_files?(files_array)
+      begin
+        CloudFileSyncJob.perform_later(@cloud_integration)
+        flash.now[:notice] = "Syncing files in the background..."
+      rescue => e
+        Rails.logger.error "Failed to enqueue sync job: #{e.message}"
+        flash.now[:alert] = "Unable to sync files at this time. Please try again later."
+      end
     end
   end
   
@@ -67,6 +76,14 @@ class CloudFilesController < ApplicationController
   def sync_needed?
     last_file = @cloud_integration.cloud_files.order(:last_synced_at).last
     last_file.nil? || last_file.last_synced_at.nil? || last_file.last_synced_at < 1.hour.ago
+  end
+  
+  def sync_needed_for_files?(files)
+    return true if files.empty?
+    
+    # Find the most recently synced file from the already loaded array
+    last_synced = files.max_by { |f| f.last_synced_at || Time.at(0) }
+    last_synced.last_synced_at.nil? || last_synced.last_synced_at < 1.hour.ago
   end
   
   def cloud_service_for(integration)

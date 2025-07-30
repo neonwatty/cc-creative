@@ -6,7 +6,8 @@ class SubAgentMergeComponentTest < ViewComponent::TestCase
     @user = users(:one)
     @document = documents(:one)
     
-    # Create some messages for merging
+    # Clear existing messages and create some messages for merging
+    @sub_agent.messages.destroy_all
     @sub_agent.messages.create!(role: "assistant", content: "First response", user: @user)
     @sub_agent.messages.create!(role: "user", content: "Question", user: @user)
     @sub_agent.messages.create!(role: "assistant", content: "Second response", user: @user)

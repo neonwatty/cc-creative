@@ -232,15 +232,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_28_211556) do
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
-  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "cloud_files", "cloud_integrations"
-  add_foreign_key "cloud_files", "documents"
-  add_foreign_key "cloud_integrations", "users"
-  add_foreign_key "context_items", "documents"
-  add_foreign_key "context_items", "users"
-  add_foreign_key "document_versions", "documents"
-  add_foreign_key "document_versions", "users", column: "created_by_user_id"
   add_foreign_key "documents", "users"
   add_foreign_key "identities", "users"
   add_foreign_key "sessions", "users"

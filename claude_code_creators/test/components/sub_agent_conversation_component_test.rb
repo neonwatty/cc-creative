@@ -204,7 +204,8 @@ class SubAgentConversationComponentTest < ViewComponent::TestCase
     # Timestamps are included in message bubbles but not with .message-timestamp class
     # The timestamp appears in different places for user vs assistant messages
     # Look for time format like "3:24 PM" since that's what format_message_time returns
-    assert_text /\\d+:\\d+ [AP]M/
+    # Allow for optional whitespace before the time
+    assert_text /\s*\d+:\d+ [AP]M/
   end
 
   test "disables input when sub agent is completed" do

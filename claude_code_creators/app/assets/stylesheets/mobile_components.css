@@ -1,0 +1,235 @@
+/* Mobile Components CSS */
+/* This file contains mobile-specific component styles */
+
+@layer components {
+  /* Mobile Navigation Components */
+  .mobile-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200;
+    @apply lg:hidden;
+    z-index: 40;
+  }
+
+  .mobile-nav-item {
+    @apply flex flex-col items-center justify-center py-2 px-4;
+    @apply text-gray-600 hover:text-gray-900;
+    @apply transition-colors duration-200;
+  }
+
+  .mobile-nav-item.active {
+    @apply text-blue-600;
+  }
+
+  /* Mobile Cards */
+  .mobile-card {
+    @apply bg-white rounded-lg shadow-sm p-4;
+    @apply touch-manipulation;
+  }
+
+  /* Mobile Buttons */
+  .mobile-button {
+    @apply min-h-[44px] min-w-[44px];
+    @apply touch-manipulation;
+  }
+
+  /* Mobile Menu Toggle */
+  .mobile-menu-toggle {
+    @apply lg:hidden;
+    @apply p-2 rounded-md;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500;
+  }
+
+  /* Mobile Drawer */
+  .mobile-drawer {
+    @apply fixed inset-y-0 left-0 z-50;
+    @apply w-full max-w-xs;
+    @apply bg-white shadow-xl;
+    @apply transform transition-transform duration-300 ease-in-out;
+  }
+
+  .mobile-drawer.closed {
+    @apply -translate-x-full;
+  }
+
+  /* Mobile List Items */
+  .mobile-list-item {
+    @apply py-3 px-4;
+    @apply border-b border-gray-100;
+    @apply active:bg-gray-50;
+  }
+
+  /* Mobile Search */
+  .mobile-search {
+    @apply w-full px-4 py-3;
+    @apply text-base;
+    @apply border border-gray-300 rounded-lg;
+    @apply focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+  }
+
+  /* Mobile Tabs */
+  .mobile-tabs {
+    @apply flex overflow-x-auto;
+    @apply -mx-4 px-4;
+    @apply scrollbar-hide;
+  }
+
+  .mobile-tab {
+    @apply flex-shrink-0;
+    @apply px-4 py-2;
+    @apply text-sm font-medium;
+    @apply border-b-2 border-transparent;
+    @apply whitespace-nowrap;
+  }
+
+  .mobile-tab.active {
+    @apply border-blue-600 text-blue-600;
+  }
+
+  /* Mobile Modal */
+  .mobile-modal {
+    @apply fixed inset-0 z-50;
+    @apply flex items-end;
+    @apply lg:items-center lg:justify-center;
+  }
+
+  .mobile-modal-content {
+    @apply w-full;
+    @apply bg-white rounded-t-2xl;
+    @apply lg:rounded-2xl lg:max-w-lg;
+    @apply max-h-[90vh] overflow-y-auto;
+  }
+
+  /* Mobile Action Sheet */
+  .mobile-action-sheet {
+    @apply fixed bottom-0 left-0 right-0 z-50;
+    @apply bg-white rounded-t-2xl;
+    @apply transform transition-transform duration-300;
+  }
+
+  .mobile-action-sheet-item {
+    @apply w-full py-4 px-4;
+    @apply text-left;
+    @apply border-b border-gray-100;
+    @apply hover:bg-gray-50 active:bg-gray-100;
+  }
+
+  /* Mobile Floating Action Button */
+  .mobile-fab {
+    @apply fixed bottom-20 right-4;
+    @apply w-14 h-14;
+    @apply bg-blue-600 text-white;
+    @apply rounded-full shadow-lg;
+    @apply flex items-center justify-center;
+    @apply hover:bg-blue-700 active:bg-blue-800;
+    @apply lg:hidden;
+  }
+
+  /* Mobile Pull to Refresh */
+  .mobile-pull-refresh {
+    @apply flex items-center justify-center;
+    @apply py-4;
+    @apply text-gray-500;
+  }
+
+  /* Mobile Empty State */
+  .mobile-empty-state {
+    @apply flex flex-col items-center justify-center;
+    @apply py-12 px-4;
+    @apply text-center;
+  }
+
+  .mobile-empty-state-icon {
+    @apply w-16 h-16 mb-4;
+    @apply text-gray-400;
+  }
+
+  /* Mobile Loading States */
+  .mobile-skeleton {
+    @apply animate-pulse;
+    @apply bg-gray-200 rounded;
+  }
+
+  .mobile-skeleton-text {
+    @apply h-4 bg-gray-200 rounded;
+    @apply mb-2;
+  }
+
+  /* Mobile Swipe Actions */
+  .mobile-swipe-actions {
+    @apply flex items-center;
+    @apply h-full;
+    @apply absolute right-0 top-0;
+  }
+
+  .mobile-swipe-action {
+    @apply flex items-center justify-center;
+    @apply h-full px-6;
+    @apply text-white font-medium;
+  }
+
+  /* Mobile Header */
+  .mobile-header {
+    @apply sticky top-0 z-40;
+    @apply bg-white border-b border-gray-200;
+    @apply px-4 py-3;
+  }
+
+  /* Mobile Footer */
+  .mobile-footer {
+    @apply pb-20; /* Account for bottom navigation */
+    @apply lg:pb-0;
+  }
+}
+
+/* Mobile Utilities */
+@layer utilities {
+  /* Touch Target Size */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  /* Scrollbar Hide */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Safe Area Insets */
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-inset-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* Disable Text Selection */
+  .no-select {
+    @apply select-none;
+    -webkit-touch-callout: none;
+  }
+
+  /* Smooth Scrolling */
+  .smooth-scroll {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent Overscroll */
+  .overscroll-none {
+    overscroll-behavior: none;
+  }
+
+  /* Mobile Landscape Adjustments */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .mobile-landscape-compact {
+      @apply py-2;
+    }
+
+    .mobile-header {
+      @apply py-2;
+    }
+  }
+}

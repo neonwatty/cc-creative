@@ -1,6 +1,6 @@
 class CloudIntegrationsController < ApplicationController
   # Authentication is already handled by ApplicationController via Authentication concern
-  before_action :set_cloud_integration, only: [:show, :destroy]
+  before_action :set_cloud_integration, only: [:destroy]
   
   def index
     @cloud_integrations = current_user.cloud_integrations.includes(:cloud_files)

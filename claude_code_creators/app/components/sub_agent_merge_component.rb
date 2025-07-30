@@ -17,8 +17,8 @@ class SubAgentMergeComponent < ViewComponent::Base
 
   def extract_mergeable_content
     # Get all assistant messages that could be merged
-    assistant_messages = sub_agent.claude_messages
-                                  .assistant_messages
+    assistant_messages = sub_agent.messages
+                                  .where(role: 'assistant')
                                   .order(created_at: :desc)
                                   .limit(10)
     
@@ -61,9 +61,9 @@ class SubAgentMergeComponent < ViewComponent::Base
 
   def merge_location_options
     [
-      { value: "cursor", label: "At cursor position", description: "Insert at the current cursor location" },
-      { value: "end", label: "End of document", description: "Append to the end of the document" },
-      { value: "beginning", label: "Beginning of document", description: "Insert at the start of the document" },
+      { value: "cursor", label: "Insert at cursor", description: "Insert at the current cursor location" },
+      { value: "end", label: "Append to end", description: "Append to the end of the document" },
+      { value: "beginning", label: "Insert at beginning", description: "Insert at the start of the document" },
       { value: "replace", label: "Replace entire document", description: "Replace all existing content" }
     ]
   end
@@ -75,10 +75,30 @@ class SubAgentMergeComponent < ViewComponent::Base
   end
 
   def merge_summary
-    message_count = sub_agent.claude_messages.assistant_messages.count
-    word_count = merge_content.split.size
+    message_count = sub_agent.messages.where(role: 'assistant').count
+    word_count_value = word_count(merge_content)
     
-    "Merging #{message_count} assistant #{'response'.pluralize(message_count)} (#{word_count} words)"
+    "Merging #{message_count} assistant #{'response'.pluralize(message_count)} (#{word_count_value} words)"
+  end
+
+  def word_count(content)
+    content.to_s.split.size
+  end
+
+  def assistant_message_count
+    sub_agent.messages.where(role: 'assistant').count
+  end
+
+  def has_content_to_merge?
+    assistant_message_count > 0
+  end
+
+  def content_is_long?
+    merge_content.length > 1000
+  end
+
+  def is_large_merge?
+    assistant_message_count > 10 || word_count(merge_content) > 1000
   end
 
   def success_message_classes

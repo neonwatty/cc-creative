@@ -1,0 +1,10 @@
+<div class="message <%= message.role %>-message" data-message-id="<%= message.id %>">
+  <div class="message-meta">
+    <strong><%= message.user.name %></strong>
+    <span class="role-badge"><%= message.role.capitalize %></span>
+    <small class="timestamp"><%= message.created_at.strftime("%l:%M %p") %></small>
+  </div>
+  <div class="message-content">
+    <%= simple_format(message.content) %>
+  </div>
+</div>
