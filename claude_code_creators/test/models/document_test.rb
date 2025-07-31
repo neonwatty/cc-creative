@@ -194,6 +194,126 @@ class DocumentTest < ActiveSupport::TestCase
     assert_equal [], @document.tags
   end
   
+  # Test all the version-related methods
+  test "next_version_number returns incremented version" do
+    @document.save!
+    assert_equal 1, @document.next_version_number
+    
+    # Update current_version_number to test increment
+    @document.update!(current_version_number: 5)
+    assert_equal 6, @document.next_version_number
+  end
+  
+  test "latest_version returns most recent version" do
+    @document.save!
+    assert_nil @document.latest_version
+    
+    # Create some versions
+    v1 = @document.document_versions.create!(
+      version_number: 1,
+      created_by_user: @user,
+      content_snapshot: "Version 1",
+      title: "Title 1",
+      word_count: 2
+    )
+    v2 = @document.document_versions.create!(
+      version_number: 2,
+      created_by_user: @user,
+      content_snapshot: "Version 2",
+      title: "Title 2",
+      word_count: 2
+    )
+    
+    assert_equal v2, @document.latest_version
+  end
+  
+  test "version_at returns specific version" do
+    @document.save!
+    v1 = @document.document_versions.create!(
+      version_number: 1,
+      created_by_user: @user,
+      content_snapshot: "Version 1",
+      title: "Title 1",
+      word_count: 2
+    )
+    
+    assert_equal v1, @document.version_at(1)
+    assert_nil @document.version_at(999)
+  end
+  
+  test "create_version delegates to DocumentVersion" do
+    @document.save!
+    
+    # Mock DocumentVersion.create_from_document
+    DocumentVersion.expects(:create_from_document).with(@document, @user, {}).returns(true)
+    
+    @document.create_version(@user)
+  end
+  
+  test "create_auto_version creates automatic version" do
+    @document.save!
+    
+    DocumentVersion.expects(:create_from_document).with(@document, @user, is_auto_version: true).returns(true)
+    
+    @document.create_auto_version(@user)
+  end
+  
+  test "create_manual_version creates manual version with metadata" do
+    @document.save!
+    
+    expected_options = {
+      is_auto_version: false,
+      version_name: "Release v1.0",
+      version_notes: "First release"
+    }
+    
+    DocumentVersion.expects(:create_from_document).with(@document, @user, expected_options).returns(true)
+    
+    @document.create_manual_version(@user, version_name: "Release v1.0", version_notes: "First release")
+  end
+  
+  test "content_changed_since_last_version returns true when no versions exist" do
+    @document.save!
+    assert @document.content_changed_since_last_version?
+  end
+  
+  test "content_changed_since_last_version detects content changes" do
+    @document.save!
+    
+    # Create initial version
+    v1 = @document.document_versions.create!(
+      version_number: 1,
+      created_by_user: @user,
+      content_snapshot: @document.content.to_plain_text,
+      title: @document.title,
+      description_snapshot: @document.description,
+      tags_snapshot: @document.tags,
+      word_count: @document.word_count
+    )
+    
+    # No changes yet
+    assert_not @document.content_changed_since_last_version?
+    
+    # Change content
+    @document.content = "Updated content"
+    assert @document.content_changed_since_last_version?
+    
+    # Reset and change title
+    @document.content = v1.content_snapshot
+    @document.title = "New Title"
+    assert @document.content_changed_since_last_version?
+    
+    # Reset and change description
+    @document.title = v1.title
+    @document.description = "New Description"
+    assert @document.content_changed_since_last_version?
+    
+    # Reset and change tags
+    @document.description = v1.description_snapshot
+    @document.tags = ["new", "tags"]
+    assert @document.content_changed_since_last_version?
+  end
+  
   test "should strip and remove blank tags from tag_list" do
     @document.tag_list = " ruby , , rails , , "
     assert_equal ["ruby", "rails"], @document.tags

@@ -123,4 +123,63 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     # Should redirect (either to root or new_session), not to authentication
     assert_response :redirect
   end
+  
+  test "should not create session for unconfirmed email" do
+    # Create unconfirmed user
+    unconfirmed_user = User.create!(
+      name: "Unconfirmed User",
+      email_address: "unconfirmed@example.com",
+      password: "password",
+      email_confirmed: false
+    )
+    
+    post session_url, params: {
+      email_address: unconfirmed_user.email_address,
+      password: "password"
+    }
+    
+    assert_redirected_to new_session_path
+    assert_equal "Please confirm your email address before signing in. Check your inbox for the confirmation email.", flash[:alert]
+    assert_nil cookies[:session_id]
+  end
+  
+  test "should handle login with existing identity" do
+    # Create an identity linked to the user
+    identity = @user.identities.create!(
+      provider: "google",
+      uid: "12345", 
+      email: @user.email_address,
+      name: @user.name
+    )
+    
+    # Now login with the user
+    post session_url, params: {
+      email_address: @user.email_address,
+      password: "password"
+    }
+    
+    # Should login successfully
+    assert_redirected_to root_url
+    assert_not_nil cookies[:session_id]
+  end
+  
+  test "destroy action clears session" do
+    # First sign in
+    sign_in_as(@user)
+    
+    # Then sign out
+    delete session_url
+    
+    assert_redirected_to new_session_path
+    # Cookie might be empty string rather than nil
+    assert cookies[:session_id].blank?
+  end
+  
+  test "new action renders login form" do
+    get new_session_url
+    
+    assert_response :success
+    # The form might post to session_url not session_path
+    assert_select "form"
+  end
 end
