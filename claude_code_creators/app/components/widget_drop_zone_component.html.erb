@@ -1,6 +1,4 @@
-<div class="<%= drop_zone_class %>" 
-     <%= drop_zone_data_attributes.map { |k, v| "#{k}=\"#{ERB::Util.html_escape(v)}\"" }.join(" ").html_safe %>
-     data-widget-drop-zone-target="dropZone">
+<%= content_tag :div, class: drop_zone_class, data: drop_zone_data_attributes.merge("widget-drop-zone-target": "dropZone") do %>
   
   <!-- Pulse Animation (hidden by default, shown during active drag) -->
   <div class="<%= pulse_animation_class %>" 
@@ -100,4 +98,4 @@
       </p>
     </div>
   </div>
-</div>
+<% end %>

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class CloudFileBrowserComponent < ViewComponent::Base
+  include ActionView::Helpers::TagHelper
+  
   def initialize(integration:, files: [], view_mode: 'grid', pagination: nil, search_query: nil, filter: 'all')
     @integration = integration
     @files = files
@@ -17,10 +19,10 @@ class CloudFileBrowserComponent < ViewComponent::Base
   def controller_data
     {
       controller: 'cloud-file-browser',
-      'cloud-file-browser-integration-id-value': integration.id,
-      'cloud-file-browser-view-mode-value': view_mode,
-      'cloud-file-browser-filter-value': filter,
-      'cloud-file-browser-search-query-value': search_query
+      cloud_file_browser_integration_id_value: integration.id,
+      cloud_file_browser_view_mode_value: view_mode,
+      cloud_file_browser_filter_value: filter,
+      cloud_file_browser_search_query_value: search_query
     }
   end
 

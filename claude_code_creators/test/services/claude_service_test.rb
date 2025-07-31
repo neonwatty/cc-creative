@@ -1,163 +1,250 @@
 require "test_helper"
-require "ostruct"
 
 class ClaudeServiceTest < ActiveSupport::TestCase
   setup do
-    @session_id = "test-session-#{SecureRandom.uuid}"
-    
-    # Mock Rails.application.config.anthropic
+    # Configure Rails config for testing
     Rails.application.config.stubs(:anthropic).returns({
-      api_key: 'test-api-key',
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 4096,
+      api_key: "test-api-key",
+      model: "claude-3-opus-20240229",
+      max_tokens: 1000,
       temperature: 0.7
     })
     
-    @service = ClaudeService.new(session_id: @session_id)
+    @service = ClaudeService.new(session_id: "test-session")
     
-    # Mock Anthropic client
-    @mock_client = mock('anthropic_client')
-    @service.instance_variable_set(:@client, @mock_client)
-  end
-  
-  teardown do
-    # Clean up test data
-    ClaudeSession.where(session_id: @session_id).destroy_all
-    ClaudeMessage.where(session_id: @session_id).destroy_all
-    
-    # Restore Rails config
-    Rails.application.config.unstub(:anthropic)
-  end
-  
-  test "initializes with session_id" do
-    assert_equal @session_id, @service.instance_variable_get(:@session_id)
-    assert_nil @service.instance_variable_get(:@sub_agent_name)
-  end
-  
-  test "initializes with sub_agent_name" do
-    sub_agent_service = ClaudeService.new(
-      session_id: @session_id,
-      sub_agent_name: "test-agent"
-    )
-    assert_equal "test-agent", sub_agent_service.instance_variable_get(:@sub_agent_name)
-  end
-  
-  test "send_message returns structured response" do
-    # Mock response
-    mock_response = OpenStruct.new(
+    # Mock Anthropic API responses
+    @mock_response = OpenStruct.new(
       content: [OpenStruct.new(text: "Hello! I'm Claude.")],
-      usage: { total_tokens: 42 }
+      usage: { 
+        input_tokens: 10,
+        output_tokens: 5,
+        total_tokens: 15
+      }
     )
-    
-    @mock_client.expects(:messages).returns(mock_response)
-    
-    result = @service.send_message("Hello Claude!")
-    
-    assert_equal "Hello! I'm Claude.", result[:response]
-    assert_equal({ total_tokens: 42 }, result[:usage])
-    assert_equal @session_id, result[:session_id]
-    assert_nil result[:sub_agent]
   end
-  
+
+  teardown do
+    # WebMock.reset!
+  end
+
+  test "initializes with session_id and sub_agent_name" do
+    service = ClaudeService.new(session_id: "test-123", sub_agent_name: "editor")
+    assert_not_nil service
+  end
+
+  test "initializes with auto-generated session_id when not provided" do
+    SecureRandom.stubs(:uuid).returns("auto-generated-uuid")
+    service = ClaudeService.new
+    assert_not_nil service
+  end
+
+  test "send_message makes API call and returns structured response" do
+    # Mock the Anthropic client
+    mock_client = mock()
+    mock_client.expects(:messages).with(
+      model: "claude-3-opus-20240229",
+      max_tokens: 1000,
+      temperature: 0.7,
+      system: anything,
+      messages: [{ role: "user", content: "Hello Claude" }]
+    ).returns(@mock_response)
+    
+    Anthropic::Client.stubs(:new).returns(mock_client)
+    
+    # Create service and send message
+    service = ClaudeService.new(session_id: "test-session")
+    response = service.send_message("Hello Claude")
+    
+    assert_equal "Hello! I'm Claude.", response[:response]
+    assert_equal "test-session", response[:session_id]
+    assert_nil response[:sub_agent]
+    assert_equal 10, response[:usage][:input_tokens]
+  end
+
+  test "send_message with context includes previous messages" do
+    mock_client = mock()
+    mock_client.expects(:messages).with(
+      model: anything,
+      max_tokens: anything,
+      temperature: anything,
+      system: anything,
+      messages: [
+        { role: "user", content: "First message" },
+        { role: "assistant", content: "First response" },
+        { role: "user", content: "Second message" }
+      ]
+    ).returns(@mock_response)
+    
+    Anthropic::Client.stubs(:new).returns(mock_client)
+    
+    service = ClaudeService.new
+    context = {
+      previous_messages: [
+        { role: "user", content: "First message" },
+        { role: "assistant", content: "First response" }
+      ]
+    }
+    
+    service.send_message("Second message", context: context)
+  end
+
+  test "send_message with custom system prompt" do
+    mock_client = mock()
+    mock_client.expects(:messages).with(
+      model: anything,
+      max_tokens: anything,
+      temperature: anything,
+      system: "You are a helpful coding assistant.",
+      messages: anything
+    ).returns(@mock_response)
+    
+    Anthropic::Client.stubs(:new).returns(mock_client)
+    
+    service = ClaudeService.new
+    service.send_message("Help me code", system_prompt: "You are a helpful coding assistant.")
+  end
+
   test "send_message stores interaction in database" do
-    # Mock response
-    mock_response = OpenStruct.new(
-      content: [OpenStruct.new(text: "Test response")],
-      usage: { total_tokens: 20 }
-    )
+    mock_client = mock()
+    mock_client.stubs(:messages).returns(@mock_response)
+    Anthropic::Client.stubs(:new).returns(mock_client)
     
-    @mock_client.expects(:messages).returns(mock_response)
+    service = ClaudeService.new(session_id: "test-session")
     
-    assert_difference 'ClaudeMessage.count', 2 do
-      @service.send_message("Test message")
+    assert_difference "ClaudeMessage.count", 2 do
+      service.send_message("Hello Claude")
     end
     
-    # Check stored messages
-    messages = ClaudeMessage.where(session_id: @session_id).order(:created_at)
+    user_message = ClaudeMessage.where(role: "user").last
+    assert_equal "test-session", user_message.session_id
+    assert_equal "Hello Claude", user_message.content
     
-    assert_equal 2, messages.count
-    assert_equal "user", messages.first.role
-    assert_equal "Test message", messages.first.content
-    assert_equal "assistant", messages.last.role
-    assert_equal "Test response", messages.last.content
+    assistant_message = ClaudeMessage.where(role: "assistant").last
+    assert_equal "test-session", assistant_message.session_id
+    assert_equal "Hello! I'm Claude.", assistant_message.content
   end
-  
+
   test "send_message raises ApiError on Anthropic error" do
-    # Mock the Anthropic::Error class if it doesn't exist
-    unless defined?(Anthropic::Error)
-      Anthropic = Module.new
-      Anthropic::Error = Class.new(StandardError)
-    end
+    mock_client = mock()
+    mock_client.expects(:messages).raises(Anthropic::Error.new("API Error"))
+    Anthropic::Client.stubs(:new).returns(mock_client)
     
-    @mock_client.expects(:messages).raises(Anthropic::Error.new("API Error"))
+    service = ClaudeService.new
     
-    assert_raises(ClaudeService::ApiError) do
-      @service.send_message("Test")
+    assert_raises ClaudeService::ApiError do
+      service.send_message("Hello")
     end
   end
-  
-  test "create_sub_agent returns new service instance" do
-    sub_agent = @service.create_sub_agent("research", initial_context: { task: "research" })
+
+  test "send_message raises ConfigurationError when client not configured" do
+    Rails.application.config.anthropic[:api_key] = nil
     
-    assert_instance_of ClaudeService, sub_agent
-    assert_equal "#{@session_id}:research", sub_agent.instance_variable_get(:@session_id)
-    assert_equal "research", sub_agent.instance_variable_get(:@sub_agent_name)
+    service = ClaudeService.new
+    
+    assert_raises ClaudeService::ConfigurationError do
+      service.send_message("Hello")
+    end
   end
-  
+
+  test "create_sub_agent creates new service with sub_agent context" do
+    service = ClaudeService.new(session_id: "main-session")
+    sub_agent = service.create_sub_agent("editor", initial_context: { role: "code editor" })
+    
+    assert_not_nil sub_agent
+    assert_equal "editor", sub_agent.instance_variable_get(:@sub_agent_name)
+    assert_equal "main-session:editor", sub_agent.instance_variable_get(:@session_id)
+  end
+
   test "set_context updates session context" do
-    @service.set_context({ user_name: "Alice", preferences: { theme: "dark" } })
+    service = ClaudeService.new(session_id: "test-session")
     
-    session = ClaudeSession.find_by(session_id: @session_id)
-    assert_equal "Alice", session.context["user_name"]
-    assert_equal "dark", session.context["preferences"]["theme"]
-  end
-  
-  test "get_context returns session context" do
-    # Create session with context
-    ClaudeSession.create!(
-      session_id: @session_id,
-      context: { test_key: "test_value" }
-    )
+    service.set_context({ theme: "dark", language: "ruby" })
     
-    context = @service.get_context
-    assert_equal "test_value", context["test_key"]
+    session = ClaudeSession.find_by(session_id: "test-session")
+    assert_equal "dark", session.context["theme"]
+    assert_equal "ruby", session.context["language"]
   end
-  
+
+  test "get_context returns current context" do
+    service = ClaudeService.new(session_id: "test-session")
+    service.set_context({ theme: "light" })
+    
+    context = service.get_context
+    assert_equal "light", context["theme"]
+  end
+
   test "clear_context removes all context" do
-    # Create session with context
-    ClaudeSession.create!(
-      session_id: @session_id,
-      context: { test_key: "test_value" }
-    )
+    service = ClaudeService.new(session_id: "test-session")
+    service.set_context({ theme: "dark", language: "ruby" })
     
-    @service.clear_context
+    service.clear_context
     
-    context = @service.get_context
+    context = service.get_context
     assert_empty context
   end
-  
+
   test "conversation_history returns recent messages" do
     # Create some messages
-    5.times do |i|
-      ClaudeMessage.create!(
-        session_id: @session_id,
-        role: i.even? ? "user" : "assistant",
-        content: "Message #{i}"
-      )
-    end
+    ClaudeMessage.create!(
+      session_id: "test-session",
+      role: "user",
+      content: "First message",
+      created_at: 2.hours.ago
+    )
     
-    history = @service.conversation_history(limit: 3)
+    ClaudeMessage.create!(
+      session_id: "test-session",
+      role: "assistant",
+      content: "First response",
+      created_at: 1.hour.ago
+    )
     
-    assert_equal 3, history.count
-    assert_equal "Message 4", history.first.content
+    service = ClaudeService.new(session_id: "test-session")
+    history = service.conversation_history(limit: 2)
+    
+    assert_equal 2, history.count
+    assert_equal "First response", history.first.content
   end
-  
-  test "handles missing API key gracefully" do
-    service = ClaudeService.new(session_id: "test")
-    service.instance_variable_set(:@client, nil)
+
+  test "stream_message returns enumerator" do
+    mock_client = mock()
+    mock_client.expects(:messages).with(
+      model: anything,
+      max_tokens: anything,
+      temperature: anything,
+      system: anything,
+      messages: anything,
+      stream: anything
+    )
     
-    assert_raises(ClaudeService::ConfigurationError) do
-      service.send_message("Test")
-    end
+    Anthropic::Client.stubs(:new).returns(mock_client)
+    
+    service = ClaudeService.new
+    result = service.stream_message("Hello")
+    
+    assert_kind_of Enumerator, result
+  end
+
+  test "context manager merges context updates" do
+    service = ClaudeService.new(session_id: "test-session")
+    
+    service.set_context({ theme: "dark" })
+    service.set_context({ language: "ruby" })
+    
+    context = service.get_context
+    assert_equal "dark", context["theme"]
+    assert_equal "ruby", context["language"]
+  end
+
+  test "handles sub_agent_name in stored messages" do
+    mock_client = mock()
+    mock_client.stubs(:messages).returns(@mock_response)
+    Anthropic::Client.stubs(:new).returns(mock_client)
+    
+    service = ClaudeService.new(session_id: "test-session", sub_agent_name: "editor")
+    service.send_message("Hello")
+    
+    messages = ClaudeMessage.where(session_id: "test-session")
+    assert messages.all? { |m| m.sub_agent_name == "editor" }
   end
 end

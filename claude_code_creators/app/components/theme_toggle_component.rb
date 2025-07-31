@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ThemeToggleComponent < ViewComponent::Base
+  include ActionView::Helpers::TagHelper
+  
   def initialize(variant: :default, size: :md, position: :inline, classes: nil)
     @variant = variant
     @size = size

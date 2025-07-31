@@ -209,10 +209,10 @@
         <% if show_labels? %>
           <div class="flex-1 min-w-0">
             <p class="text-sm font-medium text-creative-neutral-900 dark:text-creative-neutral-100 truncate">
-              <%= current_user.name.presence || current_user.email.split('@').first %>
+              <%= current_user.name.presence || current_user.email_address.split('@').first %>
             </p>
             <p class="text-xs text-creative-neutral-500 dark:text-creative-neutral-400 truncate">
-              <%= current_user.email %>
+              <%= current_user.email_address %>
             </p>
           </div>
           

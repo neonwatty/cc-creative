@@ -43,6 +43,7 @@ end
 require_relative "../config/environment"
 require "rails/test_help"
 require "mocha/minitest"
+# require "webmock/minitest"
 
 # Load support files
 Dir[Rails.root.join("test/support/**/*.rb")].each { |f| require f }
@@ -70,6 +71,9 @@ module ActiveSupport
     end
 
     # Add more helper methods to be used by all tests here...
+    
+    # Disable real HTTP connections except for localhost
+    # WebMock.disable_net_connect!(allow_localhost: true)
     
     # Authentication test helpers
     def sign_in_as(user)

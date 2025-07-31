@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class WidgetDropZoneComponent < ViewComponent::Base
+  include ActionView::Helpers::TagHelper
+  
   def initialize(target_element:, accepted_types: [], options: {})
     @target_element = target_element
     @accepted_types = accepted_types.presence || %w[context_item widget snippet]
@@ -189,10 +191,10 @@ class WidgetDropZoneComponent < ViewComponent::Base
   def drop_zone_data_attributes
     {
       controller: "widget-drop-zone",
-      "widget-drop-zone-target-value" => target_element,
-      "widget-drop-zone-accepted-types-value" => accepted_types.to_json,
-      "widget-drop-zone-allow-multiple-value" => allow_multiple,
-      "widget-drop-zone-position-value" => position,
+      "widget_drop_zone_target_value": target_element,
+      "widget_drop_zone_accepted_types_value": accepted_types.to_json,
+      "widget_drop_zone_allow_multiple_value": allow_multiple,
+      "widget_drop_zone_position_value": position,
       action: [
         "dragover->widget-drop-zone#handleDragOver",
         "dragenter->widget-drop-zone#handleDragEnter", 

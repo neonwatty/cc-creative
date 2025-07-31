@@ -1,4 +1,4 @@
-<div class="<%= browser_css_classes %>" <%= tag.attributes(controller_data) %>>
+<%= content_tag :div, class: browser_css_classes, data: controller_data do %>
   
   <!-- Browser Header -->
   <div class="file-browser__header">
@@ -139,4 +139,4 @@
       <span class="error-text"></span>
     </div>
   </div>
-</div>
+<% end %>

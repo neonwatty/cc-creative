@@ -1,4 +1,4 @@
-<div class="<%= wrapper_classes %>" data-<%= controller_data.to_a.map { |k, v| "#{k}=\"#{v}\"" }.join(" data-") %>>
+<%= content_tag :div, class: wrapper_classes, data: controller_data do %>
   <button 
     type="button"
     class="<%= toggle_classes %>"
@@ -24,7 +24,7 @@
     <!-- Subtle backdrop for fixed positioning -->
     <div class="absolute inset-0 -z-10 rounded-full bg-white/80 backdrop-blur-sm dark:bg-creative-neutral-800/80"></div>
   <% end %>
-</div>
+<% end %>
 
 <!-- Enhanced styles for smooth transitions -->
 <style>
