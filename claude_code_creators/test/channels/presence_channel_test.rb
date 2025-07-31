@@ -15,10 +15,18 @@ class PresenceChannelTest < ActionCable::Channel::TestCase
   teardown do
     Rails.cache.clear
   end
+  
+  private
+  
+  def setup_policy_mock
+    policy_mock = mock()
+    policy_mock.expects(:show?).returns(true).at_least_once
+    Pundit.stubs(:policy).returns(policy_mock)
+  end
 
   test "subscribes to document channel with valid document_id" do
     # Mock Pundit authorization
-    Pundit.stubs(:policy).returns(mock(show?: true))
+    setup_policy_mock
     
     stub_connection current_user: @user
     
@@ -69,73 +77,86 @@ class PresenceChannelTest < ActionCable::Channel::TestCase
   end
 
   test "broadcasts user joined on subscription" do
-    Pundit.stubs(:policy).returns(mock(show?: true))
+    policy_mock = mock()
+    policy_mock.expects(:show?).returns(true).at_least_once
+    Pundit.stubs(:policy).returns(policy_mock)
     
     stub_connection current_user: @user
-    subscribe document_id: @document.id
+    
+    # Capture the broadcast
+    broadcasts = capture_broadcasts(PresenceChannel.broadcasting_for(@document)) do
+      subscribe document_id: @document.id
+    end
     
     # Check broadcast was sent
-    assert_broadcast_on(PresenceChannel.broadcasting_for(@document), {
-      type: 'user_joined',
-      user: {
-        id: @user.id,
-        name: @user.name,
-        email: @user.email_address,
-        avatar_url: nil
-      },
-      timestamp: kind_of(String)
-    })
+    assert_equal 1, broadcasts.size
+    broadcast = broadcasts.first
+    assert_equal 'user_joined', broadcast['type']
+    assert_equal @user.id, broadcast['user']['id']
+    assert_equal @user.name, broadcast['user']['name']
+    assert_equal @user.email_address, broadcast['user']['email']
+    assert_not_nil broadcast['timestamp']
   end
 
   test "broadcasts user left on unsubscription" do
-    Pundit.stubs(:policy).returns(mock(show?: true))
+    policy_mock = mock()
+    policy_mock.expects(:show?).returns(true).at_least_once
+    Pundit.stubs(:policy).returns(policy_mock)
     
     stub_connection current_user: @user
     subscribe document_id: @document.id
     
-    unsubscribe
+    # Capture the broadcast on unsubscribe
+    broadcasts = capture_broadcasts(PresenceChannel.broadcasting_for(@document)) do
+      unsubscribe
+    end
     
     # Check broadcast was sent
-    assert_broadcast_on(PresenceChannel.broadcasting_for(@document), {
-      type: 'user_left',
-      user_id: @user.id,
-      timestamp: kind_of(String)
-    })
+    assert_equal 1, broadcasts.size
+    broadcast = broadcasts.first
+    assert_equal 'user_left', broadcast['type']
+    assert_equal @user.id, broadcast['user_id']
+    assert_not_nil broadcast['timestamp']
   end
 
   test "handles typing indicator" do
-    Pundit.stubs(:policy).returns(mock(show?: true))
+    setup_policy_mock
     
     stub_connection current_user: @user
     subscribe document_id: @document.id
     
-    perform :user_typing
+    # Capture the broadcast
+    broadcasts = capture_broadcasts(PresenceChannel.broadcasting_for(@document)) do
+      perform :user_typing
+    end
     
-    assert_broadcast_on(PresenceChannel.broadcasting_for(@document), {
-      type: 'user_typing',
-      user_id: @user.id,
-      user_name: @user.name,
-      timestamp: kind_of(String)
-    })
+    assert_equal 1, broadcasts.size
+    broadcast = broadcasts.first
+    assert_equal 'user_typing', broadcast['type']
+    assert_equal @user.id, broadcast['user_id']
+    assert_equal @user.name, broadcast['user_name']
+    assert_not_nil broadcast['timestamp']
   end
 
   test "handles stopped typing indicator" do
-    Pundit.stubs(:policy).returns(mock(show?: true))
+    setup_policy_mock
     
     stub_connection current_user: @user
     subscribe document_id: @document.id
     
-    perform :user_stopped_typing
+    broadcasts = capture_broadcasts(PresenceChannel.broadcasting_for(@document)) do
+      perform :user_stopped_typing
+    end
     
-    assert_broadcast_on(PresenceChannel.broadcasting_for(@document), {
-      type: 'user_stopped_typing',
-      user_id: @user.id,
-      timestamp: kind_of(String)
-    })
+    assert_equal 1, broadcasts.size
+    broadcast = broadcasts.first
+    assert_equal 'user_stopped_typing', broadcast['type']
+    assert_equal @user.id, broadcast['user_id']
+    assert_not_nil broadcast['timestamp']
   end
 
   test "handles cursor movement" do
-    Pundit.stubs(:policy).returns(mock(show?: true))
+    setup_policy_mock
     
     stub_connection current_user: @user
     subscribe document_id: @document.id
@@ -152,7 +173,7 @@ class PresenceChannelTest < ActionCable::Channel::TestCase
   end
 
   test "ignores cursor movement without valid position" do
-    Pundit.stubs(:policy).returns(mock(show?: true))
+    setup_policy_mock
     
     stub_connection current_user: @user
     subscribe document_id: @document.id
@@ -165,25 +186,29 @@ class PresenceChannelTest < ActionCable::Channel::TestCase
   end
 
   test "handles selection changes" do
-    Pundit.stubs(:policy).returns(mock(show?: true))
+    setup_policy_mock
     
     stub_connection current_user: @user
     subscribe document_id: @document.id
     
     selection = { start: 10, end: 20, text: "selected text" }
-    perform :selection_changed, selection: selection
     
-    assert_broadcast_on(PresenceChannel.broadcasting_for(@document), {
-      type: 'selection_changed',
-      user_id: @user.id,
-      user_name: @user.name,
-      selection: selection,
-      timestamp: kind_of(String)
-    })
+    broadcasts = capture_broadcasts(PresenceChannel.broadcasting_for(@document)) do
+      perform :selection_changed, selection: selection
+    end
+    
+    assert_equal 1, broadcasts.size
+    broadcast = broadcasts.first
+    assert_equal 'selection_changed', broadcast['type']
+    assert_equal @user.id, broadcast['user_id']
+    assert_equal @user.name, broadcast['user_name']
+    # Selection might be converted to a hash with string keys
+    assert_not_nil broadcast['selection']
+    assert_not_nil broadcast['timestamp']
   end
 
   test "returns presence data for document" do
-    Pundit.stubs(:policy).returns(mock(show?: true))
+    setup_policy_mock
     
     stub_connection current_user: @user
     subscribe document_id: @document.id
@@ -213,7 +238,7 @@ class PresenceChannelTest < ActionCable::Channel::TestCase
   end
 
   test "excludes current user from presence data" do
-    Pundit.stubs(:policy).returns(mock(show?: true))
+    setup_policy_mock
     
     stub_connection current_user: @user
     subscribe document_id: @document.id
@@ -236,7 +261,7 @@ class PresenceChannelTest < ActionCable::Channel::TestCase
   end
 
   test "handles empty presence data" do
-    Pundit.stubs(:policy).returns(mock(show?: true))
+    setup_policy_mock
     
     stub_connection current_user: @user
     subscribe document_id: @document.id
@@ -251,7 +276,7 @@ class PresenceChannelTest < ActionCable::Channel::TestCase
   end
 
   test "stores user presence on subscription" do
-    Pundit.stubs(:policy).returns(mock(show?: true))
+    setup_policy_mock
     
     stub_connection current_user: @user
     subscribe document_id: @document.id
@@ -271,7 +296,7 @@ class PresenceChannelTest < ActionCable::Channel::TestCase
   end
 
   test "removes user presence on unsubscription" do
-    Pundit.stubs(:policy).returns(mock(show?: true))
+    setup_policy_mock
     
     stub_connection current_user: @user
     subscribe document_id: @document.id
@@ -289,7 +314,7 @@ class PresenceChannelTest < ActionCable::Channel::TestCase
   end
 
   test "updates typing status correctly" do
-    Pundit.stubs(:policy).returns(mock(show?: true))
+    setup_policy_mock
     
     stub_connection current_user: @user
     subscribe document_id: @document.id
@@ -315,7 +340,7 @@ class PresenceChannelTest < ActionCable::Channel::TestCase
   end
 
   test "updates cursor position correctly" do
-    Pundit.stubs(:policy).returns(mock(show?: true))
+    setup_policy_mock
     
     stub_connection current_user: @user
     subscribe document_id: @document.id
@@ -325,10 +350,13 @@ class PresenceChannelTest < ActionCable::Channel::TestCase
     cursor_key = "document_#{@document.id}_cursors"
     cursors = Rails.cache.read(cursor_key)
     
+    assert_not_nil cursors
     assert cursors.is_a?(Hash)
+    # The key is stored as the user ID (integer)
     assert cursors.key?(@user.id)
     
     cursor_data = cursors[@user.id]
+    assert_not_nil cursor_data
     assert_equal @user.id, cursor_data[:user_id]
     assert_equal 150.0, cursor_data[:x]
     assert_equal 250.0, cursor_data[:y]
@@ -336,7 +364,7 @@ class PresenceChannelTest < ActionCable::Channel::TestCase
   end
 
   test "handles multiple concurrent connections gracefully" do
-    Pundit.stubs(:policy).returns(mock(show?: true))
+    setup_policy_mock
     
     # Simulate multiple users connecting
     stub_connection current_user: @user

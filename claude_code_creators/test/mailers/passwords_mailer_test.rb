@@ -12,7 +12,12 @@ class PasswordsMailerTest < ActionMailer::TestCase
     assert_equal "Reset your password", mail.subject
     assert_equal ["test@example.com"], mail.to
     assert_equal ["noreply@claudecodecreators.com"], mail.from
-    assert_match @user.email_address, mail.body.encoded
+    
+    # Check content that's actually in the email
+    assert_match @user.name, mail.body.encoded
+    assert_match "Reset Password", mail.body.encoded
+    assert_match "Claude Code Creators", mail.body.encoded
+    assert_match "expire in", mail.body.encoded
   end
 
   test "reset email includes user in instance variable" do

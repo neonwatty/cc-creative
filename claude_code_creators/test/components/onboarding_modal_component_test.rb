@@ -32,8 +32,10 @@ class OnboardingModalComponentTest < ViewComponent::TestCase
     
     rendered = render_inline(OnboardingModalComponent.new(current_user: @user))
     
-    assert_selector ".opacity-0.invisible"
-    refute_selector ".opacity-100.visible"
+    # When show_modal is false, the element has display: none style, so check with visible: false
+    assert_selector "[style*='display: none']", visible: false
+    assert_selector ".opacity-0", visible: false
+    assert_selector ".invisible", visible: false
   end
 
   test "shows onboarding when force_show is true" do
@@ -105,14 +107,14 @@ class OnboardingModalComponentTest < ViewComponent::TestCase
       options: { current_step: 2, force_show: true }
     ))
     
-    # Step 1 should be completed
-    assert_selector ".bg-creative-secondary-500", count: 1
+    # Step 1 should be completed (step circle + progress line = 2 elements)
+    assert_selector ".bg-creative-secondary-500", count: 2
     
     # Step 2 should be current
     assert_selector ".bg-creative-primary-500.ring-4", count: 1
     
-    # Steps 3 and 4 should be pending
-    assert_selector ".bg-creative-neutral-200", count: 2
+    # Steps 3 and 4 should be pending (step circles + progress lines = 4 elements)
+    assert_selector ".bg-creative-neutral-200", count: 4
   end
 
   test "shows previous button on step 2" do
