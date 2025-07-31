@@ -149,7 +149,7 @@ class PresenceChannel < ApplicationCable::Channel
     user_data = {
       id: current_user.id,
       name: current_user.name,
-      email: current_user.email,
+      email: current_user.email_address,
       joined_at: Time.current.iso8601,
       last_seen: Time.current.iso8601,
       typing: false
@@ -298,8 +298,8 @@ class PresenceChannel < ApplicationCable::Channel
     {
       id: user.id,
       name: user.name,
-      email: user.email,
-      avatar_url: user.avatar.attached? ? Rails.application.routes.url_helpers.rails_blob_url(user.avatar) : nil
+      email: user.email_address,
+      avatar_url: nil  # Avatar functionality not implemented in User model
     }
   end
 
