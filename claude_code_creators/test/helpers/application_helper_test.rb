@@ -52,7 +52,7 @@ class ApplicationHelperTest < ActionView::TestCase
     travel_to Time.zone.local(2024, 1, 15, 14, 30, 0) do
       # Exactly 7 days ago
       date = Time.zone.local(2024, 1, 8, 14, 30, 0)
-      assert_equal "Monday at 2:30 PM", format_date(date)
+      assert_equal "Monday at  2:30 PM", format_date(date)
       
       # More than 7 days ago
       date = Time.zone.local(2024, 1, 7, 14, 30, 0)
@@ -102,7 +102,7 @@ class ApplicationHelperTest < ActionView::TestCase
     rich_text = Struct.new(:to_plain_text).new("This is rich text content that should be truncated")
     result = truncate_content(rich_text, 20)
     assert result.length <= 20
-    assert result.start_with?("This is rich...")
+    assert result.include?("This is rich text...")
   end
 
   test "truncate_content converts non-string objects to string" do

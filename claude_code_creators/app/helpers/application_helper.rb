@@ -6,7 +6,7 @@ module ApplicationHelper
       "Today at #{date.strftime('%l:%M %p').strip}"
     elsif date.yesterday?
       "Yesterday at #{date.strftime('%l:%M %p').strip}"
-    elsif date > 7.days.ago
+    elsif date >= 7.days.ago
       date.strftime('%A at %l:%M %p').strip
     else
       date.strftime('%B %d, %Y')

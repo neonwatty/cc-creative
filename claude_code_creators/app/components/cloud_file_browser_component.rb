@@ -101,6 +101,17 @@ class CloudFileBrowserComponent < ViewComponent::Base
     "0 selected"
   end
 
+
+
+  def render_pagination
+    return "" unless pagination
+    
+    # Simple pagination rendering - could be enhanced
+    content_tag :div, class: "pagination" do
+      "Page #{pagination[:current_page]} of #{pagination[:total_pages]}"
+    end
+  end
+
   def batch_actions
     [
       {

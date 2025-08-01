@@ -1,10 +1,52 @@
 require "test_helper"
 
+# Mock Google API classes for testing before any service files are loaded
+module Google
+  module Apis
+    module DriveV3
+      class DriveService; end
+    end
+    
+    class Error < StandardError
+      attr_accessor :status_code
+      
+      def initialize(message)
+        super(message)
+      end
+    end
+    
+    class AuthorizationError < Error; end
+    class ClientError < Error; end
+  end
+  
+  module Auth
+    class UserRefreshCredentials; end
+  end
+end
+
+# Stub the require statements to prevent loading actual Google API gems
+require_stub = Object.method(:require)
+Object.define_method(:require) do |name|
+  return true if ['google/apis/drive_v3', 'googleauth'].include?(name)
+  require_stub.call(name)
+end
+
 module CloudServices
   class GoogleDriveServiceTest < ActiveSupport::TestCase
     setup do
-      @integration = cloud_integrations(:one)
-      @service = GoogleDriveService.new(@integration)
+      # Clean up any existing integrations to avoid uniqueness conflicts
+      @user = users(:one)
+      @user.cloud_integrations.where(provider: 'google_drive').destroy_all
+      
+      # Create integration with properly encrypted attributes instead of using fixtures
+      @integration = CloudIntegration.create!(
+        user: @user,
+        provider: 'google_drive',
+        access_token: 'test_access_token_1',
+        refresh_token: 'test_refresh_token_1',
+        expires_at: 1.hour.from_now,
+        settings: { scope: "read_write", token_type: "Bearer" }
+      )
       
       # Mock Google API client
       @mock_drive_service = mock()
@@ -18,6 +60,9 @@ module CloudServices
       # Configure Rails credentials for testing
       Rails.application.credentials.stubs(:dig).with(:google, :client_id).returns("test-client-id")
       Rails.application.credentials.stubs(:dig).with(:google, :client_secret).returns("test-client-secret")
+      
+      # Now create the service with the properly encrypted integration
+      @service = GoogleDriveService.new(@integration)
     end
 
     teardown do
@@ -71,7 +116,7 @@ module CloudServices
       
       HTTParty.expects(:post).returns(mock_response)
       
-      assert_raises CloudServices::BaseService::ApiError do
+      assert_raises CloudServices::ApiError do
         GoogleDriveService.exchange_code("invalid-code")
       end
     end
@@ -146,7 +191,7 @@ module CloudServices
       
       result = @service.import_file("sheet-id")
       
-      assert_equal "text/csv", result[:content]
+      assert_equal "col1,col2\nval1,val2", result[:content]
     end
 
     test "import_file downloads regular files" do
@@ -208,7 +253,7 @@ module CloudServices
       
       @mock_drive_service.expects(:list_files).raises(error)
       
-      assert_raises CloudServices::BaseService::AuthenticationError do
+      assert_raises CloudServices::AuthenticationError do
         @service.list_files
       end
     end
@@ -219,7 +264,7 @@ module CloudServices
       
       @mock_drive_service.expects(:list_files).raises(error)
       
-      assert_raises CloudServices::BaseService::AuthorizationError do
+      assert_raises CloudServices::AuthorizationError do
         @service.list_files
       end
     end
@@ -230,7 +275,7 @@ module CloudServices
       
       @mock_drive_service.expects(:get_file).raises(error)
       
-      assert_raises CloudServices::BaseService::NotFoundError do
+      assert_raises CloudServices::NotFoundError do
         @service.import_file("missing-id")
       end
     end

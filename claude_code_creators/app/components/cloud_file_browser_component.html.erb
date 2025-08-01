@@ -30,19 +30,17 @@
     </div>
     
     <div class="file-browser__filters">
-      <select class="filter-select" 
-              data-action="change->cloud-file-browser#changeFilter"
-              data-cloud-file-browser-target="filterSelect">
-        <% filter_options.each do |option| %>
-          <option value="<%= option[:value] %>" 
-                  <%= 'selected' if option[:value] == filter %>>
-            <%= option[:label] %> (<%= option[:count] %>)
-          </option>
-        <% end %>
-      </select>
+      <% filter_options.each do |option| %>
+        <button class="filter-tab <%= 'active' if option[:value] == filter %>" 
+                data-action="click->cloud-file-browser#changeFilter"
+                data-filter="<%= option[:value] %>"
+                data-cloud-file-browser-target="filterTab">
+          <%= option[:label] %> (<%= option[:count] %>)
+        </button>
+      <% end %>
       
       <select class="sort-select" 
-              data-action="change->cloud-file-browser#changeSort"
+              data-action="change->cloud-file-browser#sortFiles"
               data-cloud-file-browser-target="sortSelect">
         <% sort_options.each do |option| %>
           <option value="<%= option[:value] %>"><%= option[:label] %></option>
@@ -53,8 +51,8 @@
     <div class="file-browser__view-toggle" data-cloud-file-browser-target="viewToggle">
       <% view_toggle_options.each do |option| %>
         <button class="view-toggle__btn <%= 'active' if option[:mode] == view_mode %>" 
-                data-action="click->cloud-file-browser#toggleView"
-                data-view-mode="<%= option[:mode] %>"
+                data-action="click->cloud-file-browser#changeView"
+                data-view="<%= option[:mode] %>"
                 title="<%= option[:label] %>">
           <i class="icon icon--<%= option[:icon] %>"></i>
         </button>

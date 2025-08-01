@@ -75,10 +75,13 @@ class PresenceChannel < ApplicationCable::Channel
     return unless document && authorized_for_document?(document)
 
     position = data['position'] || {}
-    return unless position['x'] && position['y']
+    # Handle both string and symbol keys for coordinates
+    x = position['x'] || position[:x]
+    y = position['y'] || position[:y]
+    return unless x && y
 
     # Store cursor position (optional, for persistence)
-    update_cursor_position(document, position)
+    update_cursor_position(document, x, y)
     
     # Broadcast to other users (excluding sender)
     broadcast_presence_update(document, {
@@ -86,8 +89,8 @@ class PresenceChannel < ApplicationCable::Channel
       user_id: current_user.id,
       user_name: current_user.name,
       position: {
-        x: position['x'].to_f,
-        y: position['y'].to_f
+        x: x.to_f,
+        y: y.to_f
       },
       timestamp: Time.current.iso8601
     }, except: current_user)
@@ -207,12 +210,12 @@ class PresenceChannel < ApplicationCable::Channel
     end
   end
 
-  def update_cursor_position(document, position)
+  def update_cursor_position(document, x, y)
     cursor_key = "document_#{document.id}_cursors"
     cursor_data = {
       user_id: current_user.id,
-      x: position['x'].to_f,
-      y: position['y'].to_f,
+      x: x.to_f,
+      y: y.to_f,
       updated_at: Time.current.iso8601
     }
 

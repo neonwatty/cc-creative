@@ -161,15 +161,19 @@ class PresenceChannelTest < ActionCable::Channel::TestCase
     stub_connection current_user: @user
     subscribe document_id: @document.id
     
-    perform :cursor_moved, position: { x: 100, y: 200 }
+    # Capture the broadcast by directly calling the method
+    broadcasts = capture_broadcasts(PresenceChannel.broadcasting_for(@document)) do
+      subscription.cursor_moved({ 'position' => { 'x' => 100, 'y' => 200 } })
+    end
     
-    assert_broadcast_on(PresenceChannel.broadcasting_for(@document), {
-      type: 'cursor_moved',
-      user_id: @user.id,
-      user_name: @user.name,
-      position: { x: 100.0, y: 200.0 },
-      timestamp: kind_of(String)
-    })
+    assert_equal 1, broadcasts.size
+    broadcast = broadcasts.first
+    assert_equal 'cursor_moved', broadcast['type']
+    assert_equal @user.id, broadcast['user_id']
+    assert_equal @user.name, broadcast['user_name']
+    assert_equal 100.0, broadcast['position']['x']
+    assert_equal 200.0, broadcast['position']['y']
+    assert_not_nil broadcast['timestamp']
   end
 
   test "ignores cursor movement without valid position" do
@@ -345,7 +349,7 @@ class PresenceChannelTest < ActionCable::Channel::TestCase
     stub_connection current_user: @user
     subscribe document_id: @document.id
     
-    perform :cursor_moved, position: { x: 150, y: 250 }
+    subscription.cursor_moved({ 'position' => { 'x' => 150, 'y' => 250 } })
     
     cursor_key = "document_#{@document.id}_cursors"
     cursors = Rails.cache.read(cursor_key)

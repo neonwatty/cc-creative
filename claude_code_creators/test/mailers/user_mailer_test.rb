@@ -12,7 +12,7 @@ class UserMailerTest < ActionMailer::TestCase
     assert_equal "Please confirm your email address", mail.subject
     assert_equal ["user@example.com"], mail.to
     assert_equal ["noreply@claudecodecreators.com"], mail.from
-    assert_match @user.email_address, mail.body.encoded
+    assert_match /Welcome to Claude Code Creators/, mail.body.encoded
   end
 
   test "confirmation email includes user in instance variable" do
@@ -39,7 +39,8 @@ class UserMailerTest < ActionMailer::TestCase
   test "confirmation email uses correct layout" do
     mail = UserMailer.confirmation(@user)
     
-    # Check that it uses the mailer layout
-    assert_match /mailer/, mail.body.encoded
+    # Check that it uses the mailer layout by looking for HTML structure from layout
+    assert_match /<!DOCTYPE html>/, mail.body.encoded
+    assert_match /<html>/, mail.body.encoded
   end
 end

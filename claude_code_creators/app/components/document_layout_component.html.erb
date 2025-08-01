@@ -1,4 +1,4 @@
-<div class="<%= layout_class %>" <%= layout_data_attributes.map { |k, v| "#{k}=\"#{v}\"" }.join(" ").html_safe %>>
+<div class="<%= layout_class %>" data-controller="document-layout" data-document-layout-sidebar-collapsed-value="<%= @sidebar_collapsed %>" data-document-layout-layout-type-value="<%= @layout_type %>" data-document-layout-enable-collaboration-value="<%= @enable_collaboration %>">
   <!-- Mobile Menu Overlay -->
   <div class="<%= mobile_overlay_class %>" 
        data-document-layout-target="mobileOverlay"

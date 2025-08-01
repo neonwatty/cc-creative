@@ -5,7 +5,12 @@ class AuthenticationTest < ActionController::TestCase
   class TestController < ApplicationController
     include Authentication
     
+    attr_accessor :captured_session, :captured_user
+    
     def index
+      # Capture Current attributes during request processing
+      self.captured_session = Current.session
+      self.captured_user = Current.user
       render plain: "Success"
     end
     
@@ -74,14 +79,13 @@ class AuthenticationTest < ActionController::TestCase
   
   # Test resume_session
   test "resume_session sets Current.session and Current.user when valid cookie exists" do
-    # Ensure the session exists and is valid
-    @session.update!(user_agent: request.user_agent, ip_address: request.remote_ip)
+    # Ensure the session exists and is valid - use default fixture values
     cookies.signed[:session_id] = @session.id
     get :index
     
     assert_response :success
-    assert_not_nil Current.session
-    assert_equal @user.id, Current.user.id
+    assert_not_nil @controller.captured_session
+    assert_equal @user.id, @controller.captured_user.id
   end
   
   test "resume_session returns nil when no cookie exists" do
@@ -100,14 +104,13 @@ class AuthenticationTest < ActionController::TestCase
   
   # Test find_session_by_cookie
   test "find_session_by_cookie returns session when valid cookie exists" do
-    @session.update!(user_agent: request.user_agent, ip_address: request.remote_ip)
     cookies.signed[:session_id] = @session.id
     get :index
     
     # Session was found since we were able to access protected action
     assert_response :success
-    assert_not_nil Current.session
-    assert_equal @user.id, Current.user.id
+    assert_not_nil @controller.captured_session
+    assert_equal @user.id, @controller.captured_user.id
   end
   
   test "find_session_by_cookie returns nil when no cookie exists" do

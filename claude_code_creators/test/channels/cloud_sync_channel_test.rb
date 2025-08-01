@@ -108,8 +108,11 @@ class CloudSyncChannelTest < ActionCable::Channel::TestCase
   end
 
   test "does not trigger sync for inactive integration" do
-    # Mock the active? method to return false
-    @integration.stubs(:active?).returns(false)
+    # Mock the integration lookup and active? method
+    inactive_integration = mock('integration')
+    inactive_integration.stubs(:active?).returns(false)
+    
+    @user.cloud_integrations.stubs(:find_by).with(id: @integration.id).returns(inactive_integration)
     
     stub_connection current_user: @user
     subscribe integration_id: @integration.id

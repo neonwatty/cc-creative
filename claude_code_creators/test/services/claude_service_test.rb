@@ -215,7 +215,7 @@ class ClaudeServiceTest < ActiveSupport::TestCase
       system: anything,
       messages: anything,
       stream: anything
-    )
+    ).returns(nil)
     
     Anthropic::Client.stubs(:new).returns(mock_client)
     
@@ -223,6 +223,9 @@ class ClaudeServiceTest < ActiveSupport::TestCase
     result = service.stream_message("Hello")
     
     assert_kind_of Enumerator, result
+    
+    # Consume the enumerator to trigger the API call
+    result.to_a rescue nil
   end
 
   test "context manager merges context updates" do

@@ -35,6 +35,6 @@ class ApplicationRecordTest < ActiveSupport::TestCase
     
     # Test that it can be used as a base for other models
     test_model = Class.new(ApplicationRecord)
-    assert test_model.abstract_class == false
+    refute test_model.abstract_class?
   end
 end

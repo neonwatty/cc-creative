@@ -19,8 +19,11 @@ class CloudFileBrowserComponentTest < ViewComponent::TestCase
   end
 
   test "renders grid view mode" do
+    file = OpenStruct.new(importable?: true, synced?: false, size: 1024)
+    files = [file]
     rendered = render_inline(CloudFileBrowserComponent.new(
       integration: @integration,
+      files: files,
       view_mode: 'grid'
     ))
     
@@ -30,8 +33,11 @@ class CloudFileBrowserComponentTest < ViewComponent::TestCase
   end
 
   test "renders list view mode" do
+    file = OpenStruct.new(importable?: true, synced?: false, size: 1024)
+    files = [file]
     rendered = render_inline(CloudFileBrowserComponent.new(
       integration: @integration,
+      files: files,  
       view_mode: 'list'
     ))
     
@@ -117,12 +123,15 @@ class CloudFileBrowserComponentTest < ViewComponent::TestCase
   test "renders batch actions when files selected" do
     rendered = render_inline(CloudFileBrowserComponent.new(integration: @integration))
     
-    assert_selector "[data-action='click->cloud-file-browser#batchImport']", text: "Import Selected"
-    assert_selector "[data-action='click->cloud-file-browser#batchDownload']", text: "Download Selected"
+    # Batch actions are hidden by default, check they exist but aren't visible
+    assert_selector "[data-action='click->cloud-file-browser#batchImport']", text: "Import Selected", visible: false
+    assert_selector "[data-action='click->cloud-file-browser#batchDownload']", text: "Download Selected", visible: false
   end
 
   test "renders sync status" do
-    rendered = render_inline(CloudFileBrowserComponent.new(integration: @integration))
+    integration = @integration
+    integration.stubs(:cloud_files).returns(CloudFile.none)
+    rendered = render_inline(CloudFileBrowserComponent.new(integration: integration))
     
     assert_text "No files synced"
   end
