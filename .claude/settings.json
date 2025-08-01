@@ -36,7 +36,22 @@
       "Bash(grep *)",
       "Bash(rg *)",
       "Bash(find *)",
+      "Bash(rm *)",
+      "Bash(mkdir *)",
+      "Bash(touch *)",
+      "Bash(open *)",
+      "Bash(source *)",
+      "Bash(ruby *)",
+      "Bash(jq *)",
+      "Bash(exit)",
+      "Bash(RAILS_ENV=test *)",
+      "Bash(COVERAGE_QUIET=true *)",
+      "WebFetch(domain:docs.anthropic.com)",
       "mcp__task-master-ai__*"
-    ]
-  }
+    ],
+    "deny": []
+  },
+  "disabledMcpjsonServers": [
+    "task-master-ai"
+  ]
 }
