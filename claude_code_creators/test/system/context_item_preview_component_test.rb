@@ -178,7 +178,7 @@ class ContextItemPreviewComponentSystemTest < ApplicationSystemTestCase
 
   test "content formatting for different types" do
     # Test code content formatting
-    @context_item.update!(content: "console.log('hello')", item_type: "code")
+    @context_item.update!(content: "console.log('hello')", item_type: "snippet")
     visit_test_page_with_component
     show_modal
 

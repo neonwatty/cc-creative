@@ -16,18 +16,18 @@ class CollaborationControllerTest < ActionDispatch::IntegrationTest
 
   # Session Management Tests
   test "should start collaboration session for authorized user" do
-    post collaboration_start_path(@document), 
-         params: { 
-           session_settings: { 
-             max_users: 5, 
+    post collaboration_start_path(@document),
+         params: {
+           session_settings: {
+             max_users: 5,
              editing_mode: "collaborative",
              conflict_resolution: "timestamp_priority"
-           } 
+           }
          }
 
     assert_response :success
     json_response = JSON.parse(response.body)
-    
+
     assert_equal "session_started", json_response["status"]
     assert_present json_response["session_id"]
     assert_equal @document.id, json_response["document_id"]
@@ -68,7 +68,7 @@ class CollaborationControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     json_response = JSON.parse(response.body)
-    
+
     assert_equal "session_joined", json_response["status"]
     assert_equal session_id, json_response["session_id"]
     assert_equal @other_user.id, json_response["user_id"]
@@ -78,7 +78,7 @@ class CollaborationControllerTest < ActionDispatch::IntegrationTest
     # Start session with max_users: 1
     post collaboration_start_path(@document),
          params: { session_settings: { max_users: 1 } }
-    
+
     session_data = JSON.parse(response.body)
     session_id = session_data["session_id"]
 
@@ -110,7 +110,7 @@ class CollaborationControllerTest < ActionDispatch::IntegrationTest
   # Document Locking Tests
   test "should acquire document lock for editing" do
     post collaboration_lock_path(@document),
-         params: { 
+         params: {
            lock_type: "write",
            section: { start: 0, end: 100 },
            timeout: 300
@@ -118,7 +118,7 @@ class CollaborationControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     json_response = JSON.parse(response.body)
-    
+
     assert_equal "lock_acquired", json_response["status"]
     assert_present json_response["lock_id"]
     assert_equal "write", json_response["lock_type"]
@@ -129,7 +129,7 @@ class CollaborationControllerTest < ActionDispatch::IntegrationTest
     # First user acquires write lock
     post collaboration_lock_path(@document),
          params: { lock_type: "write", section: { start: 0, end: 100 } }
-    
+
     first_response = JSON.parse(response.body)
     assert_equal "lock_acquired", first_response["status"]
 
@@ -150,7 +150,7 @@ class CollaborationControllerTest < ActionDispatch::IntegrationTest
     # Acquire lock
     post collaboration_lock_path(@document),
          params: { lock_type: "write", section: { start: 0, end: 100 } }
-    
+
     lock_data = JSON.parse(response.body)
     lock_id = lock_data["lock_id"]
 
@@ -166,8 +166,8 @@ class CollaborationControllerTest < ActionDispatch::IntegrationTest
   test "should auto-release expired locks" do
     # Acquire lock with short timeout
     post collaboration_lock_path(@document),
-         params: { 
-           lock_type: "write", 
+         params: {
+           lock_type: "write",
            section: { start: 0, end: 100 },
            timeout: 1
          }
@@ -192,7 +192,7 @@ class CollaborationControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     json_response = JSON.parse(response.body)
-    
+
     assert json_response["can_collaborate"]
     assert json_response["can_read"]
     assert json_response["can_write"]
@@ -214,7 +214,7 @@ class CollaborationControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     json_response = JSON.parse(response.body)
-    
+
     assert_not json_response["can_write"]
     assert json_response["can_read"]
   end
@@ -229,7 +229,7 @@ class CollaborationControllerTest < ActionDispatch::IntegrationTest
     )).once
 
     post collaboration_presence_path(@document),
-         params: { 
+         params: {
            status: "active",
            activity: "editing"
          }
@@ -258,7 +258,7 @@ class CollaborationControllerTest < ActionDispatch::IntegrationTest
 
     # Simulate disconnection and reconnection
     post collaboration_reconnect_path(@document),
-         params: { 
+         params: {
            session_id: session_id,
            last_known_state: {
              cursor_position: 100,
@@ -268,7 +268,7 @@ class CollaborationControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     json_response = JSON.parse(response.body)
-    
+
     assert_equal "reconnected", json_response["status"]
     assert_present json_response["sync_data"]
     assert_present json_response["missed_operations"]
@@ -276,7 +276,7 @@ class CollaborationControllerTest < ActionDispatch::IntegrationTest
 
   test "should handle invalid session recovery" do
     post collaboration_reconnect_path(@document),
-         params: { 
+         params: {
            session_id: "invalid-session-id",
            last_known_state: {}
          }
@@ -321,10 +321,10 @@ class CollaborationControllerTest < ActionDispatch::IntegrationTest
     # Mock conflict resolution
     OperationalTransformService.any_instance.expects(:apply_and_broadcast_operation)
                               .with(@document, operation)
-                              .returns({ 
-                                status: "conflict_resolved", 
+                              .returns({
+                                status: "conflict_resolved",
                                 transformed_operation: operation,
-                                conflicts: ["position_adjusted"]
+                                conflicts: [ "position_adjusted" ]
                               })
 
     post collaboration_operation_path(@document),
@@ -348,7 +348,7 @@ class CollaborationControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     json_response = JSON.parse(response.body)
-    
+
     assert_equal "active", json_response["session_status"]
     assert_present json_response["active_users"]
     assert_present json_response["active_locks"]
@@ -360,7 +360,7 @@ class CollaborationControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     json_response = JSON.parse(response.body)
-    
+
     assert json_response["users"].is_a?(Array)
     # Should include current user
     user_ids = json_response["users"].map { |u| u["id"] }
@@ -372,7 +372,7 @@ class CollaborationControllerTest < ActionDispatch::IntegrationTest
     # Send many operations rapidly
     10.times do |i|
       post collaboration_operation_path(@document),
-           params: { 
+           params: {
              operation: {
                type: "insert",
                position: i,

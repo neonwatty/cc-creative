@@ -268,11 +268,11 @@ class CollaborationStatusComponent < ViewComponent::Base
 
     case style
     when :minimal
-      base_classes.concat(["w-3", "h-3"])
+      base_classes.concat([ "w-3", "h-3" ])
     when :detailed
-      base_classes.concat(["w-4", "h-4"])
+      base_classes.concat([ "w-4", "h-4" ])
     else # compact
-      base_classes.concat(["w-3", "h-3"])
+      base_classes.concat([ "w-3", "h-3" ])
     end
 
     base_classes.join(" ")
@@ -318,22 +318,22 @@ class CollaborationStatusComponent < ViewComponent::Base
     case status
     when :syncing, :saving
       <<~SVG
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"#{' '}
               d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
       SVG
     when :saved
       <<~SVG
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"#{' '}
               d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
       SVG
     when :error
       <<~SVG
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"#{' '}
               d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
       SVG
     else
       <<~SVG
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"#{' '}
               d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
       SVG
     end
@@ -341,7 +341,7 @@ class CollaborationStatusComponent < ViewComponent::Base
 
   def wifi_icon_svg
     <<~SVG
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"#{' '}
             d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/>
     SVG
   end

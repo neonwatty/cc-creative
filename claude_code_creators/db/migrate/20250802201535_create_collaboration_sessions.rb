@@ -14,7 +14,7 @@ class CreateCollaborationSessions < ActiveRecord::Migration[8.0]
       t.timestamps
     end
     add_index :collaboration_sessions, :session_id, unique: true
-    add_index :collaboration_sessions, [:document_id, :status]
+    add_index :collaboration_sessions, [ :document_id, :status ]
     add_index :collaboration_sessions, :started_at
   end
 end

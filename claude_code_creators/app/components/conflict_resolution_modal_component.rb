@@ -14,7 +14,7 @@ class ConflictResolutionModalComponent < ViewComponent::Base
 
   private
 
-  attr_reader :document, :current_user, :modal_size, :conflict_type, :auto_resolve, 
+  attr_reader :document, :current_user, :modal_size, :conflict_type, :auto_resolve,
               :show_diff, :enable_merge, :resolution_timeout
 
   def modal_backdrop_class
@@ -56,13 +56,13 @@ class ConflictResolutionModalComponent < ViewComponent::Base
 
     case modal_size
     when :small
-      base_classes.concat(["w-full", "max-w-md", "mx-4"])
+      base_classes.concat([ "w-full", "max-w-md", "mx-4" ])
     when :medium
-      base_classes.concat(["w-full", "max-w-2xl", "mx-4"])
+      base_classes.concat([ "w-full", "max-w-2xl", "mx-4" ])
     when :full
-      base_classes.concat(["w-full", "max-w-7xl", "mx-4", "h-[90vh]"])
+      base_classes.concat([ "w-full", "max-w-7xl", "mx-4", "h-[90vh]" ])
     else # large
-      base_classes.concat(["w-full", "max-w-4xl", "mx-4"])
+      base_classes.concat([ "w-full", "max-w-4xl", "mx-4" ])
     end
 
     base_classes.join(" ")
@@ -181,7 +181,7 @@ class ConflictResolutionModalComponent < ViewComponent::Base
     when :remote
       base_classes.concat([
         "bg-creative-accent-teal",
-        "bg-opacity-5", 
+        "bg-opacity-5",
         "border-creative-accent-teal",
         "border-opacity-20"
       ])
@@ -330,17 +330,17 @@ class ConflictResolutionModalComponent < ViewComponent::Base
     case conflict_type
     when :format
       <<~SVG
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"#{' '}
               d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
       SVG
     when :simultaneous
       <<~SVG
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"#{' '}
               d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
       SVG
     else # content
       <<~SVG
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"#{' '}
               d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
       SVG
     end

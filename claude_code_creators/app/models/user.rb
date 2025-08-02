@@ -51,6 +51,32 @@ class User < ApplicationRecord
     UserMailer.confirmation(self).deliver_later
   end
 
+  # Summary of user's documents
+  def documents_summary
+    {
+      total_count: documents.count,
+      recent_count: documents.where('created_at > ?', 7.days.ago).count,
+      total_size: 0, # File size not implemented yet
+      last_updated: documents.maximum(:updated_at)
+    }
+  end
+
+  # User's effective permissions based on role
+  def effective_permissions
+    case role
+    when 'admin'
+      %w[read write delete manage_users manage_system]
+    when 'editor'
+      %w[read write delete]
+    when 'user'
+      %w[read write]
+    when 'guest'
+      %w[read]
+    else
+      []
+    end
+  end
+
   private
 
   def password_salt

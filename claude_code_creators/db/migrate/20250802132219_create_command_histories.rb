@@ -14,8 +14,8 @@ class CreateCommandHistories < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :command_histories, [:user_id, :executed_at]
-    add_index :command_histories, [:document_id, :executed_at]
-    add_index :command_histories, [:command, :status]
+    add_index :command_histories, [ :user_id, :executed_at ]
+    add_index :command_histories, [ :document_id, :executed_at ]
+    add_index :command_histories, [ :command, :status ]
   end
 end

@@ -198,7 +198,7 @@ module CommandTestHelper
   def execute_command_in_editor(command_text)
     editor_input = find("[data-slash-commands-target='input']")
     editor_input.set(command_text)
-    editor_input.send_keys([:control, :enter])
+    editor_input.send_keys([ :control, :enter ])
   end
 
   # Validation helpers

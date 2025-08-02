@@ -74,7 +74,7 @@ Rails.application.routes.draw do
     end
 
     # Command execution routes
-    resources :commands, only: [:create]
+    resources :commands, only: [ :create ]
 
     # Collaboration routes
     scope path: "collaboration", as: "collaboration" do
@@ -113,6 +113,28 @@ Rails.application.routes.draw do
   end
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+
+  # Health check and monitoring routes
+  get "health" => "health#show", as: :health_check
+  get "health/liveness" => "health#liveness", as: :liveness_check
+  get "health/readiness" => "health#readiness", as: :readiness_check
+
+  # Metrics and monitoring endpoints
+  get "metrics" => "metrics#show", as: :metrics
+  get "metrics/prometheus" => "metrics#prometheus", as: :prometheus_metrics
+  
+  # Admin analytics dashboard
+  namespace :admin do
+    resources :analytics, only: [ :index ] do
+      collection do
+        get :users
+        get :performance
+        get :errors
+        get :system
+        get :export
+      end
+    end
+  end
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.

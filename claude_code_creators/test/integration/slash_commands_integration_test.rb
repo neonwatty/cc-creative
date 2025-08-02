@@ -20,7 +20,7 @@ class SlashCommandsIntegrationTest < ActionDispatch::IntegrationTest
     # Simulate typing slash command
     post document_commands_path(@document), params: {
       command: "save",
-      parameters: ["integration_test"],
+      parameters: [ "integration_test" ],
       xhr: true
     }, headers: { "Content-Type" => "application/json" }
 
@@ -43,7 +43,7 @@ class SlashCommandsIntegrationTest < ActionDispatch::IntegrationTest
       item_type: "saved_context",
       user: @user
     )
-    
+
     @document.context_items.create!(
       title: "test_file.txt",
       content: "File content",
@@ -58,7 +58,7 @@ class SlashCommandsIntegrationTest < ActionDispatch::IntegrationTest
     }, xhr: true
 
     assert_response :success
-    
+
     # Should include context-aware suggestions
     assert_match /existing_context/, response.body
     assert_match /test_file\.txt/, response.body
@@ -82,7 +82,7 @@ class SlashCommandsIntegrationTest < ActionDispatch::IntegrationTest
     # Execute save command
     post document_commands_path(@document), params: {
       command: "save",
-      parameters: ["claude_integration_test"]
+      parameters: [ "claude_integration_test" ]
     }
 
     assert_response :success
@@ -113,7 +113,7 @@ class SlashCommandsIntegrationTest < ActionDispatch::IntegrationTest
     # Execute load command
     post document_commands_path(@document), params: {
       command: "load",
-      parameters: ["load_integration_test"]
+      parameters: [ "load_integration_test" ]
     }
 
     assert_response :success
@@ -126,7 +126,7 @@ class SlashCommandsIntegrationTest < ActionDispatch::IntegrationTest
     assert claude_context.context_data["messages"].any? { |m| m["content"] == "Loaded message" }
   end
 
-  # Compact Command Integration Tests  
+  # Compact Command Integration Tests
   test "compact command integration with Claude API" do
     # Create large Claude context
     messages = []
@@ -147,7 +147,7 @@ class SlashCommandsIntegrationTest < ActionDispatch::IntegrationTest
       ],
       "compression_ratio" => 0.05
     }
-    
+
     # Mock the ClaudeService
     ClaudeService.any_instance.expects(:compact_context).returns(mock_claude_response)
 
@@ -168,10 +168,10 @@ class SlashCommandsIntegrationTest < ActionDispatch::IntegrationTest
   test "clear command integration with context cleanup" do
     # Create various contexts to clear
     claude_context = @document.claude_contexts.create!(
-      context_data: { "messages" => ["test"] },
+      context_data: { "messages" => [ "test" ] },
       user: @user
     )
-    
+
     sub_agent = @document.sub_agents.create!(
       name: "Test Agent",
       role: "helper",
@@ -181,7 +181,7 @@ class SlashCommandsIntegrationTest < ActionDispatch::IntegrationTest
     # Execute clear command
     post document_commands_path(@document), params: {
       command: "clear",
-      parameters: ["context"]
+      parameters: [ "context" ]
     }
 
     assert_response :success
@@ -190,7 +190,7 @@ class SlashCommandsIntegrationTest < ActionDispatch::IntegrationTest
 
     # Verify contexts were cleared
     assert_not ClaudeContext.exists?(claude_context.id)
-    
+
     # Document should still exist
     assert Document.exists?(@document.id)
   end
@@ -209,7 +209,7 @@ class SlashCommandsIntegrationTest < ActionDispatch::IntegrationTest
     # Execute include command
     post document_commands_path(@document), params: {
       command: "include",
-      parameters: ["include_test.md", "markdown"]
+      parameters: [ "include_test.md", "markdown" ]
     }
 
     assert_response :success
@@ -235,7 +235,7 @@ class SlashCommandsIntegrationTest < ActionDispatch::IntegrationTest
     # Execute snippet command
     post document_commands_path(@document), params: {
       command: "snippet",
-      parameters: ["price_calculator"],
+      parameters: [ "price_calculator" ],
       selected_content: selected_content
     }
 
@@ -273,7 +273,7 @@ class SlashCommandsIntegrationTest < ActionDispatch::IntegrationTest
 
     post document_commands_path(@document), params: {
       command: "save",
-      parameters: ["unauthorized_test"]
+      parameters: [ "unauthorized_test" ]
     }
 
     assert_response :forbidden
@@ -288,7 +288,7 @@ class SlashCommandsIntegrationTest < ActionDispatch::IntegrationTest
 
     post document_commands_path(@document), params: {
       command: "save",
-      parameters: ["service_error_test"]
+      parameters: [ "service_error_test" ]
     }
 
     assert_response :internal_server_error
@@ -308,7 +308,7 @@ class SlashCommandsIntegrationTest < ActionDispatch::IntegrationTest
       @document.context_items.create!(
         title: "item_#{i}",
         content: "Content #{i}",
-        item_type: "note",
+        item_type: "snippet",
         user: @user
       )
     end
@@ -316,7 +316,7 @@ class SlashCommandsIntegrationTest < ActionDispatch::IntegrationTest
     start_time = Time.current
     post document_commands_path(@document), params: {
       command: "save",
-      parameters: ["performance_test"]
+      parameters: [ "performance_test" ]
     }
     end_time = Time.current
 
@@ -328,10 +328,10 @@ class SlashCommandsIntegrationTest < ActionDispatch::IntegrationTest
   test "integration with ActionCable for real-time updates" do
     # This would test WebSocket integration if implemented
     # For now, verify the structure exists
-    
+
     get document_path(@document)
     assert_response :success
-    
+
     # Should have ActionCable connection setup
     assert_select "[data-controller*='presence']" # Existing presence system
     # Future: assert_select "[data-controller*='command-status']"
@@ -341,38 +341,38 @@ class SlashCommandsIntegrationTest < ActionDispatch::IntegrationTest
   test "integration with concurrent user access" do
     # Create second user session
     other_user = users(:two)
-    
+
     # Grant access to document
     @document.update!(user: @user) # Ensure ownership
-    
+
     # Both users execute commands simultaneously
     threads = []
     results = []
-    
+
     threads << Thread.new do
       post document_commands_path(@document), params: {
         command: "save",
-        parameters: ["user1_concurrent"]
+        parameters: [ "user1_concurrent" ]
       }
       results << response.status
     end
-    
+
     # Switch to other user (in real app, this would be separate session)
     threads << Thread.new do
       # Simulate second user action
       context_item = @document.context_items.create!(
         title: "user2_context",
         content: "Concurrent content",
-        item_type: "note",
+        item_type: "snippet",
         user: other_user
       )
       results << (context_item.persisted? ? 200 : 500)
     end
-    
+
     threads.each(&:join)
-    
+
     # Both operations should succeed
-    assert results.all? { |status| [200, 201].include?(status) }
+    assert results.all? { |status| [ 200, 201 ].include?(status) }
   end
 
   # Mobile Integration Tests
@@ -384,7 +384,7 @@ class SlashCommandsIntegrationTest < ActionDispatch::IntegrationTest
     }
 
     assert_response :success
-    
+
     # Should have mobile-optimized command interface
     assert_select "[data-controller*='slash-commands']"
     # Future mobile-specific assertions would go here
@@ -398,7 +398,7 @@ class SlashCommandsIntegrationTest < ActionDispatch::IntegrationTest
     # Should have proper ARIA attributes
     assert_select "[role='textbox'][aria-label]" # Editor input
     assert_select "[data-controller*='slash-commands']"
-    
+
     # Command suggestions should be accessible
     get document_command_suggestions_path(@document), params: { filter: "" }, xhr: true
     assert_response :success
@@ -413,19 +413,19 @@ class SlashCommandsIntegrationTest < ActionDispatch::IntegrationTest
     # Execute multiple commands that should maintain consistency
     post document_commands_path(@document), params: {
       command: "save",
-      parameters: ["consistency_test_1"]
+      parameters: [ "consistency_test_1" ]
     }
     assert_response :success
 
     post document_commands_path(@document), params: {
       command: "load",
-      parameters: ["consistency_test_1"]
+      parameters: [ "consistency_test_1" ]
     }
     assert_response :success
 
     post document_commands_path(@document), params: {
       command: "save",
-      parameters: ["consistency_test_2"]
+      parameters: [ "consistency_test_2" ]
     }
     assert_response :success
 
@@ -438,7 +438,7 @@ class SlashCommandsIntegrationTest < ActionDispatch::IntegrationTest
     assert @document.context_items.find_by(title: "consistency_test_2").present?
   end
 
-  # Browser Compatibility Integration Tests  
+  # Browser Compatibility Integration Tests
   test "integration with different browser capabilities" do
     # Test with older browser (simulated)
     get document_path(@document), headers: {
@@ -446,16 +446,16 @@ class SlashCommandsIntegrationTest < ActionDispatch::IntegrationTest
     }
 
     assert_response :success
-    
+
     # Should still have basic command functionality
     assert_select "[data-controller*='slash-commands']"
-    
+
     # Execute command via fallback method
     post document_commands_path(@document), params: {
       command: "save",
-      parameters: ["browser_compat_test"]
+      parameters: [ "browser_compat_test" ]
     }
-    
+
     assert_response :success
   end
 

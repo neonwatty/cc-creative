@@ -39,7 +39,7 @@ class CommandSuggestionsComponentTest < ViewComponent::TestCase
       position: { x: 100, y: 200 },
       filter: "sa"
     )
-    
+
     render_inline(filtered_component)
 
     assert_selector "[data-command='save']"
@@ -116,7 +116,7 @@ class CommandSuggestionsComponentTest < ViewComponent::TestCase
       filter: "",
       selected_index: 0
     )
-    
+
     render_inline(selected_component)
 
     first_command = page.all(".command-item").first
@@ -133,7 +133,7 @@ class CommandSuggestionsComponentTest < ViewComponent::TestCase
       position: { x: 100, y: 200 },
       filter: ""
     )
-    
+
     render_inline(guest_component)
 
     assert_no_selector "[data-command='clear']"  # Restricted command
@@ -143,14 +143,14 @@ class CommandSuggestionsComponentTest < ViewComponent::TestCase
   test "should show all commands for admin users" do
     admin_user = users(:one)
     admin_user.update!(role: :admin)
-    
+
     admin_component = CommandSuggestionsComponent.new(
       document: @document,
       user: admin_user,
       position: { x: 100, y: 200 },
       filter: ""
     )
-    
+
     render_inline(admin_component)
 
     assert_selector "[data-command='save']"
@@ -170,7 +170,7 @@ class CommandSuggestionsComponentTest < ViewComponent::TestCase
       content: "Sample saved context content",
       user: @user
     )
-    
+
     render_inline(@component)
 
     load_item = page.find("[data-command='load']")
@@ -185,7 +185,7 @@ class CommandSuggestionsComponentTest < ViewComponent::TestCase
       content: "Sample file content",
       user: @user
     )
-    
+
     render_inline(@component)
 
     include_item = page.find("[data-command='include']")
@@ -196,10 +196,10 @@ class CommandSuggestionsComponentTest < ViewComponent::TestCase
   test "should show Claude context status for context commands" do
     # Create Claude context
     @document.claude_contexts.create!(
-      context_data: { "messages" => ["test"] },
+      context_data: { "messages" => [ "test" ] },
       user: @user
     )
-    
+
     render_inline(@component)
 
     compact_item = page.find("[data-command='compact']")
@@ -216,7 +216,7 @@ class CommandSuggestionsComponentTest < ViewComponent::TestCase
     assert_selector ".command-suggestions-dropdown.fade-in"
     assert_selector ".command-list"
     assert_selector ".command-item.interactive"
-    
+
     # Each command should have proper styling
     page.all(".command-item").each do |item|
       assert item.has_css?(".command-name")
@@ -232,7 +232,7 @@ class CommandSuggestionsComponentTest < ViewComponent::TestCase
       position: { x: 100, y: 200 },
       filter: "xyz"
     )
-    
+
     render_inline(no_match_component)
 
     assert_text "No commands found"
@@ -274,7 +274,7 @@ class CommandSuggestionsComponentTest < ViewComponent::TestCase
       position: { x: 1200, y: 200 },
       filter: ""
     )
-    
+
     render_inline(edge_component)
 
     dropdown = page.find(".command-suggestions-dropdown")
@@ -291,7 +291,7 @@ class CommandSuggestionsComponentTest < ViewComponent::TestCase
       filter: "",
       mobile: true
     )
-    
+
     render_inline(mobile_component)
 
     assert_selector ".command-suggestions-dropdown.mobile"
@@ -308,7 +308,7 @@ class CommandSuggestionsComponentTest < ViewComponent::TestCase
       filter: "",
       limit: 3
     )
-    
+
     render_inline(limited_component)
 
     commands = page.all(".command-item")
@@ -337,7 +337,7 @@ class CommandSuggestionsComponentTest < ViewComponent::TestCase
 
     # Should have announcement region
     assert_selector ".sr-only[aria-live='polite']"
-    
+
     # Commands should have proper descriptions
     commands = page.all(".command-item")
     commands.each do |command|
@@ -354,7 +354,7 @@ class CommandSuggestionsComponentTest < ViewComponent::TestCase
       position: { x: 100, y: 200 },
       filter: ""
     )
-    
+
     render_inline(nil_doc_component)
 
     assert_text "No document context"
@@ -364,7 +364,7 @@ class CommandSuggestionsComponentTest < ViewComponent::TestCase
   test "should handle permission errors gracefully" do
     # Mock permission check to fail
     Pundit.stubs(:policy).raises(Pundit::NotAuthorizedError)
-    
+
     render_inline(@component)
 
     assert_text "Access denied"
@@ -377,10 +377,10 @@ class CommandSuggestionsComponentTest < ViewComponent::TestCase
 
     dropdown = page.find(".command-suggestions-dropdown")
     assert dropdown["data-controller"].include?("command-suggestions")
-    
+
     # Should have targets defined
     assert dropdown["data-command-suggestions-target"] == "dropdown"
-    
+
     # Should have action handlers
     commands = page.all(".command-item")
     commands.each do |command|

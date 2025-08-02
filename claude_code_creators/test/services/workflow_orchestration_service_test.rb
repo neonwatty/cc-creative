@@ -22,7 +22,7 @@ class WorkflowOrchestrationServiceTest < ActiveSupport::TestCase
       estimated_hours: 8,
       assigned_to: @other_user.id,
       due_date: 1.week.from_now,
-      tags: ["authentication", "security"],
+      tags: [ "authentication", "security" ],
       acceptance_criteria: [
         "User can log in with email/password",
         "User can log out",
@@ -48,14 +48,14 @@ class WorkflowOrchestrationServiceTest < ActiveSupport::TestCase
     task_data = {
       title: "Complex feature implementation",
       description: "Requires multiple developers",
-      assigned_to: [@user.id, @other_user.id],
+      assigned_to: [ @user.id, @other_user.id ],
       collaboration_type: "paired_programming"
     }
 
     result = @service.create_task(@document.id, @admin_user.id, task_data)
 
     assert result[:success]
-    
+
     task = @service.get_task(result[:task_id])
     assert_includes task[:assigned_users], @user.id
     assert_includes task[:assigned_users], @other_user.id
@@ -101,7 +101,7 @@ class WorkflowOrchestrationServiceTest < ActiveSupport::TestCase
     # Create dependent task
     dependent_task = @service.create_task(@document.id, @user.id, {
       title: "Implement data models",
-      depends_on: [prereq_task[:task_id]],
+      depends_on: [ prereq_task[:task_id] ],
       priority: "medium"
     })
 
@@ -134,9 +134,9 @@ class WorkflowOrchestrationServiceTest < ActiveSupport::TestCase
       task_result[:task_id],
       @user.id,
       {
-        reviewers: [@other_user.id, @admin_user.id],
+        reviewers: [ @other_user.id, @admin_user.id ],
         review_type: "feature_review",
-        files_changed: ["app/models/user.rb", "app/controllers/sessions_controller.rb"],
+        files_changed: [ "app/models/user.rb", "app/controllers/sessions_controller.rb" ],
         description: "Implemented user authentication feature"
       }
     )
@@ -156,7 +156,7 @@ class WorkflowOrchestrationServiceTest < ActiveSupport::TestCase
     # Set up review
     task_result = @service.create_task(@document.id, @user.id, { title: "Test task" })
     review_result = @service.initiate_code_review(task_result[:task_id], @user.id, {
-      reviewers: [@other_user.id]
+      reviewers: [ @other_user.id ]
     })
 
     # Submit review feedback
@@ -195,7 +195,7 @@ class WorkflowOrchestrationServiceTest < ActiveSupport::TestCase
     })
 
     review_result = @service.initiate_code_review(task_result[:task_id], @user.id, {
-      reviewers: [@other_user.id, @admin_user.id]
+      reviewers: [ @other_user.id, @admin_user.id ]
     })
 
     # First reviewer approves
@@ -249,7 +249,7 @@ class WorkflowOrchestrationServiceTest < ActiveSupport::TestCase
       message: "Add user authentication migration",
       author: @user.email_address,
       timestamp: Time.current.iso8601,
-      files_changed: ["db/migrate/20250802_add_auth.rb"]
+      files_changed: [ "db/migrate/20250802_add_auth.rb" ]
     }
 
     track_result = @service.track_git_commit(task_result[:task_id], commit_data)
@@ -270,7 +270,7 @@ class WorkflowOrchestrationServiceTest < ActiveSupport::TestCase
 
     # Simulate merge conflict
     conflict_data = {
-      conflicting_files: ["app/models/user.rb", "config/routes.rb"],
+      conflicting_files: [ "app/models/user.rb", "config/routes.rb" ],
       base_branch: "main",
       conflict_markers: true,
       auto_resolvable: false
@@ -351,7 +351,7 @@ class WorkflowOrchestrationServiceTest < ActiveSupport::TestCase
     channel_result = @service.create_communication_channel(@document.id, @admin_user.id, {
       name: "Development Coordination",
       type: "team_chat",
-      participants: [@user.id, @other_user.id, @admin_user.id],
+      participants: [ @user.id, @other_user.id, @admin_user.id ],
       purpose: "Coordinate development tasks and share updates"
     })
 
@@ -424,13 +424,13 @@ class WorkflowOrchestrationServiceTest < ActiveSupport::TestCase
 
   test "generates productivity reports" do
     # Set up test data with various task statuses
-    statuses = ["completed", "in_progress", "blocked", "pending"]
+    statuses = [ "completed", "in_progress", "blocked", "pending" ]
     statuses.each_with_index do |status, index|
       task = @service.create_task(@document.id, @admin_user.id, {
         title: "Task with #{status} status",
         assigned_to: @user.id
       })
-      
+
       @service.update_task_status(task[:task_id], @user.id, { status: status })
     end
 
@@ -458,7 +458,7 @@ class WorkflowOrchestrationServiceTest < ActiveSupport::TestCase
         { field: "category", operator: "equals", value: "feature" }
       ],
       actions: [
-        { type: "create_review_request", reviewers: [@admin_user.id] },
+        { type: "create_review_request", reviewers: [ @admin_user.id ] },
         { type: "notify_stakeholders" },
         { type: "update_milestone_progress" }
       ]
@@ -524,11 +524,11 @@ class WorkflowOrchestrationServiceTest < ActiveSupport::TestCase
   test "handles circular task dependencies" do
     # Create three tasks with circular dependencies
     task_a = @service.create_task(@document.id, @user.id, { title: "Task A" })
-    task_b = @service.create_task(@document.id, @user.id, { title: "Task B", depends_on: [task_a[:task_id]] })
-    
+    task_b = @service.create_task(@document.id, @user.id, { title: "Task B", depends_on: [ task_a[:task_id] ] })
+
     # Try to make task_a depend on task_b (creating circular dependency)
     result = @service.update_task_dependencies(task_a[:task_id], {
-      depends_on: [task_b[:task_id]]
+      depends_on: [ task_b[:task_id] ]
     })
 
     assert_not result[:success]

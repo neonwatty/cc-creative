@@ -68,13 +68,13 @@ class PluginTest < ActiveSupport::TestCase
   end
 
   test "should validate version format" do
-    valid_versions = ["1.0.0", "2.1.3", "0.1.0-beta"]
+    valid_versions = [ "1.0.0", "2.1.3", "0.1.0-beta" ]
     valid_versions.each do |version|
       @plugin.version = version
       assert @plugin.valid?, "#{version} should be a valid version"
     end
 
-    invalid_versions = ["1.0", "v1.0.0", "1.0.0.0", "invalid"]
+    invalid_versions = [ "1.0", "v1.0.0", "1.0.0.0", "invalid" ]
     invalid_versions.each do |version|
       @plugin.version = version
       assert_not @plugin.valid?, "#{version} should be invalid"

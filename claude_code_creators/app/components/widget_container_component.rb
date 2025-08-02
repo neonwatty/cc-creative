@@ -19,8 +19,8 @@ class WidgetContainerComponent < ViewComponent::Base
 
   private
 
-  attr_reader :document_id, :user_id, :options, :layout_mode, :enable_docking, 
-              :show_guidelines, :auto_save, :max_widgets, :enable_resize, 
+  attr_reader :document_id, :user_id, :options, :layout_mode, :enable_docking,
+              :show_guidelines, :auto_save, :max_widgets, :enable_resize,
               :enable_snap, :snap_grid
 
   def container_class
@@ -39,11 +39,11 @@ class WidgetContainerComponent < ViewComponent::Base
     # Layout mode variants
     case layout_mode
     when "column"
-      base_classes += ["flex", "flex-col", "space-y-4", "p-4"]
+      base_classes += [ "flex", "flex-col", "space-y-4", "p-4" ]
     when "row"
-      base_classes += ["flex", "flex-row", "space-x-4", "p-4", "overflow-x-auto"]
+      base_classes += [ "flex", "flex-row", "space-x-4", "p-4", "overflow-x-auto" ]
     else # grid
-      base_classes += ["relative"]
+      base_classes += [ "relative" ]
     end
 
     base_classes.join(" ")
@@ -101,15 +101,15 @@ class WidgetContainerComponent < ViewComponent::Base
     # Zone-specific positioning with enhanced visual feedback
     case zone
     when "left"
-      base_classes += ["left-2", "top-1/4", "bottom-1/4", "w-20"]
+      base_classes += [ "left-2", "top-1/4", "bottom-1/4", "w-20" ]
     when "right"
-      base_classes += ["right-2", "top-1/4", "bottom-1/4", "w-20"]
+      base_classes += [ "right-2", "top-1/4", "bottom-1/4", "w-20" ]
     when "top"
-      base_classes += ["top-2", "left-1/4", "right-1/4", "h-20"]
+      base_classes += [ "top-2", "left-1/4", "right-1/4", "h-20" ]
     when "bottom"
-      base_classes += ["bottom-2", "left-1/4", "right-1/4", "h-20"]
+      base_classes += [ "bottom-2", "left-1/4", "right-1/4", "h-20" ]
     when "center"
-      base_classes += ["top-1/2", "left-1/2", "transform", "-translate-x-1/2", "-translate-y-1/2", "w-40", "h-40"]
+      base_classes += [ "top-1/2", "left-1/2", "transform", "-translate-x-1/2", "-translate-y-1/2", "w-40", "h-40" ]
     end
 
     base_classes.join(" ")
@@ -263,7 +263,7 @@ class WidgetContainerComponent < ViewComponent::Base
       {
         type: "notes",
         name: "Notes",
-        icon: "📝", 
+        icon: "📝",
         description: "Editable notes widget"
       },
       {

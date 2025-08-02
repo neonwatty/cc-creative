@@ -49,12 +49,12 @@ class ExtensionLog < ApplicationRecord
   def self.performance_metrics(plugin_id, days: 30)
     logs = where(plugin_id: plugin_id)
            .where("created_at >= ?", days.days.ago)
-    
+
     total_count = logs.count
     success_count = logs.successful.count
     error_count = logs.errors.count
     avg_execution_time = logs.where.not(execution_time: nil).average(:execution_time)
-    
+
     {
       total_executions: total_count,
       success_rate: total_count > 0 ? (success_count.to_f / total_count * 100).round(2) : 0,
@@ -68,10 +68,10 @@ class ExtensionLog < ApplicationRecord
     logs = where(plugin_id: plugin_id)
            .where("created_at >= ?", days.days.ago)
            .where.not(resource_usage: nil)
-    
+
     memory_usage = logs.map { |log| log.resource_usage&.dig("memory_used") }.compact
     cpu_usage = logs.map { |log| log.resource_usage&.dig("cpu_time") }.compact
-    
+
     {
       memory_trend: {
         average: memory_usage.any? ? (memory_usage.sum.to_f / memory_usage.size).round(2) : 0,
@@ -91,7 +91,7 @@ class ExtensionLog < ApplicationRecord
 
   def validate_resource_usage_structure
     return unless resource_usage.present?
-    
+
     unless resource_usage.is_a?(Hash)
       errors.add(:resource_usage, "must be a valid JSON object")
     end

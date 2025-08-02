@@ -17,9 +17,9 @@ class CreateCommandAuditLogs < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :command_audit_logs, [:user_id, :executed_at]
-    add_index :command_audit_logs, [:document_id, :executed_at]
-    add_index :command_audit_logs, [:command, :status]
+    add_index :command_audit_logs, [ :user_id, :executed_at ]
+    add_index :command_audit_logs, [ :document_id, :executed_at ]
+    add_index :command_audit_logs, [ :command, :status ]
     add_index :command_audit_logs, :session_id
   end
 end

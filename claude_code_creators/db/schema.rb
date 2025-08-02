@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_02_205920) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_02_240000) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.string "name", null: false
     t.text "body"
@@ -49,6 +49,22 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_02_205920) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "business_event_logs", force: :cascade do |t|
+    t.string "event_name", null: false
+    t.json "event_data"
+    t.string "environment", null: false
+    t.string "request_id"
+    t.datetime "occurred_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["environment", "occurred_at"], name: "index_business_event_logs_on_environment_and_occurred_at"
+    t.index ["environment"], name: "index_business_event_logs_on_environment"
+    t.index ["event_name", "environment", "occurred_at"], name: "idx_business_event_logs_name_env_occurred"
+    t.index ["event_name", "occurred_at"], name: "index_business_event_logs_on_event_name_and_occurred_at"
+    t.index ["event_name"], name: "index_business_event_logs_on_event_name"
+    t.index ["occurred_at"], name: "index_business_event_logs_on_occurred_at"
+  end
+
   create_table "claude_contexts", force: :cascade do |t|
     t.string "session_id"
     t.string "context_type"
@@ -60,9 +76,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_02_205920) do
     t.integer "user_id"
     t.text "context_data"
     t.index ["context_type"], name: "index_claude_contexts_on_context_type"
+    t.index ["document_id", "context_type", "created_at"], name: "idx_claude_contexts_doc_type_created"
     t.index ["document_id", "user_id"], name: "index_claude_contexts_on_document_id_and_user_id"
     t.index ["document_id"], name: "index_claude_contexts_on_document_id"
     t.index ["session_id", "context_type"], name: "index_claude_contexts_on_session_id_and_context_type"
+    t.index ["session_id", "created_at"], name: "idx_claude_contexts_session_created"
     t.index ["session_id"], name: "index_claude_contexts_on_session_id"
     t.index ["user_id", "created_at"], name: "index_claude_contexts_on_user_id_and_created_at"
     t.index ["user_id"], name: "index_claude_contexts_on_user_id"
@@ -103,7 +121,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_02_205920) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "document_id"
+    t.index ["cloud_integration_id", "last_synced_at"], name: "idx_cloud_files_integration_synced"
     t.index ["cloud_integration_id"], name: "index_cloud_files_on_cloud_integration_id"
+    t.index ["document_id", "provider"], name: "idx_cloud_files_doc_provider"
     t.index ["document_id"], name: "index_cloud_files_on_document_id"
   end
 
@@ -116,6 +136,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_02_205920) do
     t.text "settings"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["user_id", "provider"], name: "idx_cloud_integrations_user_provider"
     t.index ["user_id"], name: "index_cloud_integrations_on_user_id"
   end
 
@@ -131,10 +152,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_02_205920) do
     t.datetime "expires_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["document_id", "status", "started_at"], name: "idx_collaboration_sessions_doc_status_started"
     t.index ["document_id", "status"], name: "index_collaboration_sessions_on_document_id_and_status"
     t.index ["document_id"], name: "index_collaboration_sessions_on_document_id"
+    t.index ["expires_at", "status"], name: "idx_collaboration_sessions_expires_status"
     t.index ["session_id"], name: "index_collaboration_sessions_on_session_id", unique: true
     t.index ["started_at"], name: "index_collaboration_sessions_on_started_at"
+    t.index ["user_id", "status"], name: "idx_collaboration_sessions_user_status"
     t.index ["user_id"], name: "index_collaboration_sessions_on_user_id"
   end
 
@@ -173,10 +197,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_02_205920) do
     t.text "error_message"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["command", "executed_at"], name: "idx_command_histories_command_executed"
     t.index ["command", "status"], name: "index_command_histories_on_command_and_status"
     t.index ["document_id", "executed_at"], name: "index_command_histories_on_document_id_and_executed_at"
+    t.index ["document_id", "status", "executed_at"], name: "idx_command_histories_doc_status_executed"
     t.index ["document_id"], name: "index_command_histories_on_document_id"
     t.index ["user_id", "executed_at"], name: "index_command_histories_on_user_id_and_executed_at"
+    t.index ["user_id", "status", "executed_at"], name: "idx_command_histories_user_status_executed"
     t.index ["user_id"], name: "index_command_histories_on_user_id"
   end
 
@@ -192,11 +219,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_02_205920) do
     t.integer "position"
     t.text "search_content"
     t.index ["created_at"], name: "index_context_items_on_created_at"
+    t.index ["document_id", "created_at"], name: "idx_context_items_doc_created"
     t.index ["document_id", "item_type", "position"], name: "index_context_items_on_document_id_and_item_type_and_position"
+    t.index ["document_id", "position", "created_at"], name: "idx_context_items_doc_pos_created"
     t.index ["document_id", "user_id"], name: "index_context_items_on_document_id_and_user_id"
     t.index ["document_id"], name: "index_context_items_on_document_id"
+    t.index ["item_type", "created_at"], name: "idx_context_items_type_created"
     t.index ["item_type"], name: "index_context_items_on_item_type"
     t.index ["search_content"], name: "index_context_items_on_search_content"
+    t.index ["user_id", "created_at"], name: "idx_context_items_user_created"
     t.index ["user_id"], name: "index_context_items_on_user_id"
   end
 
@@ -232,8 +263,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_02_205920) do
     t.integer "word_count", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["created_by_user_id", "created_at"], name: "idx_document_versions_user_created"
     t.index ["created_by_user_id"], name: "index_document_versions_on_created_by_user_id"
     t.index ["document_id", "created_at"], name: "index_document_versions_on_document_id_and_created_at"
+    t.index ["document_id", "is_auto_version", "created_at"], name: "idx_document_versions_doc_auto_created"
     t.index ["document_id", "version_number"], name: "index_document_versions_on_document_id_and_version_number", unique: true
     t.index ["document_id"], name: "index_document_versions_on_document_id"
     t.index ["is_auto_version"], name: "index_document_versions_on_is_auto_version"
@@ -247,9 +280,32 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_02_205920) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "current_version_number", default: 0
+    t.index ["created_at", "user_id"], name: "idx_documents_created_user"
     t.index ["created_at"], name: "index_documents_on_created_at"
+    t.index ["current_version_number"], name: "idx_documents_version"
     t.index ["current_version_number"], name: "index_documents_on_current_version_number"
+    t.index ["user_id", "updated_at"], name: "idx_documents_user_updated"
     t.index ["user_id"], name: "index_documents_on_user_id"
+  end
+
+  create_table "error_logs", force: :cascade do |t|
+    t.string "error_class", null: false
+    t.text "message", null: false
+    t.text "backtrace"
+    t.json "context"
+    t.string "environment", null: false
+    t.string "request_id"
+    t.datetime "occurred_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["environment", "occurred_at"], name: "idx_error_logs_env_occurred"
+    t.index ["environment", "occurred_at"], name: "index_error_logs_on_environment_and_occurred_at"
+    t.index ["environment"], name: "index_error_logs_on_environment"
+    t.index ["error_class", "environment", "occurred_at"], name: "idx_error_logs_class_env_occurred"
+    t.index ["error_class", "occurred_at"], name: "index_error_logs_on_error_class_and_occurred_at"
+    t.index ["error_class"], name: "index_error_logs_on_error_class"
+    t.index ["occurred_at"], name: "index_error_logs_on_occurred_at"
+    t.index ["request_id"], name: "index_error_logs_on_request_id"
   end
 
   create_table "extension_logs", force: :cascade do |t|
@@ -262,7 +318,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_02_205920) do
     t.json "resource_usage"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["plugin_id", "status", "created_at"], name: "idx_extension_logs_plugin_status_created"
     t.index ["plugin_id"], name: "index_extension_logs_on_plugin_id"
+    t.index ["user_id", "action", "created_at"], name: "idx_extension_logs_user_action_created"
     t.index ["user_id"], name: "index_extension_logs_on_user_id"
   end
 
@@ -295,10 +353,33 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_02_205920) do
     t.datetime "updated_at", null: false
     t.index ["document_id", "status"], name: "index_operational_transforms_on_document_id_and_status"
     t.index ["document_id", "timestamp"], name: "index_operational_transforms_on_document_id_and_timestamp"
+    t.index ["document_id", "user_id", "timestamp"], name: "idx_operational_transforms_doc_user_time"
     t.index ["document_id"], name: "index_operational_transforms_on_document_id"
     t.index ["operation_id"], name: "index_operational_transforms_on_operation_id", unique: true
+    t.index ["operation_type", "timestamp"], name: "idx_operational_transforms_type_time"
+    t.index ["status", "timestamp"], name: "idx_operational_transforms_status_time"
     t.index ["user_id", "timestamp"], name: "index_operational_transforms_on_user_id_and_timestamp"
     t.index ["user_id"], name: "index_operational_transforms_on_user_id"
+  end
+
+  create_table "performance_logs", force: :cascade do |t|
+    t.string "operation", null: false
+    t.float "duration_ms", null: false
+    t.json "metadata"
+    t.string "environment", null: false
+    t.string "request_id"
+    t.datetime "occurred_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["duration_ms", "occurred_at"], name: "index_performance_logs_on_duration_ms_and_occurred_at"
+    t.index ["duration_ms", "operation"], name: "idx_performance_logs_duration_op"
+    t.index ["duration_ms"], name: "index_performance_logs_on_duration_ms"
+    t.index ["environment", "duration_ms"], name: "idx_performance_logs_env_duration"
+    t.index ["environment"], name: "index_performance_logs_on_environment"
+    t.index ["occurred_at"], name: "index_performance_logs_on_occurred_at"
+    t.index ["operation", "environment", "occurred_at"], name: "idx_performance_logs_op_env_occurred"
+    t.index ["operation", "occurred_at"], name: "index_performance_logs_on_operation_and_occurred_at"
+    t.index ["operation"], name: "index_performance_logs_on_operation"
   end
 
   create_table "plugin_installations", force: :cascade do |t|
@@ -310,7 +391,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_02_205920) do
     t.datetime "last_used_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["plugin_id", "status"], name: "idx_plugin_installations_plugin_status"
     t.index ["plugin_id"], name: "index_plugin_installations_on_plugin_id"
+    t.index ["user_id", "status", "last_used_at"], name: "idx_plugin_installations_user_status_used"
     t.index ["user_id"], name: "index_plugin_installations_on_user_id"
   end
 
@@ -348,6 +431,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_02_205920) do
     t.string "user_agent"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["user_id", "created_at"], name: "idx_sessions_user_created"
     t.index ["user_id"], name: "index_sessions_on_user_id"
   end
 
@@ -374,13 +458,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_02_205920) do
     t.datetime "updated_at", null: false
     t.json "context", default: {}
     t.text "system_prompt"
+    t.index ["agent_type", "status"], name: "idx_sub_agents_type_status"
     t.index ["agent_type"], name: "index_sub_agents_on_agent_type"
     t.index ["created_at"], name: "index_sub_agents_on_created_at"
     t.index ["document_id", "agent_type"], name: "index_sub_agents_on_document_id_and_agent_type"
+    t.index ["document_id", "status", "created_at"], name: "idx_sub_agents_doc_status_created"
     t.index ["document_id", "user_id"], name: "index_sub_agents_on_document_id_and_user_id"
     t.index ["document_id"], name: "index_sub_agents_on_document_id"
     t.index ["external_id"], name: "index_sub_agents_on_external_id"
     t.index ["status"], name: "index_sub_agents_on_status"
+    t.index ["user_id", "status"], name: "idx_sub_agents_user_status"
     t.index ["user_id"], name: "index_sub_agents_on_user_id"
   end
 
@@ -394,6 +481,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_02_205920) do
     t.boolean "email_confirmed", default: false, null: false
     t.datetime "email_confirmed_at"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
+    t.index ["email_confirmed", "created_at"], name: "idx_users_confirmed_created"
+    t.index ["role", "created_at"], name: "idx_users_role_created"
   end
 
   create_table "workflow_tasks", force: :cascade do |t|

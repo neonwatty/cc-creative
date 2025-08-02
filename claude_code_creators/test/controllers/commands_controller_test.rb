@@ -17,7 +17,7 @@ class CommandsControllerTest < ActionDispatch::IntegrationTest
       session = @user.sessions.create!(user_agent: "test", ip_address: "127.0.0.1")
       cookies.signed[:session_id] = session.id
     end
-    
+
     post document_commands_path(document), params: {
       command: command,
       parameters: parameters,
@@ -30,7 +30,7 @@ class CommandsControllerTest < ActionDispatch::IntegrationTest
     sign_out
     post document_commands_path(@document), params: {
       command: "save",
-      parameters: ["test"]
+      parameters: [ "test" ]
     }
     assert_response :unauthorized
   end
@@ -38,10 +38,10 @@ class CommandsControllerTest < ActionDispatch::IntegrationTest
   test "should reject commands from unauthorized users" do
     sign_out
     sign_in_as(@other_user)
-    
+
     post document_commands_path(@document), params: {
-      command: "save", 
-      parameters: ["test"]
+      command: "save",
+      parameters: [ "test" ]
     }
     assert_response :forbidden
   end
@@ -50,9 +50,9 @@ class CommandsControllerTest < ActionDispatch::IntegrationTest
   test "should execute save command successfully" do
     post document_commands_path(@document), params: {
       command: "save",
-      parameters: ["my_context"]
+      parameters: [ "my_context" ]
     }
-    
+
     assert_response :success
     response_data = JSON.parse(response.body)
     assert_equal "success", response_data["status"]
@@ -68,12 +68,12 @@ class CommandsControllerTest < ActionDispatch::IntegrationTest
       item_type: "saved_context",
       user: @user
     )
-    
+
     post document_commands_path(@document), params: {
       command: "load",
-      parameters: ["test_context"]
+      parameters: [ "test_context" ]
     }
-    
+
     assert_response :success
     response_data = JSON.parse(response.body)
     assert_equal "success", response_data["status"]
@@ -84,24 +84,24 @@ class CommandsControllerTest < ActionDispatch::IntegrationTest
   test "should execute compact command successfully" do
     # Create some Claude context to compact
     @document.claude_contexts.create!(
-      context_data: { "messages" => ["msg1", "msg2", "msg3"] },
+      context_data: { "messages" => [ "msg1", "msg2", "msg3" ] },
       user: @user,
       context_type: "document"
     )
-    
+
     # Mock Claude API response
-    claude_service = mock('claude_service')
+    claude_service = mock("claude_service")
     claude_service.stubs(:compact_context).returns({
-      compacted_messages: [{ "role" => "system", "content" => "Compacted" }],
+      compacted_messages: [ { "role" => "system", "content" => "Compacted" } ],
       compression_ratio: 0.33
     })
     ClaudeService.stubs(:new).returns(claude_service)
-    
+
     post document_commands_path(@document), params: {
       command: "compact",
       parameters: []
     }
-    
+
     assert_response :success
     response_data = JSON.parse(response.body)
     assert_equal "success", response_data["status"]
@@ -111,9 +111,9 @@ class CommandsControllerTest < ActionDispatch::IntegrationTest
   test "should execute clear command successfully" do
     post document_commands_path(@document), params: {
       command: "clear",
-      parameters: ["context"]
+      parameters: [ "context" ]
     }
-    
+
     assert_response :success
     response_data = JSON.parse(response.body)
     assert_equal "success", response_data["status"]
@@ -128,12 +128,12 @@ class CommandsControllerTest < ActionDispatch::IntegrationTest
       item_type: "file",
       user: @user
     )
-    
+
     post document_commands_path(@document), params: {
       command: "include",
-      parameters: ["include_test.txt"]
+      parameters: [ "include_test.txt" ]
     }
-    
+
     assert_response :success
     response_data = JSON.parse(response.body)
     assert_equal "success", response_data["status"]
@@ -143,10 +143,10 @@ class CommandsControllerTest < ActionDispatch::IntegrationTest
   test "should execute snippet command successfully" do
     post document_commands_path(@document), params: {
       command: "snippet",
-      parameters: ["test_snippet"],
+      parameters: [ "test_snippet" ],
       selected_content: "def test_function\n  return true\nend"
     }
-    
+
     assert_response :success
     response_data = JSON.parse(response.body)
     assert_equal "success", response_data["status"]
@@ -159,7 +159,7 @@ class CommandsControllerTest < ActionDispatch::IntegrationTest
       command: "load",
       parameters: []  # Missing required parameter
     }
-    
+
     assert_response :unprocessable_entity
     response_data = JSON.parse(response.body)
     assert_equal "error", response_data["status"]
@@ -167,10 +167,10 @@ class CommandsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should validate parameter types" do
-    post document_commands_path(@document), 
-         params: { command: "save", parameters: [123] }.to_json,
+    post document_commands_path(@document),
+         params: { command: "save", parameters: [ 123 ] }.to_json,
          headers: { "Content-Type" => "application/json" }
-    
+
     assert_response :unprocessable_entity
     response_data = JSON.parse(response.body)
     assert_equal "error", response_data["status"]
@@ -180,9 +180,9 @@ class CommandsControllerTest < ActionDispatch::IntegrationTest
   test "should validate parameter count" do
     post document_commands_path(@document), params: {
       command: "clear",
-      parameters: ["context", "document", "extra"]  # Too many
+      parameters: [ "context", "document", "extra" ]  # Too many
     }
-    
+
     assert_response :unprocessable_entity
     response_data = JSON.parse(response.body)
     assert_equal "error", response_data["status"]
@@ -195,7 +195,7 @@ class CommandsControllerTest < ActionDispatch::IntegrationTest
       command: "unknown_command",
       parameters: []
     }
-    
+
     assert_response :unprocessable_entity
     response_data = JSON.parse(response.body)
     assert_equal "error", response_data["status"]
@@ -206,12 +206,12 @@ class CommandsControllerTest < ActionDispatch::IntegrationTest
   test "should handle service errors gracefully" do
     # Mock service to raise an error
     CommandExecutionService.any_instance.stubs(:execute).raises(StandardError, "Service error")
-    
+
     post document_commands_path(@document), params: {
       command: "save",
-      parameters: ["test"]
+      parameters: [ "test" ]
     }
-    
+
     assert_response :internal_server_error
     response_data = JSON.parse(response.body)
     assert_equal "error", response_data["status"]
@@ -222,12 +222,12 @@ class CommandsControllerTest < ActionDispatch::IntegrationTest
   test "should handle timeout errors" do
     # Mock service to timeout
     CommandExecutionService.any_instance.stubs(:execute).raises(Timeout::Error)
-    
+
     post document_commands_path(@document), params: {
       command: "compact",
       parameters: []
     }
-    
+
     assert_response :request_timeout
     response_data = JSON.parse(response.body)
     assert_equal "error", response_data["status"]
@@ -237,21 +237,21 @@ class CommandsControllerTest < ActionDispatch::IntegrationTest
   test "should handle Claude API errors" do
     # Create Claude context first
     @document.claude_contexts.create!(
-      context_data: { "messages" => ["test"] },
+      context_data: { "messages" => [ "test" ] },
       user: @user,
       context_type: "document"
     )
-    
+
     # Mock Claude service to fail
-    claude_service = mock('claude_service')
+    claude_service = mock("claude_service")
     claude_service.stubs(:compact_context).raises(ClaudeService::APIError, "API Error")
     ClaudeService.stubs(:new).returns(claude_service)
-    
+
     post document_commands_path(@document), params: {
       command: "compact",
       parameters: []
     }
-    
+
     assert_response :service_unavailable
     response_data = JSON.parse(response.body)
     assert_equal "error", response_data["status"]
@@ -262,19 +262,19 @@ class CommandsControllerTest < ActionDispatch::IntegrationTest
   test "should return consistent response format for success" do
     post document_commands_path(@document), params: {
       command: "save",
-      parameters: ["test"]
+      parameters: [ "test" ]
     }
-    
+
     assert_response :success
     response_data = JSON.parse(response.body)
-    
+
     # Required fields
     assert response_data.key?("status")
     assert response_data.key?("command")
     assert response_data.key?("result")
     assert response_data.key?("execution_time")
     assert response_data.key?("timestamp")
-    
+
     # Status should be success
     assert_equal "success", response_data["status"]
   end
@@ -284,16 +284,16 @@ class CommandsControllerTest < ActionDispatch::IntegrationTest
       command: "unknown",
       parameters: []
     }
-    
+
     assert_response :unprocessable_entity
     response_data = JSON.parse(response.body)
-    
+
     # Required fields
     assert response_data.key?("status")
     assert response_data.key?("error")
     assert response_data.key?("command")
     assert response_data.key?("timestamp")
-    
+
     # Status should be error
     assert_equal "error", response_data["status"]
   end
@@ -301,15 +301,15 @@ class CommandsControllerTest < ActionDispatch::IntegrationTest
   # Performance Tests
   test "should execute commands within time limit" do
     start_time = Time.current
-    
+
     post document_commands_path(@document), params: {
       command: "save",
-      parameters: ["performance_test"]
+      parameters: [ "performance_test" ]
     }
-    
+
     end_time = Time.current
     execution_time = end_time - start_time
-    
+
     assert_response :success
     assert execution_time < 0.1  # Should complete in under 100ms
   end
@@ -317,17 +317,17 @@ class CommandsControllerTest < ActionDispatch::IntegrationTest
   test "should handle concurrent requests" do
     threads = []
     results = []
-    
+
     5.times do |i|
       threads << Thread.new do
         post document_commands_path(@document), params: {
           command: "save",
-          parameters: ["concurrent_#{i}"]
+          parameters: [ "concurrent_#{i}" ]
         }
         results << response.status
       end
     end
-    
+
     threads.each(&:join)
     assert results.all? { |status| status == 200 }
   end
@@ -338,16 +338,16 @@ class CommandsControllerTest < ActionDispatch::IntegrationTest
     10.times do
       post document_commands_path(@document), params: {
         command: "save",
-        parameters: ["rate_limit_test"]
+        parameters: [ "rate_limit_test" ]
       }
     end
-    
+
     # 11th request should hit rate limit
     post document_commands_path(@document), params: {
       command: "save",
-      parameters: ["rate_limit_test"]
+      parameters: [ "rate_limit_test" ]
     }
-    
+
     assert_response :too_many_requests
     response_data = JSON.parse(response.body)
     assert_match /Rate limit/, response_data["error"]
@@ -355,19 +355,19 @@ class CommandsControllerTest < ActionDispatch::IntegrationTest
 
   # Content Type Tests
   test "should accept JSON content type" do
-    post document_commands_path(@document), 
-         params: { command: "save", parameters: ["json_test"] }.to_json,
+    post document_commands_path(@document),
+         params: { command: "save", parameters: [ "json_test" ] }.to_json,
          headers: { "Content-Type" => "application/json" }
-    
+
     assert_response :success
   end
 
   test "should accept form data content type" do
     post document_commands_path(@document), params: {
       command: "save",
-      parameters: ["form_test"]
+      parameters: [ "form_test" ]
     }
-    
+
     assert_response :success
   end
 
@@ -375,12 +375,12 @@ class CommandsControllerTest < ActionDispatch::IntegrationTest
   test "should validate CSRF token for non-API requests" do
     # Remove CSRF token
     ActionController::Base.any_instance.stubs(:verified_request?).returns(false)
-    
+
     post document_commands_path(@document), params: {
       command: "save",
-      parameters: ["csrf_test"]
+      parameters: [ "csrf_test" ]
     }
-    
+
     assert_response :forbidden
   end
 
@@ -388,11 +388,11 @@ class CommandsControllerTest < ActionDispatch::IntegrationTest
   test "should log command execution history" do
     post document_commands_path(@document), params: {
       command: "save",
-      parameters: ["history_test"]
+      parameters: [ "history_test" ]
     }
-    
+
     assert_response :success
-    
+
     # Should create command history record
     history = CommandHistory.last
     assert_equal "save", history.command
@@ -403,12 +403,12 @@ class CommandsControllerTest < ActionDispatch::IntegrationTest
   # Document State Tests
   test "should update document state after command execution" do
     original_updated_at = @document.updated_at
-    
+
     post document_commands_path(@document), params: {
       command: "save",
-      parameters: ["state_test"]
+      parameters: [ "state_test" ]
     }
-    
+
     assert_response :success
     @document.reload
     assert @document.updated_at > original_updated_at

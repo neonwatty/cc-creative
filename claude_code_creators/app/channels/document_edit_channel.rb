@@ -5,21 +5,32 @@ class DocumentEditChannel < ApplicationCable::Channel
     @document = find_document
     return reject unless @document && authorized_for_document?(@document)
 
+    # Performance optimization: batch operations
+    @user_id = current_user.id
+    @document_id = @document.id
+    
     stream_for @document
 
-    # Add user to document editing session
-    add_user_to_editing_session(@document)
+    # Batch Redis operations for performance
+    Redis.current.pipelined do |redis|
+      # Add user to document editing session
+      add_user_to_editing_session_batched(@document, redis)
+      
+      # Update presence data
+      update_editing_presence_batched(@document, "editing", redis)
+    end
 
-    # Broadcast user joined editing
-    broadcast_editing_event("user_joined_editing", {
-      user: serialize_user(current_user),
-      timestamp: Time.current.iso8601
-    })
+    # Broadcast user joined editing (async to reduce latency)
+    ActionCable.server.broadcast(
+      "document_edit_#{@document_id}",
+      {
+        type: "user_joined_editing",
+        user: serialize_user_minimal(current_user),
+        timestamp: Time.current.to_f  # Use float for better performance
+      }
+    )
 
-    # Update user presence for editing activity
-    update_editing_presence(@document, "editing")
-
-    logger.info "User #{current_user.id} subscribed to DocumentEditChannel for document #{@document.id}"
+    logger.info "User #{@user_id} subscribed to DocumentEditChannel for document #{@document_id}"
   end
 
   def unsubscribed
@@ -40,17 +51,24 @@ class DocumentEditChannel < ApplicationCable::Channel
     logger.info "User #{current_user.id} unsubscribed from DocumentEditChannel for document #{@document.id}"
   end
 
-  # Real-time Editing Operations
+  # Real-time Editing Operations with optimizations
   def edit_operation(data = {})
     return unless @document && authorized_for_document?(@document)
 
+    # Performance: early validation before expensive operations
+    return transmit_error("Invalid operation data") unless data.is_a?(Hash)
+    
     begin
       operation = prepare_operation(data)
       validate_operation!(operation)
 
-      # Process operation through OperationalTransformService
-      service = OperationalTransformService.new
-      result = service.apply_and_broadcast_operation(@document, operation)
+      # Performance optimization: use cached service instance
+      service = operational_transform_service
+      
+      # Process operation with performance monitoring
+      result = measure_operation_performance("edit_operation") do
+        service.apply_and_broadcast_operation(@document, operation)
+      end
 
       case result[:status]
       when "success"
@@ -133,23 +151,34 @@ class DocumentEditChannel < ApplicationCable::Channel
     end
   end
 
-  # Batch Operations
+  # Optimized Batch Operations
   def batch_operations(data = {})
     return unless @document && authorized_for_document?(@document)
 
     operations = data["operations"] || []
-    return transmit({ type: "error", error: "No operations provided" }) if operations.empty?
+    return transmit_error("No operations provided") if operations.empty?
+    return transmit_error("Too many operations") if operations.size > 50  # Limit batch size
 
     begin
-      # Prepare all operations
-      prepared_operations = operations.map { |op| prepare_operation(op) }
+      # Performance: validate batch size before processing
+      total_content_size = operations.sum { |op| (op["content"] || "").length }
+      return transmit_error("Batch content too large") if total_content_size > 10_000
 
-      # Validate all operations
-      prepared_operations.each { |op| validate_operation!(op) }
+      # Prepare all operations with early exit on errors
+      prepared_operations = []
+      operations.each_with_index do |op, index|
+        prepared_op = prepare_operation(op)
+        validate_operation!(prepared_op)
+        prepared_operations << prepared_op
+      rescue => e
+        return transmit_error("Operation #{index} invalid: #{e.message}")
+      end
 
-      # Process batch through OperationalTransformService
-      service = OperationalTransformService.new
-      result = service.apply_operations_batch(@document, prepared_operations)
+      # Process batch with performance monitoring
+      service = operational_transform_service
+      result = measure_operation_performance("batch_operations") do
+        service.apply_operations_batch(@document, prepared_operations)
+      end
 
       case result[:status]
       when "batch_success"
@@ -431,17 +460,76 @@ class DocumentEditChannel < ApplicationCable::Channel
     end
   end
 
-  # User Session Management
-  def add_user_to_editing_session(document)
+  # Performance helper methods
+  def operational_transform_service
+    @operational_transform_service ||= OperationalTransformService.new
+  end
+
+  def measure_operation_performance(operation_name)
+    start_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    result = yield
+    duration_ms = ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - start_time) * 1000).round(2)
+    
+    # Log slow operations
+    if duration_ms > 50  # Log operations slower than 50ms
+      Rails.logger.warn "[SLOW_CABLE_OP] #{operation_name}: #{duration_ms}ms for document #{@document_id}"
+    end
+    
+    # Track performance metrics
+    if defined?(PerformanceLog) && duration_ms > 10
+      PerformanceLog.create!(
+        operation: "cable_#{operation_name}",
+        duration_ms: duration_ms,
+        occurred_at: Time.current,
+        environment: Rails.env,
+        metadata: { 
+          document_id: @document_id, 
+          user_id: @user_id,
+          channel: "DocumentEditChannel"
+        }
+      )
+    end
+    
+    result
+  end
+
+  def transmit_error(message)
+    transmit({
+      type: "error",
+      error: message,
+      timestamp: Time.current.to_f
+    })
+  end
+
+  def serialize_user_minimal(user)
+    {
+      id: user.id,
+      name: user.name
+    }
+  end
+
+  # Optimized User Session Management
+  def add_user_to_editing_session_batched(document, redis = nil)
     editing_key = "document_#{document.id}_editing_users"
-    users = Rails.cache.read(editing_key) || {}
-    users[current_user.id] = {
+    user_data = {
       id: current_user.id,
       name: current_user.name,
-      joined_at: Time.current.iso8601,
-      last_activity: Time.current.iso8601
+      joined_at: Time.current.to_f,
+      last_activity: Time.current.to_f
     }
-    Rails.cache.write(editing_key, users, expires_in: 1.hour)
+    
+    if redis
+      redis.hset(editing_key, current_user.id, user_data.to_json)
+      redis.expire(editing_key, 3600)  # 1 hour
+    else
+      users = Rails.cache.read(editing_key) || {}
+      users[current_user.id] = user_data
+      Rails.cache.write(editing_key, users, expires_in: 1.hour)
+    end
+  end
+
+  def add_user_to_editing_session(document)
+    add_user_to_editing_session_batched(document)
   end
 
   def remove_user_from_editing_session(document)
@@ -463,14 +551,36 @@ class DocumentEditChannel < ApplicationCable::Channel
     update_editing_presence(document, "editing")
   end
 
-  def update_editing_presence(document, activity)
-    PresenceChannel.broadcast_to(document, {
-      type: "user_editing",
+  def update_editing_presence_batched(document, activity, redis = nil)
+    presence_key = "document_#{document.id}_presence_#{current_user.id}"
+    presence_data = {
       user_id: current_user.id,
       user_name: current_user.name,
       activity: activity,
-      timestamp: Time.current.iso8601
-    })
+      timestamp: Time.current.to_f
+    }
+    
+    if redis
+      redis.setex(presence_key, 600, presence_data.to_json)  # 10 minutes
+    else
+      Rails.cache.write(presence_key, presence_data, expires_in: 10.minutes)
+    end
+  end
+
+  def update_editing_presence(document, activity)
+    update_editing_presence_batched(document, activity)
+    
+    # Broadcast presence update asynchronously
+    ActionCable.server.broadcast(
+      "presence_#{document.id}",
+      {
+        type: "user_editing",
+        user_id: current_user.id,
+        user_name: current_user.name,
+        activity: activity,
+        timestamp: Time.current.to_f
+      }
+    )
   end
 
   # Cursor Management

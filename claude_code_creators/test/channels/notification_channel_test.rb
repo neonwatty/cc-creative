@@ -7,7 +7,7 @@ class NotificationChannelTest < ActionCable::Channel::TestCase
     @user = users(:one)
     @other_user = users(:two)
     @document = documents(:one)
-    
+
     # Set up authentication
     stub_connection current_user: @user
   end
@@ -188,7 +188,7 @@ class NotificationChannelTest < ActionCable::Channel::TestCase
         id: @document.id,
         title: @document.title
       },
-      permissions: ["read", "comment"],
+      permissions: [ "read", "comment" ],
       action_url: "/documents/#{@document.id}"
     }
 
@@ -260,7 +260,7 @@ class NotificationChannelTest < ActionCable::Channel::TestCase
       timestamp: Time.current.iso8601,
       conflict_details: {
         resolution_strategy: "timestamp_priority",
-        conflicting_users: [@user.id, @other_user.id],
+        conflicting_users: [ @user.id, @other_user.id ],
         affected_sections: [
           { start: 100, end: 150, type: "overlapping_edit" }
         ]
@@ -319,7 +319,7 @@ class NotificationChannelTest < ActionCable::Channel::TestCase
 
   # Notification Filtering Tests
   test "filters notifications by severity" do
-    subscribe user_id: @user.id, severity_filter: ["error", "warning"]
+    subscribe user_id: @user.id, severity_filter: [ "error", "warning" ]
 
     # Send info notification (should be filtered out)
     info_notification = {
@@ -344,7 +344,7 @@ class NotificationChannelTest < ActionCable::Channel::TestCase
   end
 
   test "filters notifications by type" do
-    subscribe user_id: @user.id, type_filter: ["collaboration_invitation", "user_mention"]
+    subscribe user_id: @user.id, type_filter: [ "collaboration_invitation", "user_mention" ]
 
     # Send allowed notification type
     allowed_notification = {
@@ -476,7 +476,7 @@ class NotificationChannelTest < ActionCable::Channel::TestCase
         severity: "info",
         timestamp: Time.current.iso8601
       }
-      
+
       perform :send_notification, notification
     end
 
@@ -497,7 +497,7 @@ class NotificationChannelTest < ActionCable::Channel::TestCase
         timestamp: Time.current.iso8601
       },
       {
-        type: "collaboration_update", 
+        type: "collaboration_update",
         message: "User B left",
         timestamp: (Time.current + 1.second).iso8601
       },

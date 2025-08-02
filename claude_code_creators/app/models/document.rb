@@ -16,13 +16,28 @@ class Document < ApplicationRecord
   validates :title, presence: true, length: { maximum: 255 }
   validates :description, length: { maximum: 1000 }
 
-  # Scopes for common queries
+  # Optimized scopes for common queries
   scope :recent, -> { order(created_at: :desc) }
   scope :by_user, ->(user) { where(user: user) }
   scope :with_tag, ->(tag) { where("tags LIKE ?", "%#{tag}%") }
+  scope :active_in_period, ->(period) { where("updated_at > ?", period.ago) }
+  scope :with_content, -> { joins(:rich_text_content) }
+  scope :popular, -> { left_joins(:context_items).group(:id).order("COUNT(context_items.id) DESC") }
+  
+  # Performance-optimized scopes
+  scope :recent_with_minimal_data, -> { select(:id, :title, :user_id, :created_at, :updated_at).recent }
+  scope :user_documents_summary, ->(user) {
+    by_user(user)
+      .select(:id, :title, :description, :created_at, :updated_at, :current_version_number)
+      .includes(:user)
+  }
 
   # Ensure tags is always an array
   before_save :ensure_tags_array
+  
+  # Cache invalidation callbacks
+  after_update :invalidate_content_caches
+  after_destroy :invalidate_content_caches
 
   # Helper methods for tags
   def add_tag(tag)
@@ -44,10 +59,11 @@ class Document < ApplicationRecord
     self.tags = tag_string.split(",").map(&:strip).reject(&:blank?).uniq
   end
 
-  # Content manipulation methods
+  # Content manipulation methods with caching
   def word_count
-    # Count words in rich text content
-    content.to_plain_text.split(/\s+/).size
+    Rails.cache.fetch("document_#{id}_word_count", expires_in: 1.hour) do
+      content&.to_plain_text&.split(/\s+/)&.size || 0
+    end
   end
 
   def reading_time
@@ -57,7 +73,21 @@ class Document < ApplicationRecord
 
   def excerpt(length = 150)
     return "" if content.blank?
-    content.to_plain_text.truncate(length, separator: " ")
+    
+    Rails.cache.fetch("document_#{id}_excerpt_#{length}", expires_in: 1.hour) do
+      content.to_plain_text.truncate(length, separator: " ")
+    end
+  end
+  
+  # Optimized content retrieval
+  def content_plain_text
+    @content_plain_text ||= content&.to_plain_text || ""
+  end
+
+  def content_for_search
+    Rails.cache.fetch("document_#{id}_search_content", expires_in: 2.hours) do
+      [title, description, content_plain_text].compact.join(" ").strip
+    end
   end
 
   # Duplicate document for a user
@@ -130,9 +160,45 @@ class Document < ApplicationRecord
     }
   end
 
+  # Content statistics for caching
+  def content_statistics
+    {
+      word_count: word_count,
+      reading_time: reading_time,
+      character_count: content_plain_text.length,
+      paragraph_count: content_plain_text.split(/\n\s*\n/).count,
+      last_modified: updated_at
+    }
+  end
+
+  # Collaboration summary for caching
+  def collaboration_summary
+    # Placeholder for collaboration data
+    # TODO: Implement when collaboration sessions are added
+    {
+      active_collaborators: 0,
+      recent_changes: 0,
+      last_collaboration: nil
+    }
+  end
+
   private
 
   def ensure_tags_array
     self.tags ||= []
+  end
+  
+  def invalidate_content_caches
+    cache_keys = [
+      "document_#{id}_word_count",
+      "document_#{id}_search_content"
+    ]
+    
+    # Invalidate excerpt caches for common lengths
+    [100, 150, 200, 300].each do |length|
+      cache_keys << "document_#{id}_excerpt_#{length}"
+    end
+    
+    cache_keys.each { |key| Rails.cache.delete(key) }
   end
 end

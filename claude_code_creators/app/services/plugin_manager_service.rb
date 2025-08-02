@@ -1,49 +1,79 @@
 class PluginManagerService
   attr_reader :user
 
+  # Performance optimizations
+  CACHE_TTL = 5.minutes
+  PERFORMANCE_THRESHOLD_MS = 100
+  
   def initialize(user)
     @user = user
+    @installed_plugins_cache = nil
+    @plugin_cache = {}
   end
 
-  # Plugin Discovery
+  # Plugin Discovery with caching
   def discover_plugins(category: nil, search: nil)
-    plugins = Plugin.active
-    plugins = plugins.by_category(category) if category.present?
-    plugins = plugins.search(search) if search.present?
-    plugins
+    cache_key = "plugins_discovery_#{category}_#{search}_#{user.id}"
+    
+    Rails.cache.fetch(cache_key, expires_in: CACHE_TTL) do
+      plugins = Plugin.active.includes(:plugin_installations)
+      plugins = plugins.by_category(category) if category.present?
+      plugins = plugins.search(search) if search.present?
+      
+      # Add installation status for performance
+      plugins.map do |plugin|
+        plugin_hash = plugin.attributes
+        plugin_hash['installed_for_user'] = plugin.installed_for?(user)
+        plugin_hash['installation_status'] = installation_status_cached(plugin.id)
+        plugin_hash
+      end
+    end
   end
 
   def search_plugins(query)
-    Plugin.active.search(query)
+    return [] if query.blank?
+    
+    cache_key = "plugins_search_#{Digest::MD5.hexdigest(query)}_#{user.id}"
+    
+    Rails.cache.fetch(cache_key, expires_in: CACHE_TTL) do
+      Plugin.active.search(query).includes(:plugin_installations).limit(20)
+    end
   end
 
-  # Plugin Installation
+  # Plugin Installation with performance monitoring
   def install_plugin(plugin_id)
-    plugin = Plugin.find(plugin_id)
+    measure_plugin_operation("install_plugin", plugin_id) do
+      plugin = find_plugin_cached(plugin_id)
 
-    return error_result("Plugin not found") unless plugin
-    return error_result("Plugin is not active") unless plugin.status == "active"
-    return error_result("Plugin already installed") if plugin.installed_for?(user)
-    return error_result("Plugin is not compatible with current platform") unless compatible_plugin?(plugin)
+      return error_result("Plugin not found") unless plugin
+      return error_result("Plugin is not active") unless plugin.status == "active"
+      return error_result("Plugin already installed") if plugin_installed_cached?(plugin_id)
+      return error_result("Plugin is not compatible with current platform") unless compatible_plugin_cached?(plugin)
 
-    unless resolve_dependencies(plugin)
-      return error_result("Failed to resolve plugin dependencies")
-    end
+      unless resolve_dependencies_cached(plugin)
+        return error_result("Failed to resolve plugin dependencies")
+      end
 
-    begin
-      installation = PluginInstallation.create!(
-        user: user,
-        plugin: plugin,
-        status: "installed",
-        configuration: {},
-        installed_at: Time.current
-      )
+      begin
+        ActiveRecord::Base.transaction do
+          installation = PluginInstallation.create!(
+            user: user,
+            plugin: plugin,
+            status: "installed",
+            configuration: {},
+            installed_at: Time.current
+          )
 
-      log_plugin_activity(plugin, "installation", "success")
-      success_result("Plugin installed successfully", { installation: installation })
-    rescue StandardError => e
-      log_plugin_activity(plugin, "installation", "error", e.message)
-      error_result("Installation failed: #{e.message}")
+          # Invalidate caches
+          invalidate_plugin_caches(plugin_id)
+          
+          log_plugin_activity_async(plugin, "installation", "success")
+          success_result("Plugin installed successfully", { installation: installation })
+        end
+      rescue StandardError => e
+        log_plugin_activity_async(plugin, "installation", "error", e.message)
+        error_result("Installation failed: #{e.message}")
+      end
     end
   end
 
@@ -119,15 +149,26 @@ class PluginManagerService
     end
   end
 
-  # Plugin Information
+  # Plugin Information with caching
   def installed_plugins
-    PluginInstallation.for_user(user).includes(:plugin)
+    @installed_plugins_cache ||= Rails.cache.fetch("installed_plugins_#{user.id}", expires_in: CACHE_TTL) do
+      PluginInstallation.for_user(user).includes(:plugin).to_a
+    end
+  end
+
+  def installation_status_cached(plugin_id)
+    cache_key = "installation_status_#{plugin_id}_#{user.id}"
+    
+    Rails.cache.fetch(cache_key, expires_in: CACHE_TTL) do
+      installation_status(plugin_id)
+    end
   end
 
   def installation_status(plugin_id)
-    plugin = Plugin.find(plugin_id)
+    plugin = find_plugin_cached(plugin_id)
+    return "not_found" unless plugin
+    
     installation = plugin.installation_for(user)
-
     return "not_installed" unless installation
     installation.status
   end
@@ -336,5 +377,95 @@ class PluginManagerService
 
       executeCommand();
     JS
+  end
+
+  # Performance optimization helper methods
+  def find_plugin_cached(plugin_id)
+    @plugin_cache[plugin_id] ||= Rails.cache.fetch("plugin_#{plugin_id}", expires_in: CACHE_TTL) do
+      Plugin.find_by(id: plugin_id)
+    end
+  end
+
+  def plugin_installed_cached?(plugin_id)
+    cache_key = "plugin_installed_#{plugin_id}_#{user.id}"
+    
+    Rails.cache.fetch(cache_key, expires_in: CACHE_TTL) do
+      plugin = find_plugin_cached(plugin_id)
+      plugin&.installed_for?(user) || false
+    end
+  end
+
+  def compatible_plugin_cached?(plugin)
+    cache_key = "plugin_compatible_#{plugin.id}_#{Rails.env}"
+    
+    Rails.cache.fetch(cache_key, expires_in: 1.hour) do
+      compatible_plugin?(plugin)
+    end
+  end
+
+  def resolve_dependencies_cached(plugin)
+    cache_key = "plugin_dependencies_#{plugin.id}_#{plugin.updated_at.to_i}"
+    
+    Rails.cache.fetch(cache_key, expires_in: 1.hour) do
+      resolve_dependencies(plugin)
+    end
+  end
+
+  def measure_plugin_operation(operation_name, plugin_id = nil)
+    start_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    result = yield
+    duration_ms = ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - start_time) * 1000).round(2)
+    
+    # Log slow operations
+    if duration_ms > PERFORMANCE_THRESHOLD_MS
+      Rails.logger.warn "[SLOW_PLUGIN_OP] #{operation_name} (plugin_id: #{plugin_id}): #{duration_ms}ms"
+      
+      # Track performance metrics
+      if defined?(PerformanceLog)
+        PerformanceLog.create!(
+          operation: "plugin_#{operation_name}",
+          duration_ms: duration_ms,
+          occurred_at: Time.current,
+          environment: Rails.env,
+          metadata: { 
+            plugin_id: plugin_id, 
+            user_id: user.id,
+            service: "PluginManagerService"
+          }
+        )
+      end
+    end
+    
+    result
+  end
+
+  def log_plugin_activity_async(plugin, action, status, error_message = nil, execution_time = nil, resource_usage = nil)
+    # Use background job for logging to avoid blocking the main thread
+    PluginActivityLogJob.perform_later(
+      plugin.id,
+      user.id,
+      action,
+      status,
+      error_message,
+      execution_time,
+      resource_usage
+    )
+  rescue => e
+    # Fallback to synchronous logging if job queue fails
+    Rails.logger.error "Failed to queue plugin activity log job: #{e.message}"
+    log_plugin_activity(plugin, action, status, error_message, execution_time, resource_usage)
+  end
+
+  def invalidate_plugin_caches(plugin_id)
+    cache_keys = [
+      "plugin_#{plugin_id}",
+      "plugin_installed_#{plugin_id}_#{user.id}",
+      "installation_status_#{plugin_id}_#{user.id}",
+      "installed_plugins_#{user.id}"
+    ]
+    
+    cache_keys.each { |key| Rails.cache.delete(key) }
+    @installed_plugins_cache = nil
+    @plugin_cache.delete(plugin_id)
   end
 end

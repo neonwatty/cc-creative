@@ -357,7 +357,7 @@ class OperationalTransformServiceTest < ActiveSupport::TestCase
         type: "insert",
         position: i % 20,
         content: i.to_s,
-        user_id: [@user.id, @other_user.id].sample,
+        user_id: [ @user.id, @other_user.id ].sample,
         timestamp: Time.current.to_f + (i * 0.01)
       }
     end

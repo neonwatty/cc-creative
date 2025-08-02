@@ -12,7 +12,7 @@ class PluginManagerServiceTest < ActiveSupport::TestCase
       status: "active",
       metadata: {
         "entry_point" => "index.js",
-        "dependencies" => ["lodash@4.17.21"],
+        "dependencies" => [ "lodash@4.17.21" ],
         "min_version" => "1.0.0",
         "max_version" => "2.0.0"
       },
@@ -37,7 +37,7 @@ class PluginManagerServiceTest < ActiveSupport::TestCase
     command_plugin = Plugin.create!(
       @plugin.attributes.merge(name: "command-plugin", category: "command")
     )
-    
+
     editor_plugins = @service.discover_plugins(category: "editor")
     command_plugins = @service.discover_plugins(category: "command")
 
@@ -65,10 +65,10 @@ class PluginManagerServiceTest < ActiveSupport::TestCase
 
   test "should install plugin successfully" do
     result = @service.install_plugin(@plugin.id)
-    
+
     assert result[:success]
     assert_equal "Plugin installed successfully", result[:message]
-    
+
     installation = PluginInstallation.find_by(user: @user, plugin: @plugin)
     assert_not_nil installation
     assert_equal "installed", installation.status
@@ -77,9 +77,9 @@ class PluginManagerServiceTest < ActiveSupport::TestCase
 
   test "should not install already installed plugin" do
     PluginInstallation.create!(user: @user, plugin: @plugin, status: "installed")
-    
+
     result = @service.install_plugin(@plugin.id)
-    
+
     assert_not result[:success]
     assert_includes result[:error], "already installed"
   end
@@ -91,9 +91,9 @@ class PluginManagerServiceTest < ActiveSupport::TestCase
         metadata: { "min_version" => "99.0.0" }
       )
     )
-    
+
     result = @service.install_plugin(incompatible_plugin.id)
-    
+
     assert_not result[:success]
     assert_includes result[:error], "not compatible"
   end
@@ -102,38 +102,38 @@ class PluginManagerServiceTest < ActiveSupport::TestCase
     plugin_with_deps = Plugin.create!(
       @plugin.attributes.merge(
         name: "deps-plugin",
-        metadata: { "dependencies" => ["nonexistent-package@1.0.0"] }
+        metadata: { "dependencies" => [ "nonexistent-package@1.0.0" ] }
       )
     )
-    
+
     # Mock dependency resolution failure
     @service.stubs(:resolve_dependencies).returns(false)
-    
+
     result = @service.install_plugin(plugin_with_deps.id)
-    
+
     assert_not result[:success]
     assert_includes result[:error], "dependencies"
   end
 
   test "should uninstall plugin successfully" do
     installation = PluginInstallation.create!(
-      user: @user, 
-      plugin: @plugin, 
+      user: @user,
+      plugin: @plugin,
       status: "installed"
     )
-    
+
     result = @service.uninstall_plugin(@plugin.id)
-    
+
     assert result[:success]
     assert_equal "Plugin uninstalled successfully", result[:message]
-    
+
     installation.reload
     assert_equal "uninstalled", installation.status
   end
 
   test "should not uninstall non-installed plugin" do
     result = @service.uninstall_plugin(@plugin.id)
-    
+
     assert_not result[:success]
     assert_includes result[:error], "not installed"
   end
@@ -144,9 +144,9 @@ class PluginManagerServiceTest < ActiveSupport::TestCase
       plugin: @plugin,
       status: "disabled"
     )
-    
+
     result = @service.enable_plugin(@plugin.id)
-    
+
     assert result[:success]
     installation.reload
     assert_equal "installed", installation.status
@@ -158,9 +158,9 @@ class PluginManagerServiceTest < ActiveSupport::TestCase
       plugin: @plugin,
       status: "installed"
     )
-    
+
     result = @service.disable_plugin(@plugin.id)
-    
+
     assert result[:success]
     installation.reload
     assert_equal "disabled", installation.status
@@ -173,10 +173,10 @@ class PluginManagerServiceTest < ActiveSupport::TestCase
       status: "installed",
       configuration: { "theme" => "light" }
     )
-    
+
     new_config = { "theme" => "dark", "notifications" => true }
     result = @service.configure_plugin(@plugin.id, new_config)
-    
+
     assert result[:success]
     installation.reload
     assert_equal "dark", installation.configuration["theme"]
@@ -189,19 +189,19 @@ class PluginManagerServiceTest < ActiveSupport::TestCase
       plugin: @plugin,
       status: "installed"
     )
-    
+
     installed_plugins = @service.installed_plugins
-    
+
     assert_includes installed_plugins, installation
     assert installed_plugins.all? { |i| i.user == @user }
   end
 
   test "should get plugin installation status" do
     assert_equal "not_installed", @service.installation_status(@plugin.id)
-    
+
     PluginInstallation.create!(user: @user, plugin: @plugin, status: "installed")
     assert_equal "installed", @service.installation_status(@plugin.id)
-    
+
     PluginInstallation.last.update!(status: "disabled")
     assert_equal "disabled", @service.installation_status(@plugin.id)
   end
@@ -213,14 +213,14 @@ class PluginManagerServiceTest < ActiveSupport::TestCase
         metadata: { "min_version" => "1.0.0", "max_version" => "2.0.0" }
       )
     )
-    
+
     incompatible_plugin = Plugin.create!(
       @plugin.attributes.merge(
-        name: "incompatible-plugin", 
+        name: "incompatible-plugin",
         metadata: { "min_version" => "99.0.0" }
       )
     )
-    
+
     assert @service.compatible_plugin?(compatible_plugin)
     assert_not @service.compatible_plugin?(incompatible_plugin)
   end
@@ -229,20 +229,20 @@ class PluginManagerServiceTest < ActiveSupport::TestCase
     plugin_with_deps = Plugin.create!(
       @plugin.attributes.merge(
         name: "deps-plugin",
-        metadata: { "dependencies" => ["lodash@4.17.21", "axios@0.24.0"] }
+        metadata: { "dependencies" => [ "lodash@4.17.21", "axios@0.24.0" ] }
       )
     )
-    
+
     # Mock successful dependency resolution
     @service.stubs(:dependency_available?).returns(true)
-    
+
     assert @service.resolve_dependencies(plugin_with_deps)
   end
 
   test "should validate plugin sandbox configuration" do
     valid_config = { "memory_limit" => 100, "cpu_limit" => 50, "timeout" => 30 }
     invalid_config = { "memory_limit" => "unlimited" }
-    
+
     assert @service.valid_sandbox_config?(valid_config)
     assert_not @service.valid_sandbox_config?(invalid_config)
   end
@@ -253,13 +253,13 @@ class PluginManagerServiceTest < ActiveSupport::TestCase
       plugin: @plugin,
       status: "installed"
     )
-    
+
     new_version = Plugin.create!(
       @plugin.attributes.merge(name: "test-plugin", version: "2.0.0")
     )
-    
+
     result = @service.update_plugin(@plugin.id, new_version.id)
-    
+
     assert result[:success]
     installation.reload
     assert_equal new_version, installation.plugin
@@ -271,12 +271,12 @@ class PluginManagerServiceTest < ActiveSupport::TestCase
       plugin: @plugin,
       status: "installed"
     )
-    
+
     # Simulate plugin execution error
     result = @service.handle_plugin_error(@plugin.id, "Runtime error: undefined method")
-    
+
     assert result[:logged]
-    
+
     log = ExtensionLog.find_by(plugin: @plugin, user: @user)
     assert_not_nil log
     assert_equal "error", log.status
@@ -289,12 +289,12 @@ class PluginManagerServiceTest < ActiveSupport::TestCase
       plugin: @plugin,
       status: "installed"
     )
-    
+
     @service.track_plugin_usage(@plugin.id, { action: "command_executed" })
-    
+
     installation.reload
     assert_not_nil installation.last_used_at
-    
+
     log = ExtensionLog.find_by(plugin: @plugin, user: @user, action: "command_executed")
     assert_not_nil log
   end
@@ -305,7 +305,7 @@ class PluginManagerServiceTest < ActiveSupport::TestCase
       plugin: @plugin,
       status: "installed"
     )
-    
+
     # Create some logs to test health
     ExtensionLog.create!(
       plugin: @plugin,
@@ -314,9 +314,9 @@ class PluginManagerServiceTest < ActiveSupport::TestCase
       status: "success",
       execution_time: 100
     )
-    
+
     health = @service.plugin_health(@plugin.id)
-    
+
     assert_includes health.keys, :status
     assert_includes health.keys, :success_rate
     assert_includes health.keys, :average_execution_time
@@ -331,16 +331,16 @@ class PluginManagerServiceTest < ActiveSupport::TestCase
       plugin_id: deleted_plugin_id,
       status: "installed"
     )
-    
+
     @service.cleanup_orphaned_installations
-    
+
     assert_not PluginInstallation.exists?(installation.id)
   end
 
   test "should validate plugin permissions" do
     valid_permissions = { "read_files" => true, "write_files" => false, "network_access" => true }
     invalid_permissions = { "invalid_permission" => true }
-    
+
     assert @service.valid_permissions?(valid_permissions)
     assert_not @service.valid_permissions?(invalid_permissions)
   end

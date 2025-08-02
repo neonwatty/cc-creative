@@ -16,9 +16,9 @@ class CreateOperationalTransforms < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    add_index :operational_transforms, [:document_id, :timestamp]
-    add_index :operational_transforms, [:user_id, :timestamp]
+    add_index :operational_transforms, [ :document_id, :timestamp ]
+    add_index :operational_transforms, [ :user_id, :timestamp ]
     add_index :operational_transforms, :operation_id, unique: true
-    add_index :operational_transforms, [:document_id, :status]
+    add_index :operational_transforms, [ :document_id, :status ]
   end
 end

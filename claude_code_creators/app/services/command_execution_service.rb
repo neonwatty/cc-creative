@@ -358,8 +358,8 @@ class CommandExecutionService
     begin
       claude_service = ClaudeService.new
       suggestion_result = claude_service.generate_code_suggestions(
-        content_to_analyze, 
-        type: suggestion_type, 
+        content_to_analyze,
+        type: suggestion_type,
         context: context
       )
 
@@ -400,8 +400,8 @@ class CommandExecutionService
     begin
       claude_service = ClaudeService.new
       critique_result = claude_service.provide_code_critique(
-        content_to_critique, 
-        aspect: aspect, 
+        content_to_critique,
+        aspect: aspect,
         level: level
       )
 

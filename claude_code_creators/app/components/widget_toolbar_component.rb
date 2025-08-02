@@ -87,17 +87,17 @@ class WidgetToolbarComponent < ViewComponent::Base
         "cursor-move"
       ]
     else
-      base_classes += ["relative", "rounded-lg"]
+      base_classes += [ "relative", "rounded-lg" ]
     end
 
     # Size variants
     case size
     when "small"
-      base_classes += ["p-2"]
+      base_classes += [ "p-2" ]
     when "large"
-      base_classes += ["p-4"]
+      base_classes += [ "p-4" ]
     else
-      base_classes += ["p-3"]
+      base_classes += [ "p-3" ]
     end
 
     # Style variants
@@ -141,9 +141,9 @@ class WidgetToolbarComponent < ViewComponent::Base
     ]
 
     if position == "left" || position == "right"
-      base_classes += ["flex-col", "space-y-2"]
+      base_classes += [ "flex-col", "space-y-2" ]
     else
-      base_classes += ["space-x-2"]
+      base_classes += [ "space-x-2" ]
     end
 
     if enable_grouping
@@ -181,18 +181,18 @@ class WidgetToolbarComponent < ViewComponent::Base
     # Size variants
     case size
     when "small"
-      base_classes += ["w-8", "h-8", "text-sm"]
+      base_classes += [ "w-8", "h-8", "text-sm" ]
     when "large"
-      base_classes += ["w-12", "h-12", "text-base"]
+      base_classes += [ "w-12", "h-12", "text-base" ]
     else
-      base_classes += ["w-10", "h-10", "text-sm"]
+      base_classes += [ "w-10", "h-10", "text-sm" ]
     end
 
     # Label padding
     if show_labels && (position == "top" || position == "bottom")
-      base_classes += ["px-3", "space-x-2", "w-auto"]
+      base_classes += [ "px-3", "space-x-2", "w-auto" ]
     else
-      base_classes += ["rounded-lg"]
+      base_classes += [ "rounded-lg" ]
     end
 
     # Style variants
@@ -419,9 +419,9 @@ class WidgetToolbarComponent < ViewComponent::Base
     ]
 
     if position == "left" || position == "right"
-      base_classes += ["mt-2"]
+      base_classes += [ "mt-2" ]
     else
-      base_classes += ["ml-2"]
+      base_classes += [ "ml-2" ]
     end
 
     base_classes.join(" ")
@@ -575,7 +575,7 @@ class WidgetToolbarComponent < ViewComponent::Base
       },
       {
         id: "column",
-        label: "Column Layout", 
+        label: "Column Layout",
         icon: "columns",
         action: "click->widget-toolbar#setLayoutMode",
         data: { mode: "column" }
@@ -633,12 +633,12 @@ class WidgetToolbarComponent < ViewComponent::Base
 
   def action_groups
     groups = []
-    
+
     groups << { name: "Main", actions: main_actions }
     groups << { name: "Widget", actions: widget_actions }
     groups << { name: "View", actions: view_actions }
     groups << { name: "Settings", actions: settings_actions }
-    
+
     groups
   end
 

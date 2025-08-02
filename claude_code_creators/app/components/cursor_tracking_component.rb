@@ -10,12 +10,12 @@ class CursorTrackingComponent < ViewComponent::Base
     @cursor_timeout = options.fetch(:cursor_timeout, 5000) # ms
     @smooth_movement = options.fetch(:smooth_movement, true)
     @collision_detection = options.fetch(:collision_detection, true)
-    @container_selector = options.fetch(:container_selector, '.editor-content')
+    @container_selector = options.fetch(:container_selector, ".editor-content")
   end
 
   private
 
-  attr_reader :document, :current_user, :cursor_style, :show_labels, :show_trails, 
+  attr_reader :document, :current_user, :cursor_style, :show_labels, :show_trails,
               :cursor_timeout, :smooth_movement, :collision_detection, :container_selector
 
   def container_class
@@ -176,7 +176,7 @@ class CursorTrackingComponent < ViewComponent::Base
   def cursor_colors
     [
       "text-creative-primary-500 bg-creative-primary-500",
-      "text-creative-secondary-500 bg-creative-secondary-500", 
+      "text-creative-secondary-500 bg-creative-secondary-500",
       "text-creative-accent-purple bg-creative-accent-purple",
       "text-creative-accent-amber bg-creative-accent-amber",
       "text-creative-accent-rose bg-creative-accent-rose",

@@ -109,15 +109,15 @@ class ClaudeService
     return { compacted_messages: messages, compression_ratio: 1.0 } if messages.empty?
 
     # Determine compression strategy
-    target_message_count = aggressive ? [messages.length / 4, 2].max : [messages.length / 2, 5].max
-    
+    target_message_count = aggressive ? [ messages.length / 4, 2 ].max : [ messages.length / 2, 5 ].max
+
     # Don't compact if already at target size
     return { compacted_messages: messages, compression_ratio: 1.0 } if messages.length <= target_message_count
 
     begin
       # Create summarization prompt
       conversation_text = messages.map { |msg| "#{msg[:role]}: #{msg[:content]}" }.join("\n\n")
-      
+
       prompt = if aggressive
         "Please provide a very concise summary of this conversation, preserving only the most essential information and key decisions:\n\n#{conversation_text}"
       else
@@ -126,21 +126,21 @@ class ClaudeService
 
       response = @client.messages(
         model: Rails.application.config.anthropic[:model],
-        max_tokens: [Rails.application.config.anthropic[:max_tokens] / 2, 1000].min,
+        max_tokens: [ Rails.application.config.anthropic[:max_tokens] / 2, 1000 ].min,
         temperature: 0.3, # Lower temperature for consistent summarization
         system: "You are an expert at summarizing conversations while preserving important context and details.",
-        messages: [{ role: "user", content: prompt }]
+        messages: [ { role: "user", content: prompt } ]
       )
 
       summary = response.content.first.text
-      
+
       # Create compacted message structure
       compacted_messages = [
         { role: "system", content: "Previous conversation summary: #{summary}" }
       ]
-      
+
       # Keep the last few messages for immediate context
-      recent_messages = messages.last([target_message_count - 1, 2].max)
+      recent_messages = messages.last([ target_message_count - 1, 2 ].max)
       compacted_messages.concat(recent_messages)
 
       compression_ratio = compacted_messages.length.to_f / messages.length
@@ -219,7 +219,7 @@ class ClaudeService
         max_tokens: Rails.application.config.anthropic[:max_tokens],
         temperature: 0.2,
         system: system_prompt,
-        messages: [{ role: "user", content: user_prompt }]
+        messages: [ { role: "user", content: user_prompt } ]
       )
 
       parse_review_response(response.content.first.text)
@@ -240,7 +240,7 @@ class ClaudeService
         max_tokens: Rails.application.config.anthropic[:max_tokens],
         temperature: 0.3,
         system: system_prompt,
-        messages: [{ role: "user", content: user_prompt }]
+        messages: [ { role: "user", content: user_prompt } ]
       )
 
       parse_suggestion_response(response.content.first.text)
@@ -261,7 +261,7 @@ class ClaudeService
         max_tokens: Rails.application.config.anthropic[:max_tokens],
         temperature: 0.2,
         system: system_prompt,
-        messages: [{ role: "user", content: user_prompt }]
+        messages: [ { role: "user", content: user_prompt } ]
       )
 
       parse_critique_response(response.content.first.text)
@@ -275,7 +275,7 @@ class ClaudeService
   # Review system prompts
   def build_review_system_prompt(mode, focus)
     base_prompt = "You are an expert code reviewer with extensive experience in software development best practices."
-    
+
     case mode
     when "quick"
       "#{base_prompt} Provide a quick but thorough code review focusing on the most critical issues."
@@ -299,7 +299,7 @@ class ClaudeService
 
   def build_suggestion_system_prompt(type, context)
     base_prompt = "You are a senior software engineer providing code improvement suggestions."
-    
+
     case type
     when "refactor"
       "#{base_prompt} Focus on refactoring opportunities to improve code structure and maintainability."
@@ -325,7 +325,7 @@ class ClaudeService
 
   def build_critique_system_prompt(aspect, level)
     base_prompt = "You are a software architecture expert providing critical analysis of code design."
-    
+
     case aspect
     when "architecture"
       "#{base_prompt} Focus on overall architecture, design patterns, and structural decisions."
@@ -377,7 +377,7 @@ class ClaudeService
       JSON.parse(json_match[0]).symbolize_keys
     else
       {
-        suggestions: [response_text],
+        suggestions: [ response_text ],
         improvements: [],
         examples: [],
         priority: "medium"
@@ -385,7 +385,7 @@ class ClaudeService
     end
   rescue JSON::ParserError
     {
-      suggestions: [response_text],
+      suggestions: [ response_text ],
       improvements: [],
       examples: [],
       priority: "medium"
@@ -400,7 +400,7 @@ class ClaudeService
       {
         strengths: [],
         weaknesses: [],
-        recommendations: [response_text],
+        recommendations: [ response_text ],
         design_patterns: [],
         best_practices: []
       }
@@ -409,7 +409,7 @@ class ClaudeService
     {
       strengths: [],
       weaknesses: [],
-      recommendations: [response_text],
+      recommendations: [ response_text ],
       design_patterns: [],
       best_practices: []
     }

@@ -21,9 +21,9 @@ class CreateWorkflowTasks < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    add_index :workflow_tasks, [:document_id, :status]
-    add_index :workflow_tasks, [:assigned_to_id, :status]
-    add_index :workflow_tasks, [:created_by_id, :created_at]
+    add_index :workflow_tasks, [ :document_id, :status ]
+    add_index :workflow_tasks, [ :assigned_to_id, :status ]
+    add_index :workflow_tasks, [ :created_by_id, :created_at ]
     add_index :workflow_tasks, :due_date
     add_index :workflow_tasks, :priority
   end

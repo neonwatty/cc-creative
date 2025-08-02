@@ -79,7 +79,7 @@ class AIReviewPanelComponent < ViewComponent::Base
         "resize"
       ]
     else
-      base_classes += ["relative", "rounded-xl"]
+      base_classes += [ "relative", "rounded-xl" ]
     end
 
     # Size variants
@@ -87,20 +87,20 @@ class AIReviewPanelComponent < ViewComponent::Base
     when "small"
       case position
       when "left", "right"
-        base_classes += ["w-80"]
+        base_classes += [ "w-80" ]
       when "bottom"
-        base_classes += ["h-64"]
+        base_classes += [ "h-64" ]
       when "floating"
-        base_classes += ["w-80", "h-80"]
+        base_classes += [ "w-80", "h-80" ]
       end
     when "large"
       case position
       when "left", "right"
-        base_classes += ["w-[28rem]"]
+        base_classes += [ "w-[28rem]" ]
       when "bottom"
-        base_classes += ["h-96"]
+        base_classes += [ "h-96" ]
       when "floating"
-        base_classes += ["w-[32rem]", "h-[32rem]"]
+        base_classes += [ "w-[32rem]", "h-[32rem]" ]
       end
     end
 
@@ -298,13 +298,13 @@ class AIReviewPanelComponent < ViewComponent::Base
     # Add severity-specific styling
     case severity
     when "critical"
-      base_classes += ["border-l-4", "border-red-500"]
+      base_classes += [ "border-l-4", "border-red-500" ]
     when "warning"
-      base_classes += ["border-l-4", "border-creative-accent-amber"]
+      base_classes += [ "border-l-4", "border-creative-accent-amber" ]
     when "info"
-      base_classes += ["border-l-4", "border-creative-primary-500"]
+      base_classes += [ "border-l-4", "border-creative-primary-500" ]
     when "suggestion"
-      base_classes += ["border-l-4", "border-creative-secondary-500"]
+      base_classes += [ "border-l-4", "border-creative-secondary-500" ]
     end
 
     base_classes.join(" ")
@@ -320,13 +320,13 @@ class AIReviewPanelComponent < ViewComponent::Base
 
     case severity
     when "critical"
-      base_classes += ["text-red-500"]
+      base_classes += [ "text-red-500" ]
     when "warning"
-      base_classes += ["text-creative-accent-amber"]
+      base_classes += [ "text-creative-accent-amber" ]
     when "info"
-      base_classes += ["text-creative-primary-500"]
+      base_classes += [ "text-creative-primary-500" ]
     when "suggestion"
-      base_classes += ["text-creative-secondary-500"]
+      base_classes += [ "text-creative-secondary-500" ]
     end
 
     base_classes.join(" ")
@@ -514,7 +514,7 @@ class AIReviewPanelComponent < ViewComponent::Base
         line: 45,
         file: "widget_container.js",
         timestamp: 2.minutes.ago,
-        actions: ["Fix Automatically", "Show Details", "Ignore"]
+        actions: [ "Fix Automatically", "Show Details", "Ignore" ]
       },
       {
         id: 2,
@@ -524,7 +524,7 @@ class AIReviewPanelComponent < ViewComponent::Base
         line: 127,
         file: "widget_container.js",
         timestamp: 5.minutes.ago,
-        actions: ["Apply Fix", "Learn More"]
+        actions: [ "Apply Fix", "Learn More" ]
       },
       {
         id: 3,
@@ -534,7 +534,7 @@ class AIReviewPanelComponent < ViewComponent::Base
         line: 23,
         file: "widget_framework.js",
         timestamp: 8.minutes.ago,
-        actions: ["Fix", "Ignore"]
+        actions: [ "Fix", "Ignore" ]
       },
       {
         id: 4,
@@ -544,7 +544,7 @@ class AIReviewPanelComponent < ViewComponent::Base
         line: nil,
         file: "general",
         timestamp: 10.minutes.ago,
-        actions: ["Implement", "Later"]
+        actions: [ "Implement", "Later" ]
       }
     ]
   end

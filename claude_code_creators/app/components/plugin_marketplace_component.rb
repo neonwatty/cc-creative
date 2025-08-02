@@ -656,7 +656,7 @@ class PluginMarketplaceComponent < ViewComponent::Base
   def sample_categories
     [
       "Development Tools",
-      "AI & Machine Learning", 
+      "AI & Machine Learning",
       "Productivity",
       "Documentation",
       "Testing",
@@ -682,7 +682,7 @@ class PluginMarketplaceComponent < ViewComponent::Base
         downloads: "50k+",
         status: "not_installed",
         featured: true,
-        keywords: ["ai", "completion", "refactoring"]
+        keywords: [ "ai", "completion", "refactoring" ]
       },
       {
         id: 2,
@@ -696,7 +696,7 @@ class PluginMarketplaceComponent < ViewComponent::Base
         downloads: "25k+",
         status: "installed",
         featured: true,
-        keywords: ["database", "sql", "analytics"]
+        keywords: [ "database", "sql", "analytics" ]
       },
       {
         id: 3,
@@ -710,7 +710,7 @@ class PluginMarketplaceComponent < ViewComponent::Base
         downloads: "75k+",
         status: "active",
         featured: true,
-        keywords: ["deployment", "cloud", "devops"]
+        keywords: [ "deployment", "cloud", "devops" ]
       }
     ]
   end
@@ -736,7 +736,7 @@ class PluginMarketplaceComponent < ViewComponent::Base
 
   def get_action_buttons(plugin)
     status = plugin[:status]
-    
+
     case status
     when "not_installed"
       [

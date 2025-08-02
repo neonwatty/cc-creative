@@ -14,8 +14,8 @@ class ContextSynchronizationServiceTest < ActiveSupport::TestCase
   # Context Sharing Tests
   test "shares context with authorized users" do
     sharing_permissions = {
-      users: [@other_user.id],
-      permissions: ["read", "comment"],
+      users: [ @other_user.id ],
+      permissions: [ "read", "comment" ],
       expires_at: 1.week.from_now
     }
 
@@ -37,12 +37,12 @@ class ContextSynchronizationServiceTest < ActiveSupport::TestCase
       document: @document,
       user: @other_user,
       content: "Private context",
-      item_type: "note"
+      item_type: "snippet"
     )
 
     sharing_permissions = {
-      users: [@user.id],
-      permissions: ["read"]
+      users: [ @user.id ],
+      permissions: [ "read" ]
     }
 
     result = @service.share_context(unauthorized_context, @user, sharing_permissions)
@@ -53,8 +53,8 @@ class ContextSynchronizationServiceTest < ActiveSupport::TestCase
 
   test "validates sharing permissions" do
     invalid_permissions = {
-      users: [@other_user.id],
-      permissions: ["invalid_permission"]
+      users: [ @other_user.id ],
+      permissions: [ "invalid_permission" ]
     }
 
     result = @service.share_context(@context_item, @user, invalid_permissions)
@@ -162,7 +162,7 @@ class ContextSynchronizationServiceTest < ActiveSupport::TestCase
     })
 
     branch_2 = @service.create_context_branch(@context_item, @other_user, {
-      branch_name: "feature-b", 
+      branch_name: "feature-b",
       description: "Feature B development"
     })
 
@@ -230,7 +230,7 @@ class ContextSynchronizationServiceTest < ActiveSupport::TestCase
 
   test "resolves context merge conflicts automatically" do
     original_content = @context_item.content
-    
+
     # Create conflicting changes
     conflict_data = {
       base_content: original_content,
@@ -266,7 +266,7 @@ class ContextSynchronizationServiceTest < ActiveSupport::TestCase
   test "manages context access permissions" do
     permission_data = {
       user_id: @other_user.id,
-      permissions: ["read", "comment"],
+      permissions: [ "read", "comment" ],
       granted_by: @user.id,
       expires_at: 1.month.from_now
     }
@@ -287,7 +287,7 @@ class ContextSynchronizationServiceTest < ActiveSupport::TestCase
     # Test read permission
     @service.grant_context_permission(@context_item.id, {
       user_id: @other_user.id,
-      permissions: ["read"],
+      permissions: [ "read" ],
       granted_by: @user.id
     })
 
@@ -302,7 +302,7 @@ class ContextSynchronizationServiceTest < ActiveSupport::TestCase
     # Grant permission first
     @service.grant_context_permission(@context_item.id, {
       user_id: @other_user.id,
-      permissions: ["read", "write"],
+      permissions: [ "read", "write" ],
       granted_by: @user.id
     })
 
@@ -322,7 +322,7 @@ class ContextSynchronizationServiceTest < ActiveSupport::TestCase
     # Set up users with access
     @service.grant_context_permission(@context_item.id, {
       user_id: @other_user.id,
-      permissions: ["read"],
+      permissions: [ "read" ],
       granted_by: @user.id
     })
 
@@ -346,8 +346,8 @@ class ContextSynchronizationServiceTest < ActiveSupport::TestCase
     ))
 
     @service.share_context(@context_item, @user, {
-      users: [@other_user.id],
-      permissions: ["read"]
+      users: [ @other_user.id ],
+      permissions: [ "read" ]
     })
   end
 
@@ -358,7 +358,7 @@ class ContextSynchronizationServiceTest < ActiveSupport::TestCase
     # Make several changes
     changes = [
       "First update to context",
-      "Second update to context", 
+      "Second update to context",
       "Third update to context"
     ]
 
@@ -378,7 +378,7 @@ class ContextSynchronizationServiceTest < ActiveSupport::TestCase
 
   test "rolls back context to previous state" do
     original_content = @context_item.content
-    
+
     # Make changes and track
     @context_item.update!(content: "Updated content")
     change_record = @service.track_context_change(@context_item, @user, {
@@ -457,7 +457,7 @@ class ContextSynchronizationServiceTest < ActiveSupport::TestCase
 
     # Create many versions
     start_time = Time.current
-    
+
     10.times do |i|
       @service.create_context_version(@context_item, @user, {
         change_summary: "Large version #{i}"
@@ -467,7 +467,7 @@ class ContextSynchronizationServiceTest < ActiveSupport::TestCase
     processing_time = Time.current - start_time
 
     assert processing_time < 5.0, "Large context processing took too long: #{processing_time}s"
-    
+
     # Verify all versions created
     history = @service.get_context_version_history(@context_item.id)
     assert_equal 10, history[:versions].length
@@ -483,10 +483,10 @@ class ContextSynchronizationServiceTest < ActiveSupport::TestCase
         password: "password123"
       )
       users << user
-      
+
       @service.grant_context_permission(@context_item.id, {
         user_id: user.id,
-        permissions: ["read"],
+        permissions: [ "read" ],
         granted_by: @user.id
       })
     end
@@ -505,7 +505,7 @@ class ContextSynchronizationServiceTest < ActiveSupport::TestCase
 
   # Edge Cases and Error Handling Tests
   test "handles context not found gracefully" do
-    result = @service.share_context(nil, @user, { users: [@other_user.id] })
+    result = @service.share_context(nil, @user, { users: [ @other_user.id ] })
 
     assert_not result[:success]
     assert_equal "context_not_found", result[:error]
@@ -514,8 +514,8 @@ class ContextSynchronizationServiceTest < ActiveSupport::TestCase
   test "handles invalid user permissions gracefully" do
     # Try to share with non-existent user
     result = @service.share_context(@context_item, @user, {
-      users: [99999],
-      permissions: ["read"]
+      users: [ 99999 ],
+      permissions: [ "read" ]
     })
 
     assert_not result[:success]

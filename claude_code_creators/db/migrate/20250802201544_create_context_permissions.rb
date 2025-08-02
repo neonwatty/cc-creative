@@ -11,8 +11,8 @@ class CreateContextPermissions < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    add_index :context_permissions, [:context_item_id, :user_id], unique: true
-    add_index :context_permissions, [:user_id, :status]
+    add_index :context_permissions, [ :context_item_id, :user_id ], unique: true
+    add_index :context_permissions, [ :user_id, :status ]
     add_index :context_permissions, :expires_at
   end
 end

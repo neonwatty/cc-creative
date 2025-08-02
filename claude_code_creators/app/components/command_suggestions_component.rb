@@ -21,28 +21,28 @@ class CommandSuggestionsComponent < ViewComponent::Base
       {
         command: "save",
         description: "Save document to various formats",
-        parameters: [{ name: "name", required: false }],
+        parameters: [ { name: "name", required: false } ],
         category: "context",
         icon: "save-icon"
       },
       {
         command: "load",
         description: "Load external content",
-        parameters: [{ name: "name", required: true }],
+        parameters: [ { name: "name", required: true } ],
         category: "context",
         icon: "load-icon"
       },
       {
         command: "compact",
         description: "Compact Claude context using AI summarization",
-        parameters: [{ name: "mode", required: false }],
+        parameters: [ { name: "mode", required: false } ],
         category: "optimization",
         icon: "compact-icon"
       },
       {
         command: "clear",
         description: "Clear context or document content",
-        parameters: [{ name: "target", required: false }],
+        parameters: [ { name: "target", required: false } ],
         category: "cleanup",
         icon: "clear-icon"
       },
@@ -59,7 +59,7 @@ class CommandSuggestionsComponent < ViewComponent::Base
       {
         command: "snippet",
         description: "Save selected content as reusable snippet",
-        parameters: [{ name: "name", required: false }],
+        parameters: [ { name: "name", required: false } ],
         category: "content",
         icon: "snippet-icon"
       }
@@ -70,7 +70,7 @@ class CommandSuggestionsComponent < ViewComponent::Base
     return [] if document.nil?
 
     commands = available_commands.select { |cmd| command_allowed?(cmd[:command]) }
-    
+
     if filter.present?
       commands = commands.select { |cmd| cmd[:command].downcase.include?(filter) }
     end
@@ -100,7 +100,7 @@ class CommandSuggestionsComponent < ViewComponent::Base
   end
 
   def dropdown_classes
-    classes = ["command-suggestions-dropdown", "fade-in"]
+    classes = [ "command-suggestions-dropdown", "fade-in" ]
     classes << "mobile" if mobile
     classes << "position-adjusted" if position_adjusted?
     classes.join(" ")
@@ -111,20 +111,20 @@ class CommandSuggestionsComponent < ViewComponent::Base
   end
 
   def command_item_classes(index)
-    classes = ["command-item", "interactive"]
+    classes = [ "command-item", "interactive" ]
     classes << "mobile-friendly" if mobile
     classes << "selected" if index == selected_index
     classes.join(" ")
   end
 
   def parameter_classes(parameter)
-    classes = ["parameter"]
+    classes = [ "parameter" ]
     classes << (parameter[:required] ? "required" : "optional")
     classes.join(" ")
   end
 
   def category_classes(category)
-    ["command-category", category].join(" ")
+    [ "command-category", category ].join(" ")
   end
 
   def context_hints_for_command(command)
@@ -178,7 +178,7 @@ class CommandSuggestionsComponent < ViewComponent::Base
         "[#{param[:name]}]"
       end
     end
-    
+
     param_strings.join(" ")
   end
 

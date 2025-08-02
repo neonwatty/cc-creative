@@ -7,7 +7,7 @@ class DocumentEditChannelTest < ActionCable::Channel::TestCase
     @document = documents(:one)
     @user = users(:one)
     @other_user = users(:two)
-    
+
     # Set up authentication
     stub_connection current_user: @user
   end
@@ -44,7 +44,7 @@ class DocumentEditChannelTest < ActionCable::Channel::TestCase
     # Check that user was added to document presence
     presence_key = "document_#{@document.id}_presence"
     presence_data = Rails.cache.read(presence_key) || {}
-    
+
     assert presence_data.key?(@user.id) || presence_data.key?(@user.id.to_s)
   end
 
@@ -154,8 +154,8 @@ class DocumentEditChannelTest < ActionCable::Channel::TestCase
                               .twice
                               .returns(
                                 { status: "success", transformed_operation: op1 },
-                                { 
-                                  status: "transformed", 
+                                {
+                                  status: "transformed",
                                   transformed_operation: op2.merge(position: 10),
                                   original_operation: op2
                                 }
@@ -185,7 +185,7 @@ class DocumentEditChannelTest < ActionCable::Channel::TestCase
                                 status: "conflict_resolved",
                                 transformed_operation: conflicting_operation,
                                 resolution_strategy: "timestamp_priority",
-                                conflicts: ["overlapping_delete"]
+                                conflicts: [ "overlapping_delete" ]
                               })
 
     perform :edit_operation, conflicting_operation
@@ -193,7 +193,7 @@ class DocumentEditChannelTest < ActionCable::Channel::TestCase
     assert_broadcast_on(@document, {
       type: "operation_applied",
       operation: conflicting_operation,
-      conflicts: ["overlapping_delete"],
+      conflicts: [ "overlapping_delete" ],
       resolution_strategy: "timestamp_priority"
     })
   end
@@ -238,9 +238,9 @@ class DocumentEditChannelTest < ActionCable::Channel::TestCase
                               .with(cursor_position, operation)
                               .returns(18) # 10 + "INSERTED".length
 
-    perform :transform_cursor, { 
-      operation: operation, 
-      cursor_position: cursor_position 
+    perform :transform_cursor, {
+      operation: operation,
+      cursor_position: cursor_position
     }
 
     assert_broadcast_on(@document, {
@@ -304,7 +304,7 @@ class DocumentEditChannelTest < ActionCable::Channel::TestCase
     perform :request_sync, { client_state_hash: client_state_hash }
 
     transmission = transmissions.last
-    
+
     if client_state_hash == server_state_hash
       assert_equal "sync_confirmed", transmission["type"]
     else
@@ -335,7 +335,7 @@ class DocumentEditChannelTest < ActionCable::Channel::TestCase
     presence_key = "document_#{@document.id}_presence"
     presence_data = Rails.cache.read(presence_key) || {}
     user_data = presence_data[@user.id] || presence_data[@user.id.to_s]
-    
+
     assert user_data.present?
     # Activity should be recent (within last few seconds)
     last_seen = Time.parse(user_data[:last_seen] || user_data["last_seen"])
@@ -475,8 +475,8 @@ class DocumentEditChannelTest < ActionCable::Channel::TestCase
              )
 
     OperationalTransformService.any_instance.stubs(:apply_and_broadcast_operation)
-                              .returns({ 
-                                status: "success", 
+                              .returns({
+                                status: "success",
                                 transformed_operation: significant_operation,
                                 version_created: true
                               })
