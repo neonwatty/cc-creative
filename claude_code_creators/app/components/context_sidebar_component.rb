@@ -22,7 +22,7 @@ class ContextSidebarComponent < ViewComponent::Base
 
   def filtered_items(type)
     items = context_items.send(type.to_s)
-    
+
     # Apply search and filters using the model's filtered_search scope
     items = items.filtered_search(
       query: search_query,
@@ -30,7 +30,7 @@ class ContextSidebarComponent < ViewComponent::Base
       date_from: date_from,
       date_to: date_to
     )
-    
+
     # Apply sorting
     case sort_by
     when "recent"
@@ -60,7 +60,7 @@ class ContextSidebarComponent < ViewComponent::Base
 
   def tab_classes(tab)
     base_classes = "px-4 py-2 text-sm font-medium rounded-t-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-    
+
     if tab == active_tab
       "#{base_classes} bg-white text-blue-600 border-b-2 border-blue-600"
     else
@@ -100,15 +100,15 @@ class ContextSidebarComponent < ViewComponent::Base
     elsif date.yesterday?
       "Yesterday at #{date.strftime('%l:%M %p')}"
     elsif date > 7.days.ago
-      date.strftime('%A at %l:%M %p')
+      date.strftime("%A at %l:%M %p")
     else
-      date.strftime('%B %d, %Y')
+      date.strftime("%B %d, %Y")
     end
   end
 
   def truncate_content(content, length = 100)
     return "" if content.blank?
-    
+
     plain_text = ActionText::Content.new(content).to_plain_text
     plain_text.truncate(length, separator: " ")
   end
@@ -129,27 +129,27 @@ class ContextSidebarComponent < ViewComponent::Base
 
   def date_range_options
     [
-      ["All time", ""],
-      ["Today", "today"],
-      ["This week", "week"],
-      ["This month", "month"],
-      ["Last 3 months", "quarter"],
-      ["This year", "year"]
+      [ "All time", "" ],
+      [ "Today", "today" ],
+      [ "This week", "week" ],
+      [ "This month", "month" ],
+      [ "Last 3 months", "quarter" ],
+      [ "This year", "year" ]
     ]
   end
 
   def type_filter_options
     [
-      ["All types", ""],
-      ["Snippets only", "snippet"],
-      ["Drafts only", "draft"],
-      ["Versions only", "version"]
+      [ "All types", "" ],
+      [ "Snippets only", "snippet" ],
+      [ "Drafts only", "draft" ],
+      [ "Versions only", "version" ]
     ]
   end
 
   def highlighted_items(items)
     return items unless search_query.present?
-    
+
     items.map do |item|
       highlights = item.search_highlights(search_query)
       {

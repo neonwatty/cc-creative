@@ -32,7 +32,7 @@ class ApplicationRecordTest < ActiveSupport::TestCase
   test "ApplicationRecord provides base configuration to all models" do
     # Test that abstract class configuration is set
     assert ApplicationRecord.abstract_class?
-    
+
     # Test that it can be used as a base for other models
     test_model = Class.new(ApplicationRecord)
     refute test_model.abstract_class?

@@ -71,13 +71,13 @@ class SessionTest < ActiveSupport::TestCase
 
   test "should allow multiple sessions per user" do
     @session.save!
-    
+
     second_session = Session.new(
       user: @user,
       ip_address: "192.168.1.1",
       user_agent: "Chrome/91.0"
     )
-    
+
     assert second_session.save
     assert_equal 2, @user.sessions.count
   end

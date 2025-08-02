@@ -53,7 +53,7 @@ class ApplicationHelperTest < ActionView::TestCase
       # Exactly 7 days ago
       date = Time.zone.local(2024, 1, 8, 14, 30, 0)
       assert_equal "Monday at  2:30 PM", format_date(date)
-      
+
       # More than 7 days ago
       date = Time.zone.local(2024, 1, 7, 14, 30, 0)
       assert_equal "January 07, 2024", format_date(date)
@@ -108,9 +108,9 @@ class ApplicationHelperTest < ActionView::TestCase
   test "truncate_content converts non-string objects to string" do
     # Test with number
     assert_equal "12345", truncate_content(12345)
-    
+
     # Test with array
-    result = truncate_content(["apple", "banana", "orange"])
+    result = truncate_content([ "apple", "banana", "orange" ])
     assert result.start_with?('["apple"')
   end
 

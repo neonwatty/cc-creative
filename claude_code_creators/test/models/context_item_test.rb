@@ -144,7 +144,7 @@ class ContextItemTest < ActiveSupport::TestCase
   test "recent scope orders by created_at descending" do
     # Clear existing context items from fixtures
     ContextItem.destroy_all
-    
+
     old_item = ContextItem.create!(
       document: @document,
       user: @user,
@@ -201,7 +201,7 @@ class ContextItemTest < ActiveSupport::TestCase
       item_type: "snippet",
       title: "Example Code"
     )
-    
+
     assert_equal "example code ruby code example snippet", context_item.search_content
   end
 
@@ -213,7 +213,7 @@ class ContextItemTest < ActiveSupport::TestCase
       item_type: "snippet",
       title: "Original Title"
     )
-    
+
     context_item.update!(content: "Updated content", title: "New Title")
     assert_equal "new title updated content snippet", context_item.search_content
   end
@@ -221,7 +221,7 @@ class ContextItemTest < ActiveSupport::TestCase
   test "search scope finds items by query" do
     # Clear existing items
     ContextItem.destroy_all
-    
+
     item1 = ContextItem.create!(
       document: @document,
       user: @user,
@@ -229,7 +229,7 @@ class ContextItemTest < ActiveSupport::TestCase
       item_type: "snippet",
       title: "Rails Guide"
     )
-    
+
     item2 = ContextItem.create!(
       document: @document,
       user: @user,
@@ -237,17 +237,17 @@ class ContextItemTest < ActiveSupport::TestCase
       item_type: "snippet",
       title: "JS Tips"
     )
-    
+
     # Search for "rails"
     results = ContextItem.search("rails")
     assert_includes results, item1
     assert_not_includes results, item2
-    
+
     # Search for "javascript"
     results = ContextItem.search("javascript")
     assert_includes results, item2
     assert_not_includes results, item1
-    
+
     # Case insensitive search
     results = ContextItem.search("RAILS")
     assert_includes results, item1
@@ -255,7 +255,7 @@ class ContextItemTest < ActiveSupport::TestCase
 
   test "search scope returns all items when query is blank" do
     ContextItem.destroy_all
-    
+
     3.times do |i|
       ContextItem.create!(
         document: @document,
@@ -265,7 +265,7 @@ class ContextItemTest < ActiveSupport::TestCase
         title: "Title #{i}"
       )
     end
-    
+
     assert_equal 3, ContextItem.search("").count
     assert_equal 3, ContextItem.search(nil).count
   end
@@ -278,18 +278,18 @@ class ContextItemTest < ActiveSupport::TestCase
       item_type: "snippet",
       title: "PHP Example"
     )
-    
+
     # Should handle special SQL characters
     results = ContextItem.search("$var")
     assert_includes results, item
-    
+
     results = ContextItem.search("'test'")
     assert_includes results, item
   end
 
   test "by_type scope filters by item type" do
     ContextItem.destroy_all
-    
+
     snippet = ContextItem.create!(
       document: @document,
       user: @user,
@@ -297,7 +297,7 @@ class ContextItemTest < ActiveSupport::TestCase
       item_type: "snippet",
       title: "Test Snippet"
     )
-    
+
     draft = ContextItem.create!(
       document: @document,
       user: @user,
@@ -305,13 +305,13 @@ class ContextItemTest < ActiveSupport::TestCase
       item_type: "draft",
       title: "Test Draft"
     )
-    
+
     assert_includes ContextItem.by_type("snippet"), snippet
     assert_not_includes ContextItem.by_type("snippet"), draft
-    
+
     assert_includes ContextItem.by_type("draft"), draft
     assert_not_includes ContextItem.by_type("draft"), snippet
-    
+
     # Returns all when type is blank
     assert_equal 2, ContextItem.by_type("").count
     assert_equal 2, ContextItem.by_type(nil).count
@@ -319,7 +319,7 @@ class ContextItemTest < ActiveSupport::TestCase
 
   test "by_date_range scope filters by date range" do
     ContextItem.destroy_all
-    
+
     old_item = ContextItem.create!(
       document: @document,
       user: @user,
@@ -328,7 +328,7 @@ class ContextItemTest < ActiveSupport::TestCase
       title: "Old Item",
       created_at: 1.month.ago
     )
-    
+
     recent_item = ContextItem.create!(
       document: @document,
       user: @user,
@@ -337,7 +337,7 @@ class ContextItemTest < ActiveSupport::TestCase
       title: "Recent Item",
       created_at: 1.day.ago
     )
-    
+
     future_item = ContextItem.create!(
       document: @document,
       user: @user,
@@ -346,32 +346,32 @@ class ContextItemTest < ActiveSupport::TestCase
       title: "Future Item",
       created_at: 1.day.from_now
     )
-    
+
     # Test with start date only
     results = ContextItem.by_date_range(2.days.ago, nil)
     assert_includes results, recent_item
     assert_includes results, future_item
     assert_not_includes results, old_item
-    
+
     # Test with end date only
     results = ContextItem.by_date_range(nil, Time.current)
     assert_includes results, old_item
     assert_includes results, recent_item
     assert_not_includes results, future_item
-    
+
     # Test with both dates
     results = ContextItem.by_date_range(1.week.ago, Time.current)
     assert_includes results, recent_item
     assert_not_includes results, old_item
     assert_not_includes results, future_item
-    
+
     # Returns all when both dates are blank
     assert_equal 3, ContextItem.by_date_range(nil, nil).count
   end
 
   test "filtered_search combines all filters" do
     ContextItem.destroy_all
-    
+
     # Create test items
     old_snippet = ContextItem.create!(
       document: @document,
@@ -381,7 +381,7 @@ class ContextItemTest < ActiveSupport::TestCase
       title: "Ruby Code",
       created_at: 1.month.ago
     )
-    
+
     recent_snippet = ContextItem.create!(
       document: @document,
       user: @user,
@@ -390,7 +390,7 @@ class ContextItemTest < ActiveSupport::TestCase
       title: "Ruby Tutorial",
       created_at: 1.hour.ago
     )
-    
+
     recent_draft = ContextItem.create!(
       document: @document,
       user: @user,
@@ -399,7 +399,7 @@ class ContextItemTest < ActiveSupport::TestCase
       title: "Ruby Draft",
       created_at: 1.hour.ago
     )
-    
+
     other_snippet = ContextItem.create!(
       document: @document,
       user: @user,
@@ -408,7 +408,7 @@ class ContextItemTest < ActiveSupport::TestCase
       title: "JS Example",
       created_at: 1.hour.ago
     )
-    
+
     # Test with all filters
     results = ContextItem.filtered_search(
       query: "ruby",
@@ -416,7 +416,7 @@ class ContextItemTest < ActiveSupport::TestCase
       date_from: 1.day.ago,
       date_to: Time.current
     )
-    
+
     assert_includes results, recent_snippet
     assert_not_includes results, old_snippet # Too old
     assert_not_includes results, recent_draft # Wrong type
@@ -425,7 +425,7 @@ class ContextItemTest < ActiveSupport::TestCase
 
   test "search_with_highlights returns items with highlights" do
     ContextItem.destroy_all
-    
+
     item = ContextItem.create!(
       document: @document,
       user: @user,
@@ -433,12 +433,12 @@ class ContextItemTest < ActiveSupport::TestCase
       item_type: "snippet",
       title: "Search Test Example"
     )
-    
+
     results = ContextItem.search_with_highlights("search")
-    
+
     assert_equal 1, results.length
     result = results.first
-    
+
     assert_equal item, result[:item]
     assert_equal "<mark>Search</mark> Test Example", result[:highlights][:title]
     assert result[:highlights][:content].include?("<mark>search</mark>")
@@ -451,15 +451,15 @@ class ContextItemTest < ActiveSupport::TestCase
 
   test "highlight_text marks matching text" do
     item = ContextItem.new
-    
+
     # Basic highlighting
     result = item.highlight_text("Hello world", "world")
     assert_equal "Hello <mark>world</mark>", result
-    
+
     # Case insensitive
     result = item.highlight_text("Hello WORLD", "world")
     assert_equal "Hello <mark>WORLD</mark>", result
-    
+
     # Multiple occurrences
     result = item.highlight_text("Ruby is great, I love Ruby", "Ruby")
     assert_equal "<mark>Ruby</mark> is great, I love <mark>Ruby</mark>", result
@@ -468,7 +468,7 @@ class ContextItemTest < ActiveSupport::TestCase
   test "highlight_text truncates long content" do
     item = ContextItem.new
     long_text = "The quick brown fox jumps over the lazy dog. " * 10 # 450 chars
-    
+
     result = item.highlight_text(long_text, "fox", max_length: 100)
     # Text should be truncated (result will be longer due to mark tags)
     assert result.include?("..."), "Expected truncated text to include ellipsis"
@@ -477,10 +477,10 @@ class ContextItemTest < ActiveSupport::TestCase
 
   test "highlight_text handles special regex characters" do
     item = ContextItem.new
-    
+
     result = item.highlight_text("Price is $10.00", "$10.00")
     assert_equal "Price is <mark>$10.00</mark>", result
-    
+
     result = item.highlight_text("Use [brackets] here", "[brackets]")
     assert_equal "Use <mark>[brackets]</mark> here", result
   end
@@ -490,9 +490,9 @@ class ContextItemTest < ActiveSupport::TestCase
       title: "Ruby Programming Guide",
       content: "Learn Ruby programming with ruby code examples and Ruby development"
     )
-    
+
     highlights = item.search_highlights("ruby")
-    
+
     assert_equal "<mark>Ruby</mark> Programming Guide", highlights[:title]
     assert highlights[:content].include?("<mark>Ruby</mark>"), "Expected content to highlight 'Ruby'"
     assert highlights[:content].include?("<mark>ruby</mark>"), "Expected content to highlight 'ruby'"
@@ -500,14 +500,14 @@ class ContextItemTest < ActiveSupport::TestCase
 
   test "search_highlights returns empty hash for blank query" do
     item = ContextItem.new(title: "Test", content: "Content")
-    
+
     assert_equal({}, item.search_highlights(""))
     assert_equal({}, item.search_highlights(nil))
   end
 
   test "position is set automatically on create" do
     ContextItem.destroy_all
-    
+
     # Create first item
     item1 = ContextItem.create!(
       document: @document,
@@ -517,7 +517,7 @@ class ContextItemTest < ActiveSupport::TestCase
       title: "First Item"
     )
     assert_equal 1, item1.position
-    
+
     # Create second item of same type
     item2 = ContextItem.create!(
       document: @document,
@@ -527,7 +527,7 @@ class ContextItemTest < ActiveSupport::TestCase
       title: "Second Item"
     )
     assert_equal 2, item2.position
-    
+
     # Create item of different type - should have position 1
     item3 = ContextItem.create!(
       document: @document,
@@ -541,7 +541,7 @@ class ContextItemTest < ActiveSupport::TestCase
 
   test "ordered scope sorts by position then created_at" do
     ContextItem.destroy_all
-    
+
     # Create items with specific positions and times - need to update position after creation
     item1 = ContextItem.create!(
       document: @document,
@@ -552,7 +552,7 @@ class ContextItemTest < ActiveSupport::TestCase
       created_at: 2.hours.ago
     )
     item1.update_column(:position, 2)
-    
+
     item2 = ContextItem.create!(
       document: @document,
       user: @user,
@@ -562,7 +562,7 @@ class ContextItemTest < ActiveSupport::TestCase
       created_at: 1.hour.ago
     )
     item2.update_column(:position, 1)
-    
+
     item3 = ContextItem.create!(
       document: @document,
       user: @user,
@@ -572,12 +572,12 @@ class ContextItemTest < ActiveSupport::TestCase
       created_at: 30.minutes.ago
     )
     item3.update_column(:position, 2)
-    
+
     ordered = ContextItem.ordered.to_a
-    
+
     # item2 comes first (position 1)
     assert_equal item2, ordered[0]
-    
+
     # For position 2, more recent item3 comes before item1
     assert_equal item3, ordered[1]
     assert_equal item1, ordered[2]

@@ -2,7 +2,7 @@ class CloudSyncChannel < ApplicationCable::Channel
   def subscribed
     # Subscribe to cloud sync updates for the current user
     stream_for current_user
-    
+
     # Also subscribe to specific integration channels if provided
     if params[:integration_id].present?
       integration = current_user.cloud_integrations.find_by(id: params[:integration_id])
@@ -18,8 +18,8 @@ class CloudSyncChannel < ApplicationCable::Channel
 
   # Client can request sync status updates
   def get_sync_status(data)
-    integration_id = data['integration_id']
-    
+    integration_id = data["integration_id"]
+
     if integration_id.present?
       integration = current_user.cloud_integrations.find_by(id: integration_id)
       if integration
@@ -32,7 +32,7 @@ class CloudSyncChannel < ApplicationCable::Channel
           last_sync: integration.cloud_files.maximum(:last_synced_at),
           error: nil
         }
-        
+
         transmit(status)
       end
     else
@@ -47,47 +47,47 @@ class CloudSyncChannel < ApplicationCable::Channel
           error: nil
         }
       end
-      
+
       transmit({ integrations: statuses })
     end
   end
 
   # Client can trigger sync (with rate limiting)
   def trigger_sync(data)
-    integration_id = data['integration_id']
-    
+    integration_id = data["integration_id"]
+
     return unless integration_id.present?
-    
+
     integration = current_user.cloud_integrations.find_by(id: integration_id)
     return unless integration&.active?
-    
+
     # Rate limiting: prevent sync requests more than once every 30 seconds
     cache_key = "sync_limit:#{current_user.id}:#{integration_id}"
     if Rails.cache.exist?(cache_key)
-      transmit({ 
+      transmit({
         error: "Sync rate limited. Please wait before syncing again.",
         integration_id: integration_id
       })
       return
     end
-    
+
     # Set rate limit cache
     Rails.cache.write(cache_key, true, expires_in: 30.seconds)
-    
+
     # Queue sync job
     CloudFileSyncJob.perform_later(integration)
-    
+
     # Notify client that sync started
     transmit({
-      event: 'sync_started',
+      event: "sync_started",
       integration_id: integration_id,
       provider: integration.provider,
       message: "Sync started for #{integration.provider_name}"
     })
-    
+
     # Broadcast to all subscribers
     CloudSyncChannel.broadcast_to(current_user, {
-      event: 'sync_started',
+      event: "sync_started",
       integration_id: integration_id,
       provider: integration.provider
     })

@@ -16,8 +16,8 @@ class CreateDocumentVersions < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :document_versions, [:document_id, :version_number], unique: true
-    add_index :document_versions, [:document_id, :created_at]
+    add_index :document_versions, [ :document_id, :version_number ], unique: true
+    add_index :document_versions, [ :document_id, :created_at ]
     add_index :document_versions, :is_auto_version
   end
 end

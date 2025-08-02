@@ -10,9 +10,9 @@ class CreateClaudeMessages < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    
+
     add_index :claude_messages, :session_id
     add_index :claude_messages, :sub_agent_name
-    add_index :claude_messages, [:session_id, :created_at]
+    add_index :claude_messages, [ :session_id, :created_at ]
   end
 end

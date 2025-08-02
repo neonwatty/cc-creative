@@ -29,8 +29,8 @@ class SubAgentMessageTest < ActiveSupport::TestCase
   end
 
   test "should accept valid roles" do
-    valid_roles = ["user", "assistant", "system"]
-    
+    valid_roles = [ "user", "assistant", "system" ]
+
     valid_roles.each do |role|
       @message.role = role
       assert @message.valid?, "#{role} should be valid"
@@ -80,11 +80,11 @@ class SubAgentMessageTest < ActiveSupport::TestCase
       user: @user,
       sub_agent: @sub_agent
     )
-    
+
     user_messages = SubAgentMessage.by_role("user")
     assert_includes user_messages, @message
     assert_not_includes user_messages, assistant_message
-    
+
     assistant_messages = SubAgentMessage.by_role("assistant")
     assert_includes assistant_messages, assistant_message
     assert_not_includes assistant_messages, @message
@@ -93,7 +93,7 @@ class SubAgentMessageTest < ActiveSupport::TestCase
   test "recent scope should order by created_at desc" do
     # Clear existing messages to ensure clean test
     SubAgentMessage.destroy_all
-    
+
     old_message = SubAgentMessage.create!(
       role: "user",
       content: "Old",
@@ -108,7 +108,7 @@ class SubAgentMessageTest < ActiveSupport::TestCase
       sub_agent: @sub_agent,
       created_at: 1.day.ago
     )
-    
+
     messages = SubAgentMessage.recent
     assert_equal new_message.id, messages.first.id
     assert_equal old_message.id, messages.second.id
@@ -150,7 +150,7 @@ class SubAgentMessageTest < ActiveSupport::TestCase
   test "should truncate content" do
     @message.content = "This is a very long message that should be truncated when we call the truncate method with a specific length limit"
     truncated = @message.truncate_content(50)
-    
+
     assert truncated.length <= 53 # 50 + "..."
     assert truncated.ends_with?("...")
   end
@@ -158,7 +158,7 @@ class SubAgentMessageTest < ActiveSupport::TestCase
   test "should not truncate short content" do
     @message.content = "Short message"
     truncated = @message.truncate_content(50)
-    
+
     assert_equal "Short message", truncated
     assert_not truncated.ends_with?("...")
   end
@@ -166,7 +166,7 @@ class SubAgentMessageTest < ActiveSupport::TestCase
   test "should format for display" do
     @message.save!
     formatted = @message.formatted_for_display
-    
+
     assert formatted[:id] == @message.id
     assert formatted[:role] == @message.role
     assert formatted[:content] == @message.content
@@ -177,7 +177,7 @@ class SubAgentMessageTest < ActiveSupport::TestCase
   test "should export message" do
     @message.save!
     export = @message.export
-    
+
     assert_equal @message.role, export[:role]
     assert_equal @message.content, export[:content]
     assert export[:timestamp].present?
@@ -223,7 +223,7 @@ class SubAgentMessageTest < ActiveSupport::TestCase
   test "should be destroyed when sub_agent is destroyed" do
     @message.save!
     message_count = @sub_agent.messages.count
-    assert_difference('SubAgentMessage.count', -message_count) do
+    assert_difference("SubAgentMessage.count", -message_count) do
       @sub_agent.destroy
     end
   end
@@ -246,7 +246,7 @@ class SubAgentMessageTest < ActiveSupport::TestCase
   test "should handle very long content efficiently" do
     long_content = "a" * 50_000
     @message.content = long_content
-    
+
     assert @message.valid?
     assert @message.save
     assert_equal 50_000, @message.reload.content.length
@@ -261,7 +261,7 @@ class SubAgentMessageTest < ActiveSupport::TestCase
       user: other_user,
       document: documents(:two)
     )
-    
+
     # Currently the model allows this, but it might be a business rule to enforce
     message = SubAgentMessage.new(
       role: "user",
@@ -269,7 +269,7 @@ class SubAgentMessageTest < ActiveSupport::TestCase
       user: @user,
       sub_agent: other_sub_agent
     )
-    
+
     assert message.valid? # Current implementation allows this
   end
 end

@@ -9,7 +9,7 @@ class CloudProviderComponentTest < ViewComponent::TestCase
 
   test "renders disconnected provider" do
     rendered = render_inline(CloudProviderComponent.new(
-      provider: 'google_drive',
+      provider: "google_drive",
       integration: nil,
       show_stats: true,
       show_actions: true
@@ -26,15 +26,15 @@ class CloudProviderComponentTest < ViewComponent::TestCase
   test "renders connected provider" do
     integration = CloudIntegration.create!(
       user: @user,
-      provider: 'google_drive',
-      access_token: 'test_token',
-      refresh_token: 'test_refresh',
+      provider: "google_drive",
+      access_token: "test_token",
+      refresh_token: "test_refresh",
       expires_at: 2.hours.from_now, # Far enough in future to avoid "needs refresh"
       settings: {}
     )
-    
+
     rendered = render_inline(CloudProviderComponent.new(
-      provider: 'google_drive',
+      provider: "google_drive",
       integration: integration,
       show_stats: true,
       show_actions: true
@@ -52,15 +52,15 @@ class CloudProviderComponentTest < ViewComponent::TestCase
   test "renders expired provider" do
     integration = CloudIntegration.create!(
       user: @user,
-      provider: 'dropbox',
-      access_token: 'test_token',
-      refresh_token: 'test_refresh',
+      provider: "dropbox",
+      access_token: "test_token",
+      refresh_token: "test_refresh",
       expires_at: 1.hour.ago,
       settings: {}
     )
-    
+
     rendered = render_inline(CloudProviderComponent.new(
-      provider: 'dropbox',
+      provider: "dropbox",
       integration: integration,
       show_stats: true,
       show_actions: true
@@ -77,15 +77,15 @@ class CloudProviderComponentTest < ViewComponent::TestCase
   test "renders provider needing refresh" do
     integration = CloudIntegration.create!(
       user: @user,
-      provider: 'notion',
-      access_token: 'test_token',
-      refresh_token: 'test_refresh',
+      provider: "notion",
+      access_token: "test_token",
+      refresh_token: "test_refresh",
       expires_at: 30.minutes.from_now,
       settings: {}
     )
-    
+
     rendered = render_inline(CloudProviderComponent.new(
-      provider: 'notion',
+      provider: "notion",
       integration: integration,
       show_stats: true,
       show_actions: true
@@ -100,15 +100,15 @@ class CloudProviderComponentTest < ViewComponent::TestCase
   test "renders without stats when show_stats is false" do
     integration = CloudIntegration.create!(
       user: @user,
-      provider: 'google_drive',
-      access_token: 'test_token',
-      refresh_token: 'test_refresh',
+      provider: "google_drive",
+      access_token: "test_token",
+      refresh_token: "test_refresh",
       expires_at: 1.hour.from_now,
       settings: {}
     )
-    
+
     rendered = render_inline(CloudProviderComponent.new(
-      provider: 'google_drive',
+      provider: "google_drive",
       integration: integration,
       show_stats: false,
       show_actions: true
@@ -120,15 +120,15 @@ class CloudProviderComponentTest < ViewComponent::TestCase
   test "renders without actions when show_actions is false" do
     integration = CloudIntegration.create!(
       user: @user,
-      provider: 'google_drive',
-      access_token: 'test_token',
-      refresh_token: 'test_refresh',
+      provider: "google_drive",
+      access_token: "test_token",
+      refresh_token: "test_refresh",
       expires_at: 1.hour.from_now,
       settings: {}
     )
-    
+
     rendered = render_inline(CloudProviderComponent.new(
-      provider: 'google_drive',
+      provider: "google_drive",
       integration: integration,
       show_stats: true,
       show_actions: false
@@ -140,26 +140,26 @@ class CloudProviderComponentTest < ViewComponent::TestCase
   test "shows file count and last sync for connected provider" do
     integration = CloudIntegration.create!(
       user: @user,
-      provider: 'google_drive',
-      access_token: 'test_token',
-      refresh_token: 'test_refresh',
+      provider: "google_drive",
+      access_token: "test_token",
+      refresh_token: "test_refresh",
       expires_at: 1.hour.from_now,
       settings: {}
     )
-    
+
     # Create some cloud files
     3.times do |i|
       integration.cloud_files.create!(
-        provider: 'google_drive',
+        provider: "google_drive",
         file_id: "file_#{i}",
         name: "File #{i}",
-        mime_type: 'text/plain',
+        mime_type: "text/plain",
         last_synced_at: (i + 1).hours.ago
       )
     end
-    
+
     rendered = render_inline(CloudProviderComponent.new(
-      provider: 'google_drive',
+      provider: "google_drive",
       integration: integration,
       show_stats: true,
       show_actions: true
@@ -173,9 +173,9 @@ class CloudProviderComponentTest < ViewComponent::TestCase
 
   test "shows correct provider descriptions" do
     providers = {
-      'google_drive' => 'Import documents from Google Drive and export your work back to Drive.',
-      'dropbox' => 'Sync files with Dropbox for seamless document management.',
-      'notion' => 'Connect to Notion to import pages and export documents as Notion pages.'
+      "google_drive" => "Import documents from Google Drive and export your work back to Drive.",
+      "dropbox" => "Sync files with Dropbox for seamless document management.",
+      "notion" => "Connect to Notion to import pages and export documents as Notion pages."
     }
 
     providers.each do |provider, description|
@@ -192,7 +192,7 @@ class CloudProviderComponentTest < ViewComponent::TestCase
 
   test "includes oauth controller data for disconnected providers" do
     rendered = render_inline(CloudProviderComponent.new(
-      provider: 'google_drive',
+      provider: "google_drive",
       integration: nil,
       show_stats: true,
       show_actions: true
@@ -207,15 +207,15 @@ class CloudProviderComponentTest < ViewComponent::TestCase
   test "includes sync status data for connected providers" do
     integration = CloudIntegration.create!(
       user: @user,
-      provider: 'google_drive',
-      access_token: 'test_token',
-      refresh_token: 'test_refresh',
+      provider: "google_drive",
+      access_token: "test_token",
+      refresh_token: "test_refresh",
       expires_at: 1.hour.from_now,
       settings: {}
     )
-    
+
     rendered = render_inline(CloudProviderComponent.new(
-      provider: 'google_drive',
+      provider: "google_drive",
       integration: integration,
       show_stats: true,
       show_actions: true

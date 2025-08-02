@@ -22,7 +22,7 @@ class DocumentPolicyTest < ActiveSupport::TestCase
   test "admin can view any document" do
     policy = DocumentPolicy.new(@admin, @document)
     assert policy.show?
-    
+
     policy = DocumentPolicy.new(@admin, @other_document)
     assert policy.show?
   end
@@ -30,7 +30,7 @@ class DocumentPolicyTest < ActiveSupport::TestCase
   test "editor can view any document" do
     policy = DocumentPolicy.new(@editor, @document)
     assert policy.show?
-    
+
     policy = DocumentPolicy.new(@editor, @other_document)
     assert policy.show?
   end

@@ -6,17 +6,17 @@ class PresenceChannel < ApplicationCable::Channel
     return reject unless document && authorized_for_document?(document)
 
     stream_for document
-    
+
     # Track user presence
     add_user_to_presence(document)
-    
+
     # Broadcast user joined to other subscribers
     broadcast_presence_update(document, {
-      type: 'user_joined',
+      type: "user_joined",
       user: serialize_user(current_user),
       timestamp: Time.current.iso8601
     })
-    
+
     logger.info "User #{current_user.id} joined presence for document #{document.id}"
   end
 
@@ -26,14 +26,14 @@ class PresenceChannel < ApplicationCable::Channel
 
     # Remove user from presence
     remove_user_from_presence(document)
-    
+
     # Broadcast user left to other subscribers
     broadcast_presence_update(document, {
-      type: 'user_left',
+      type: "user_left",
       user_id: current_user.id,
       timestamp: Time.current.iso8601
     })
-    
+
     logger.info "User #{current_user.id} left presence for document #{document.id}"
   end
 
@@ -44,10 +44,10 @@ class PresenceChannel < ApplicationCable::Channel
 
     # Update typing timestamp
     update_typing_status(document, true)
-    
+
     # Broadcast to other users (excluding sender)
     broadcast_presence_update(document, {
-      type: 'user_typing',
+      type: "user_typing",
       user_id: current_user.id,
       user_name: current_user.name,
       timestamp: Time.current.iso8601
@@ -60,10 +60,10 @@ class PresenceChannel < ApplicationCable::Channel
 
     # Update typing timestamp
     update_typing_status(document, false)
-    
+
     # Broadcast to other users (excluding sender)
     broadcast_presence_update(document, {
-      type: 'user_stopped_typing',
+      type: "user_stopped_typing",
       user_id: current_user.id,
       timestamp: Time.current.iso8601
     }, except: current_user)
@@ -74,18 +74,18 @@ class PresenceChannel < ApplicationCable::Channel
     document = find_document
     return unless document && authorized_for_document?(document)
 
-    position = data['position'] || {}
+    position = data["position"] || {}
     # Handle both string and symbol keys for coordinates
-    x = position['x'] || position[:x]
-    y = position['y'] || position[:y]
+    x = position["x"] || position[:x]
+    y = position["y"] || position[:y]
     return unless x && y
 
     # Store cursor position (optional, for persistence)
     update_cursor_position(document, x, y)
-    
+
     # Broadcast to other users (excluding sender)
     broadcast_presence_update(document, {
-      type: 'cursor_moved',
+      type: "cursor_moved",
       user_id: current_user.id,
       user_name: current_user.name,
       position: {
@@ -101,11 +101,11 @@ class PresenceChannel < ApplicationCable::Channel
     document = find_document
     return unless document && authorized_for_document?(document)
 
-    selection = data['selection'] || {}
-    
+    selection = data["selection"] || {}
+
     # Broadcast selection to other users (excluding sender)
     broadcast_presence_update(document, {
-      type: 'selection_changed',
+      type: "selection_changed",
       user_id: current_user.id,
       user_name: current_user.name,
       selection: selection,
@@ -119,10 +119,10 @@ class PresenceChannel < ApplicationCable::Channel
     return unless document && authorized_for_document?(document)
 
     presence_data = get_document_presence(document)
-    
+
     # Send presence data back to requesting user
     transmit({
-      type: 'presence_data',
+      type: "presence_data",
       users: presence_data[:users],
       cursors: presence_data[:cursors],
       typing_users: presence_data[:typing_users],
@@ -135,7 +135,7 @@ class PresenceChannel < ApplicationCable::Channel
   def find_document
     document_id = params[:document_id]
     return nil unless document_id
-    
+
     @document ||= Document.find_by(id: document_id)
   end
 
@@ -172,7 +172,7 @@ class PresenceChannel < ApplicationCable::Channel
 
   def remove_user_from_presence(document)
     presence_key = "document_#{document.id}_presence"
-    
+
     if Rails.cache.respond_to?(:hdel)
       # Redis-backed cache
       Rails.cache.hdel(presence_key, current_user.id)
@@ -186,17 +186,17 @@ class PresenceChannel < ApplicationCable::Channel
 
   def update_typing_status(document, typing)
     presence_key = "document_#{document.id}_presence"
-    
+
     if Rails.cache.respond_to?(:hget)
       # Redis-backed cache
       user_data_json = Rails.cache.hget(presence_key, current_user.id)
       return unless user_data_json
-      
+
       user_data = JSON.parse(user_data_json)
-      user_data['typing'] = typing
-      user_data['last_seen'] = Time.current.iso8601
-      user_data['typing_at'] = typing ? Time.current.iso8601 : nil
-      
+      user_data["typing"] = typing
+      user_data["last_seen"] = Time.current.iso8601
+      user_data["typing_at"] = typing ? Time.current.iso8601 : nil
+
       Rails.cache.hset(presence_key, current_user.id, user_data.to_json)
     else
       # Memory-backed cache
@@ -234,7 +234,7 @@ class PresenceChannel < ApplicationCable::Channel
   def get_document_presence(document)
     presence_key = "document_#{document.id}_presence"
     cursor_key = "document_#{document.id}_cursors"
-    
+
     users = []
     cursors = {}
     typing_users = []
@@ -244,11 +244,11 @@ class PresenceChannel < ApplicationCable::Channel
       presence_data = Rails.cache.hgetall(presence_key) || {}
       presence_data.each do |user_id, user_data_json|
         next if user_id.to_i == current_user.id # Exclude current user
-        
+
         begin
           user_data = JSON.parse(user_data_json)
           users << serialize_user_from_data(user_data)
-          typing_users << user_id.to_i if user_data['typing']
+          typing_users << user_id.to_i if user_data["typing"]
         rescue JSON::ParserError
           next
         end
@@ -257,7 +257,7 @@ class PresenceChannel < ApplicationCable::Channel
       cursor_data = Rails.cache.hgetall(cursor_key) || {}
       cursor_data.each do |user_id, cursor_json|
         next if user_id.to_i == current_user.id # Exclude current user
-        
+
         begin
           cursor_info = JSON.parse(cursor_json)
           cursors[user_id] = cursor_info
@@ -270,7 +270,7 @@ class PresenceChannel < ApplicationCable::Channel
       presence_data = Rails.cache.read(presence_key) || {}
       presence_data.each do |user_id, user_data|
         next if user_id == current_user.id # Exclude current user
-        
+
         users << serialize_user_from_data(user_data)
         typing_users << user_id if user_data[:typing]
       end
@@ -307,17 +307,17 @@ class PresenceChannel < ApplicationCable::Channel
   end
 
   def serialize_user_from_data(user_data)
-    if user_data.is_a?(Hash) && user_data.key?('id')
+    if user_data.is_a?(Hash) && user_data.key?("id")
       # JSON data (from Redis)
       {
-        id: user_data['id'],
-        name: user_data['name'],
-        email: user_data['email'],
-        joined_at: user_data['joined_at'],
-        last_seen: user_data['last_seen'],
-        typing: user_data['typing']
+        id: user_data["id"],
+        name: user_data["name"],
+        email: user_data["email"],
+        joined_at: user_data["joined_at"],
+        last_seen: user_data["last_seen"],
+        typing: user_data["typing"]
       }
-    else 
+    else
       # Ruby hash data (from memory cache)
       user_data
     end

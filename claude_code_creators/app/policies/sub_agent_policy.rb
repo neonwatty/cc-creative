@@ -30,15 +30,15 @@ class SubAgentPolicy < ApplicationPolicy
     # User must own the sub_agent or the document
     record.user_id == user.id || record.document.user_id == user.id
   end
-  
+
   def activate?
     update?
   end
-  
+
   def complete?
     update?
   end
-  
+
   def pause?
     update?
   end

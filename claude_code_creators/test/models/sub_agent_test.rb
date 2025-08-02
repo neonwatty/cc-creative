@@ -38,11 +38,11 @@ class SubAgentTest < ActiveSupport::TestCase
 
   test "should accept all valid agent types" do
     valid_types = [
-      'ruby-rails-expert', 'javascript-package-expert', 'tailwind-css-expert',
-      'test-runner-fixer', 'error-debugger', 'project-orchestrator', 
-      'git-auto-commit', 'custom'
+      "ruby-rails-expert", "javascript-package-expert", "tailwind-css-expert",
+      "test-runner-fixer", "error-debugger", "project-orchestrator",
+      "git-auto-commit", "custom"
     ]
-    
+
     valid_types.each do |agent_type|
       @sub_agent.agent_type = agent_type
       assert @sub_agent.valid?, "#{agent_type} should be valid"
@@ -62,8 +62,8 @@ class SubAgentTest < ActiveSupport::TestCase
   end
 
   test "should accept all valid statuses" do
-    valid_statuses = ['active', 'idle', 'completed']
-    
+    valid_statuses = [ "active", "idle", "completed" ]
+
     valid_statuses.each do |status|
       @sub_agent.status = status
       assert @sub_agent.valid?, "#{status} should be valid"
@@ -123,8 +123,8 @@ class SubAgentTest < ActiveSupport::TestCase
       content: "Test message",
       user: @user
     )
-    
-    assert_difference('SubAgentMessage.count', -1) do
+
+    assert_difference("SubAgentMessage.count", -1) do
       @sub_agent.destroy
     end
   end
@@ -146,7 +146,7 @@ class SubAgentTest < ActiveSupport::TestCase
       user: @user,
       document: @document
     )
-    
+
     active_agents = SubAgent.active
     assert_includes active_agents, @sub_agent
     assert_not_includes active_agents, idle_agent
@@ -162,7 +162,7 @@ class SubAgentTest < ActiveSupport::TestCase
       user: @user,
       document: @document
     )
-    
+
     idle_agents = SubAgent.idle
     assert_includes idle_agents, idle_agent
     assert_not_includes idle_agents, @sub_agent
@@ -177,7 +177,7 @@ class SubAgentTest < ActiveSupport::TestCase
       user: @user,
       document: @document
     )
-    
+
     completed_agents = SubAgent.completed
     assert_includes completed_agents, completed_agent
     assert_not_includes completed_agents, @sub_agent
@@ -185,7 +185,7 @@ class SubAgentTest < ActiveSupport::TestCase
 
   test "recent scope should order by created_at desc" do
     SubAgent.destroy_all
-    
+
     old_agent = SubAgent.create!(
       name: "Old Agent",
       agent_type: "custom",
@@ -200,7 +200,7 @@ class SubAgentTest < ActiveSupport::TestCase
       document: @document,
       created_at: 1.day.ago
     )
-    
+
     agents = SubAgent.recent
     assert_equal new_agent.id, agents.first.id
     assert_equal old_agent.id, agents.second.id
@@ -215,7 +215,7 @@ class SubAgentTest < ActiveSupport::TestCase
       user: other_user,
       document: documents(:two)
     )
-    
+
     user_agents = SubAgent.by_user(@user)
     assert_includes user_agents, @sub_agent
     assert_not_includes user_agents, other_agent
@@ -230,7 +230,7 @@ class SubAgentTest < ActiveSupport::TestCase
       user: @user,
       document: other_document
     )
-    
+
     document_agents = SubAgent.by_document(@document)
     assert_includes document_agents, @sub_agent
     assert_not_includes document_agents, other_agent
@@ -244,7 +244,7 @@ class SubAgentTest < ActiveSupport::TestCase
       user: @user,
       document: @document
     )
-    
+
     rails_agents = SubAgent.by_agent_type("ruby-rails-expert")
     assert_includes rails_agents, @sub_agent
     assert_not_includes rails_agents, other_agent
@@ -275,32 +275,32 @@ class SubAgentTest < ActiveSupport::TestCase
   test "should count messages" do
     @sub_agent.save!
     assert_equal 0, @sub_agent.message_count
-    
+
     @sub_agent.messages.create!(role: "user", content: "Test 1", user: @user)
     @sub_agent.messages.create!(role: "assistant", content: "Test 2", user: @user)
-    
+
     assert_equal 2, @sub_agent.message_count
   end
 
   test "should get last message" do
     @sub_agent.save!
     assert_nil @sub_agent.last_message
-    
+
     first_message = @sub_agent.messages.create!(role: "user", content: "First", user: @user)
     last_message = @sub_agent.messages.create!(role: "assistant", content: "Last", user: @user)
-    
+
     assert_equal last_message, @sub_agent.last_message
   end
 
   test "should have conversation with user and assistant messages" do
     @sub_agent.save!
     assert @sub_agent.has_conversation?
-    
+
     # Add only user messages
     @sub_agent.messages.create!(role: "user", content: "Test 1", user: @user)
     @sub_agent.messages.create!(role: "user", content: "Test 2", user: @user)
     assert_not @sub_agent.has_conversation?
-    
+
     # Add assistant message
     @sub_agent.messages.create!(role: "assistant", content: "Response", user: @user)
     assert @sub_agent.has_conversation?
@@ -309,7 +309,7 @@ class SubAgentTest < ActiveSupport::TestCase
   test "should update context" do
     @sub_agent.save!
     new_context = { "key" => "value", "number" => 42 }
-    
+
     @sub_agent.update_context(new_context)
     @sub_agent.reload
     assert_equal new_context, @sub_agent.context
@@ -318,17 +318,17 @@ class SubAgentTest < ActiveSupport::TestCase
   test "should merge context" do
     @sub_agent.context = { "existing" => "value" }
     @sub_agent.save!
-    
+
     @sub_agent.merge_context({ "new" => "data", "existing" => "updated" })
     @sub_agent.reload
-    
+
     assert_equal({ "existing" => "updated", "new" => "data" }, @sub_agent.context)
   end
 
   test "should clear context" do
     @sub_agent.context = { "key" => "value" }
     @sub_agent.save!
-    
+
     @sub_agent.clear_context
     @sub_agent.reload
     assert_equal({}, @sub_agent.context)
@@ -337,7 +337,7 @@ class SubAgentTest < ActiveSupport::TestCase
   test "should activate sub agent" do
     @sub_agent.status = "idle"
     @sub_agent.save!
-    
+
     @sub_agent.activate!
     assert_equal "active", @sub_agent.status
   end
@@ -345,7 +345,7 @@ class SubAgentTest < ActiveSupport::TestCase
   test "should deactivate sub agent" do
     @sub_agent.status = "active"
     @sub_agent.save!
-    
+
     @sub_agent.deactivate!
     assert_equal "idle", @sub_agent.status
   end
@@ -353,7 +353,7 @@ class SubAgentTest < ActiveSupport::TestCase
   test "should complete sub agent" do
     @sub_agent.status = "active"
     @sub_agent.save!
-    
+
     @sub_agent.complete!
     assert_equal "completed", @sub_agent.status
   end
@@ -362,9 +362,9 @@ class SubAgentTest < ActiveSupport::TestCase
     @sub_agent.save!
     @sub_agent.messages.create!(role: "user", content: "Hello", user: @user)
     @sub_agent.messages.create!(role: "assistant", content: "Hi there", user: @user)
-    
+
     summary = @sub_agent.summary
-    
+
     assert_equal @sub_agent.id, summary[:id]
     assert_equal @sub_agent.name, summary[:name]
     assert_equal @sub_agent.agent_type, summary[:agent_type]
@@ -379,9 +379,9 @@ class SubAgentTest < ActiveSupport::TestCase
     @sub_agent.save!
     @sub_agent.messages.create!(role: "user", content: "Question", user: @user)
     @sub_agent.messages.create!(role: "assistant", content: "Answer", user: @user)
-    
+
     export = @sub_agent.export_conversation
-    
+
     assert_equal @sub_agent.name, export[:agent_name]
     assert_equal @sub_agent.agent_type, export[:agent_type]
     assert_equal @sub_agent.status, export[:status]
@@ -413,7 +413,7 @@ class SubAgentTest < ActiveSupport::TestCase
     complex_context = {
       "level1" => {
         "level2" => {
-          "level3" => ["array", "of", "values"],
+          "level3" => [ "array", "of", "values" ],
           "boolean" => true,
           "number" => 123.45
         }
@@ -428,7 +428,7 @@ class SubAgentTest < ActiveSupport::TestCase
   test "should handle summary with no messages" do
     @sub_agent.save!
     summary = @sub_agent.summary
-    
+
     assert_equal 0, summary[:message_count]
     assert_nil summary[:last_message]
   end
@@ -436,7 +436,7 @@ class SubAgentTest < ActiveSupport::TestCase
   test "should handle export with empty conversation" do
     @sub_agent.save!
     export = @sub_agent.export_conversation
-    
+
     assert_equal [], export[:messages]
   end
 

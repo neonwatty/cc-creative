@@ -25,7 +25,7 @@ class SubAgentConversationComponent < ViewComponent::Base
 
   def message_bubble_classes(message)
     base_classes = "max-w-3xl rounded-lg px-4 py-3"
-    
+
     if message.user?
       "#{base_classes} ml-auto bg-blue-600 text-white"
     else
@@ -61,7 +61,7 @@ class SubAgentConversationComponent < ViewComponent::Base
 
   def send_button_classes(disabled: false)
     base_classes = "inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-    
+
     if disabled
       "#{base_classes} bg-gray-300 text-gray-500 cursor-not-allowed"
     else
@@ -83,7 +83,7 @@ class SubAgentConversationComponent < ViewComponent::Base
 
   def agent_status_banner_classes
     base_classes = "px-4 py-2 text-sm font-medium"
-    
+
     case sub_agent.status
     when "active"
       "#{base_classes} bg-green-50 text-green-800 border-b border-green-200"

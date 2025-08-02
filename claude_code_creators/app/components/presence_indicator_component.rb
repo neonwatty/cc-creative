@@ -19,7 +19,7 @@ class PresenceIndicatorComponent < ViewComponent::Base
   end
 
   def overflow_count
-    [users.count - max_display, 0].max
+    [ users.count - max_display, 0 ].max
   end
 
   def has_overflow?
@@ -40,7 +40,7 @@ class PresenceIndicatorComponent < ViewComponent::Base
   def avatar_colors
     [
       "bg-creative-primary-500 text-white",
-      "bg-creative-secondary-500 text-white", 
+      "bg-creative-secondary-500 text-white",
       "bg-creative-accent-purple text-white",
       "bg-creative-accent-amber text-white",
       "bg-creative-accent-rose text-white",

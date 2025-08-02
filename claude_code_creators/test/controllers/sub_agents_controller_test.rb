@@ -16,7 +16,7 @@ class SubAgentsControllerTest < ActionDispatch::IntegrationTest
   test "should get index as JSON" do
     get document_sub_agents_url(@document, format: :json)
     assert_response :success
-    
+
     json_response = JSON.parse(@response.body)
     assert json_response.is_a?(Array)
   end
@@ -75,7 +75,7 @@ class SubAgentsControllerTest < ActionDispatch::IntegrationTest
   test "should show sub_agent as JSON" do
     get document_sub_agent_url(@document, @sub_agent, format: :json)
     assert_response :success
-    
+
     json_response = JSON.parse(@response.body)
     assert_equal @sub_agent.id, json_response["id"]
   end
@@ -91,10 +91,10 @@ class SubAgentsControllerTest < ActionDispatch::IntegrationTest
         name: "Updated Agent Name"
       }
     }
-    
+
     assert_redirected_to document_sub_agent_url(@document, @sub_agent)
     assert_equal "Sub-agent was successfully updated.", flash[:notice]
-    
+
     @sub_agent.reload
     assert_equal "Updated Agent Name", @sub_agent.name
   end
@@ -105,7 +105,7 @@ class SubAgentsControllerTest < ActionDispatch::IntegrationTest
         name: "Updated Agent Name"
       }
     }, as: :turbo_stream
-    
+
     assert_response :success
     assert_match "turbo-stream", @response.content_type
   end
@@ -117,7 +117,7 @@ class SubAgentsControllerTest < ActionDispatch::IntegrationTest
         agent_type: "invalid"
       }
     }
-    
+
     assert_response :unprocessable_entity
   end
 
@@ -141,7 +141,7 @@ class SubAgentsControllerTest < ActionDispatch::IntegrationTest
 
   test "should activate sub_agent" do
     @sub_agent.update!(status: "idle")
-    
+
     post activate_document_sub_agent_url(@document, @sub_agent)
 
     assert_redirected_to document_sub_agent_url(@document, @sub_agent)
@@ -180,14 +180,14 @@ class SubAgentsControllerTest < ActionDispatch::IntegrationTest
       user: other_user,
       document: other_document
     )
-    
+
     get document_sub_agent_url(other_document, other_sub_agent)
     assert_redirected_to documents_url
   end
 
   test "should enforce document ownership" do
     other_document = documents(:two)
-    
+
     get document_sub_agents_url(other_document)
     assert_redirected_to documents_url
   end
@@ -216,7 +216,7 @@ class SubAgentsControllerTest < ActionDispatch::IntegrationTest
       user: @user,
       document: @document
     )
-    
+
     get document_sub_agents_url(@document, status: "active")
     assert_response :success
   end
@@ -229,7 +229,7 @@ class SubAgentsControllerTest < ActionDispatch::IntegrationTest
       user: @user,
       document: @document
     )
-    
+
     get document_sub_agents_url(@document, agent_type: "ruby-rails-expert")
     assert_response :success
   end

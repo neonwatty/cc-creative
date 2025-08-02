@@ -17,7 +17,7 @@ class ClaudeService
     raise ConfigurationError, "Anthropic client not configured" unless @client
 
     messages = build_messages(content, context)
-    
+
     begin
       response = @client.messages(
         model: Rails.application.config.anthropic[:model],
@@ -29,7 +29,7 @@ class ClaudeService
 
       # Store the interaction
       store_interaction(content, response.content.first.text, context)
-      
+
       # Return structured response
       {
         response: response.content.first.text,
@@ -45,18 +45,18 @@ class ClaudeService
   # Create a sub-agent for isolated context
   def create_sub_agent(name, initial_context: {})
     sub_agent_id = "#{@session_id}:#{name}"
-    
+
     # Initialize sub-agent with its own context
     sub_agent = self.class.new(
       session_id: sub_agent_id,
       sub_agent_name: name
     )
-    
+
     # Set initial context if provided
     if initial_context.any?
       sub_agent.set_context(initial_context)
     end
-    
+
     sub_agent
   end
 
@@ -87,7 +87,7 @@ class ClaudeService
     raise ConfigurationError, "Anthropic client not configured" unless @client
 
     messages = build_messages(content, context)
-    
+
     Enumerator.new do |yielder|
       @client.messages(
         model: Rails.application.config.anthropic[:model],
@@ -118,15 +118,15 @@ class ClaudeService
 
   def build_messages(content, context)
     messages = []
-    
+
     # Add context messages if available
     if context[:previous_messages]
       messages.concat(context[:previous_messages])
     end
-    
+
     # Add the current message
     messages << { role: "user", content: content }
-    
+
     messages
   end
 
@@ -134,15 +134,15 @@ class ClaudeService
     ClaudeMessage.create!(
       session_id: @session_id,
       sub_agent_name: @sub_agent_name,
-      role: 'user',
+      role: "user",
       content: user_content,
       context: context
     )
-    
+
     ClaudeMessage.create!(
       session_id: @session_id,
       sub_agent_name: @sub_agent_name,
-      role: 'assistant',
+      role: "assistant",
       content: assistant_response,
       context: {}
     )

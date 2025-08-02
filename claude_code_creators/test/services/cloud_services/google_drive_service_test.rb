@@ -6,19 +6,19 @@ module Google
     module DriveV3
       class DriveService; end
     end
-    
+
     class Error < StandardError
       attr_accessor :status_code
-      
+
       def initialize(message)
         super(message)
       end
     end
-    
+
     class AuthorizationError < Error; end
     class ClientError < Error; end
   end
-  
+
   module Auth
     class UserRefreshCredentials; end
   end
@@ -27,7 +27,7 @@ end
 # Stub the require statements to prevent loading actual Google API gems
 require_stub = Object.method(:require)
 Object.define_method(:require) do |name|
-  return true if ['google/apis/drive_v3', 'googleauth'].include?(name)
+  return true if [ "google/apis/drive_v3", "googleauth" ].include?(name)
   require_stub.call(name)
 end
 
@@ -36,31 +36,31 @@ module CloudServices
     setup do
       # Clean up any existing integrations to avoid uniqueness conflicts
       @user = users(:one)
-      @user.cloud_integrations.where(provider: 'google_drive').destroy_all
-      
+      @user.cloud_integrations.where(provider: "google_drive").destroy_all
+
       # Create integration with properly encrypted attributes instead of using fixtures
       @integration = CloudIntegration.create!(
         user: @user,
-        provider: 'google_drive',
-        access_token: 'test_access_token_1',
-        refresh_token: 'test_refresh_token_1',
+        provider: "google_drive",
+        access_token: "test_access_token_1",
+        refresh_token: "test_refresh_token_1",
         expires_at: 1.hour.from_now,
         settings: { scope: "read_write", token_type: "Bearer" }
       )
-      
+
       # Mock Google API client
       @mock_drive_service = mock()
       Google::Apis::DriveV3::DriveService.stubs(:new).returns(@mock_drive_service)
-      
+
       # Mock Google auth
       @mock_auth = mock()
       Google::Auth::UserRefreshCredentials.stubs(:new).returns(@mock_auth)
       @mock_drive_service.stubs(:authorization=)
-      
+
       # Configure Rails credentials for testing
       Rails.application.credentials.stubs(:dig).with(:google, :client_id).returns("test-client-id")
       Rails.application.credentials.stubs(:dig).with(:google, :client_secret).returns("test-client-secret")
-      
+
       # Now create the service with the properly encrypted integration
       @service = GoogleDriveService.new(@integration)
     end
@@ -71,7 +71,7 @@ module CloudServices
 
     test "oauth2_config returns correct configuration" do
       config = GoogleDriveService.oauth2_config
-      
+
       assert_equal "test-client-id", config[:client_id]
       assert_equal "test-client-secret", config[:client_secret]
       assert_includes config[:redirect_uri], "/cloud_integrations/google/callback"
@@ -82,7 +82,7 @@ module CloudServices
 
     test "authorization_url generates correct URL" do
       url = GoogleDriveService.authorization_url
-      
+
       assert_includes url, "https://accounts.google.com/o/oauth2/v2/auth"
       assert_includes url, "client_id=test-client-id"
       assert_includes url, "response_type=code"
@@ -94,16 +94,16 @@ module CloudServices
       # Mock HTTParty response
       mock_response = mock()
       mock_response.stubs(:success?).returns(true)
-      mock_response.stubs(:body).returns({ 
+      mock_response.stubs(:body).returns({
         access_token: "new-access-token",
         refresh_token: "new-refresh-token",
         expires_in: 3600
       }.to_json)
-      
-      HTTParty.expects(:post).with('https://oauth2.googleapis.com/token', anything).returns(mock_response)
-      
+
+      HTTParty.expects(:post).with("https://oauth2.googleapis.com/token", anything).returns(mock_response)
+
       result = GoogleDriveService.exchange_code("auth-code")
-      
+
       assert_equal "new-access-token", result["access_token"]
       assert_equal "new-refresh-token", result["refresh_token"]
       assert_equal 3600, result["expires_in"]
@@ -113,9 +113,9 @@ module CloudServices
       mock_response = mock()
       mock_response.stubs(:success?).returns(false)
       mock_response.stubs(:body).returns("Invalid code")
-      
+
       HTTParty.expects(:post).returns(mock_response)
-      
+
       assert_raises CloudServices::ApiError do
         GoogleDriveService.exchange_code("invalid-code")
       end
@@ -132,21 +132,21 @@ module CloudServices
           web_view_link: "https://docs.google.com/document/d/file1"
         )
       ]
-      
+
       mock_response = OpenStruct.new(
         files: mock_files,
         next_page_token: "next-page"
       )
-      
+
       @mock_drive_service.expects(:list_files).with(
         q: "mimeType != 'application/vnd.google-apps.folder'",
         page_size: 100,
         page_token: nil,
-        fields: 'files(id, name, mimeType, size, modifiedTime, webViewLink), nextPageToken'
+        fields: "files(id, name, mimeType, size, modifiedTime, webViewLink), nextPageToken"
       ).returns(mock_response)
-      
+
       result = @service.list_files
-      
+
       assert_equal 1, result[:files].count
       assert_equal "file1", result[:files].first[:id]
       assert_equal "Document.docx", result[:files].first[:name]
@@ -160,7 +160,7 @@ module CloudServices
         page_token: "page-token",
         fields: anything
       ).returns(OpenStruct.new(files: [], next_page_token: nil))
-      
+
       @service.list_files(query: "name contains 'test'", page_token: "page-token")
     end
 
@@ -169,12 +169,12 @@ module CloudServices
         name: "My Document",
         mime_type: "application/vnd.google-apps.document"
       )
-      
+
       @mock_drive_service.expects(:get_file).with("doc-id").returns(mock_file)
       @mock_drive_service.expects(:export_file).with("doc-id", "text/html").returns("<html>Content</html>")
-      
+
       result = @service.import_file("doc-id")
-      
+
       assert_equal "My Document", result[:name]
       assert_equal "<html>Content</html>", result[:content]
       assert_equal "application/vnd.google-apps.document", result[:mime_type]
@@ -185,12 +185,12 @@ module CloudServices
         name: "My Spreadsheet",
         mime_type: "application/vnd.google-apps.spreadsheet"
       )
-      
+
       @mock_drive_service.expects(:get_file).with("sheet-id").returns(mock_file)
       @mock_drive_service.expects(:export_file).with("sheet-id", "text/csv").returns("col1,col2\nval1,val2")
-      
+
       result = @service.import_file("sheet-id")
-      
+
       assert_equal "col1,col2\nval1,val2", result[:content]
     end
 
@@ -199,34 +199,34 @@ module CloudServices
         name: "image.png",
         mime_type: "image/png"
       )
-      
+
       @mock_drive_service.expects(:get_file).with("file-id").returns(mock_file)
       @mock_drive_service.expects(:get_file).with("file-id", download_dest: anything).returns("binary-data")
-      
+
       result = @service.import_file("file-id")
-      
+
       assert_equal "image.png", result[:name]
       assert_equal "image/png", result[:mime_type]
     end
 
     test "export_document creates file in Google Drive" do
       document = documents(:one)
-      
+
       mock_file = OpenStruct.new(
         id: "new-file-id",
         name: document.title,
         web_view_link: "https://docs.google.com/document/d/new-file-id"
       )
-      
+
       @mock_drive_service.expects(:create_file).with(
-        { name: document.title, parents: ["root"] },
+        { name: document.title, parents: [ "root" ] },
         fields: "id, name, webViewLink",
         upload_source: anything,
         content_type: "text/html"
       ).returns(mock_file)
-      
+
       cloud_file = @service.export_document(document)
-      
+
       assert_equal "new-file-id", cloud_file.file_id
       assert_equal document.title, cloud_file.name
       assert_equal "text/html", cloud_file.mime_type
@@ -236,23 +236,23 @@ module CloudServices
 
     test "export_document with custom folder" do
       document = documents(:one)
-      
+
       @mock_drive_service.expects(:create_file).with(
-        { name: document.title, parents: ["folder-123"] },
+        { name: document.title, parents: [ "folder-123" ] },
         fields: anything,
         upload_source: anything,
         content_type: anything
       ).returns(OpenStruct.new(id: "file-id", name: document.title, web_view_link: "link"))
-      
+
       @service.export_document(document, folder_id: "folder-123")
     end
 
     test "handles authentication errors" do
       error = Google::Apis::AuthorizationError.new("Unauthorized")
       error.instance_variable_set(:@status_code, 401)
-      
+
       @mock_drive_service.expects(:list_files).raises(error)
-      
+
       assert_raises CloudServices::AuthenticationError do
         @service.list_files
       end
@@ -261,9 +261,9 @@ module CloudServices
     test "handles authorization errors" do
       error = Google::Apis::ClientError.new("Forbidden")
       error.instance_variable_set(:@status_code, 403)
-      
+
       @mock_drive_service.expects(:list_files).raises(error)
-      
+
       assert_raises CloudServices::AuthorizationError do
         @service.list_files
       end
@@ -272,9 +272,9 @@ module CloudServices
     test "handles not found errors" do
       error = Google::Apis::ClientError.new("Not Found")
       error.instance_variable_set(:@status_code, 404)
-      
+
       @mock_drive_service.expects(:get_file).raises(error)
-      
+
       assert_raises CloudServices::NotFoundError do
         @service.import_file("missing-id")
       end
@@ -283,16 +283,16 @@ module CloudServices
     test "refreshes token when needed" do
       mock_response = mock()
       mock_response.stubs(:success?).returns(true)
-      mock_response.stubs(:body).returns({ 
+      mock_response.stubs(:body).returns({
         access_token: "refreshed-token",
         expires_in: 3600
       }.to_json)
-      
-      HTTParty.expects(:post).with('https://oauth2.googleapis.com/token', anything).returns(mock_response)
-      
+
+      HTTParty.expects(:post).with("https://oauth2.googleapis.com/token", anything).returns(mock_response)
+
       # Force token refresh by calling private method through send
       result = @service.send(:oauth2_refresh_request)
-      
+
       assert_equal "refreshed-token", result["access_token"]
     end
   end

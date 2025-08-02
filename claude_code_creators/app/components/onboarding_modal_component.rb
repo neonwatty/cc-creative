@@ -17,10 +17,10 @@ class OnboardingModalComponent < ViewComponent::Base
     # Show onboarding if user is new (less than 24 hours old) or explicitly requested
     return false unless current_user
     return true if options[:force_show]
-    
+
     # Check if user has seen onboarding
-    return false if current_user.attributes.key?('onboarding_completed_at') && current_user.onboarding_completed_at.present?
-    
+    return false if current_user.attributes.key?("onboarding_completed_at") && current_user.onboarding_completed_at.present?
+
     # Show for new users
     current_user.created_at > 24.hours.ago
   end
@@ -40,9 +40,9 @@ class OnboardingModalComponent < ViewComponent::Base
     ]
 
     if show_modal
-      base_classes += ["opacity-100", "visible"]
+      base_classes += [ "opacity-100", "visible" ]
     else
-      base_classes += ["opacity-0", "invisible", "pointer-events-none"]
+      base_classes += [ "opacity-0", "invisible", "pointer-events-none" ]
     end
 
     base_classes.join(" ")
@@ -184,9 +184,9 @@ class OnboardingModalComponent < ViewComponent::Base
     ]
 
     if step_number < current_step
-      base_classes += ["bg-creative-secondary-500"]
+      base_classes += [ "bg-creative-secondary-500" ]
     else
-      base_classes += ["bg-creative-neutral-200", "dark:bg-creative-neutral-600"]
+      base_classes += [ "bg-creative-neutral-200", "dark:bg-creative-neutral-600" ]
     end
 
     base_classes.join(" ")
@@ -363,7 +363,7 @@ class OnboardingModalComponent < ViewComponent::Base
       "block",
       "p-6",
       "bg-gradient-to-br",
-      "from-creative-primary-50", 
+      "from-creative-primary-50",
       "to-creative-secondary-50",
       "dark:from-creative-primary-900/20",
       "dark:to-creative-secondary-900/20",

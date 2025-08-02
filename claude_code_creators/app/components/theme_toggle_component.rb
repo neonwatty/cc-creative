@@ -2,7 +2,7 @@
 
 class ThemeToggleComponent < ViewComponent::Base
   include ActionView::Helpers::TagHelper
-  
+
   def initialize(variant: :default, size: :md, position: :inline, classes: nil)
     @variant = variant
     @size = size
@@ -15,8 +15,8 @@ class ThemeToggleComponent < ViewComponent::Base
   attr_reader :variant, :size, :position, :classes
 
   def wrapper_classes
-    base_classes = ["theme-toggle-wrapper"]
-    
+    base_classes = [ "theme-toggle-wrapper" ]
+
     case position
     when :fixed_top_right
       base_classes << "fixed top-4 right-4 z-50"

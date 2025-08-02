@@ -3,24 +3,24 @@ require "test_helper"
 class CloudFilesControllerTest < ActionDispatch::IntegrationTest
   setup do
     @user = users(:one)
-    
+
     # Delete existing integrations to avoid uniqueness conflicts
     CloudIntegration.destroy_all
-    
+
     @cloud_integration = CloudIntegration.create!(
       user: @user,
-      provider: 'google_drive',
-      access_token: 'test_token',
-      settings: { scope: 'drive.file' }
+      provider: "google_drive",
+      access_token: "test_token",
+      settings: { scope: "drive.file" }
     )
     @cloud_file = CloudFile.create!(
       cloud_integration: @cloud_integration,
-      provider: 'google_drive',
-      file_id: 'test_file_123',
-      name: 'test_document.txt',
-      mime_type: 'text/plain',
+      provider: "google_drive",
+      file_id: "test_file_123",
+      name: "test_document.txt",
+      mime_type: "text/plain",
       size: 1024,
-      metadata: { author: 'Test User' }
+      metadata: { author: "Test User" }
     )
     sign_in_as(@user)
   end
@@ -42,16 +42,16 @@ class CloudFilesControllerTest < ActionDispatch::IntegrationTest
     # Create non-importable file
     non_importable = CloudFile.create!(
       cloud_integration: @cloud_integration,
-      provider: 'google_drive',
-      file_id: 'image_file',
-      name: 'image.jpg',
-      mime_type: 'image/jpeg',
+      provider: "google_drive",
+      file_id: "image_file",
+      name: "image.jpg",
+      mime_type: "image/jpeg",
       size: 2048
     )
-    
-    get cloud_integration_cloud_files_url(@cloud_integration, importable: 'true')
+
+    get cloud_integration_cloud_files_url(@cloud_integration, importable: "true")
     assert_response :success
-    
+
     # Should show importable file
     assert_select "div", text: /#{@cloud_file.name}/
     # Should not show non-importable file
@@ -60,8 +60,8 @@ class CloudFilesControllerTest < ActionDispatch::IntegrationTest
 
   test "index should trigger sync when requested" do
     CloudFileSyncJob.expects(:perform_later).with(@cloud_integration).once
-    
-    get cloud_integration_cloud_files_url(@cloud_integration, sync: 'true')
+
+    get cloud_integration_cloud_files_url(@cloud_integration, sync: "true")
     assert_response :success
     assert_match /Syncing files/, flash[:notice]
   end
@@ -69,7 +69,7 @@ class CloudFilesControllerTest < ActionDispatch::IntegrationTest
   test "index should trigger sync when no files exist" do
     @cloud_integration.cloud_files.destroy_all
     CloudFileSyncJob.expects(:perform_later).with(@cloud_integration).once
-    
+
     get cloud_integration_cloud_files_url(@cloud_integration)
     assert_response :success
   end
@@ -78,7 +78,7 @@ class CloudFilesControllerTest < ActionDispatch::IntegrationTest
     # Make the file appear old
     @cloud_file.update!(last_synced_at: 2.hours.ago)
     CloudFileSyncJob.expects(:perform_later).with(@cloud_integration).once
-    
+
     get cloud_integration_cloud_files_url(@cloud_integration)
     assert_response :success
   end
@@ -88,14 +88,14 @@ class CloudFilesControllerTest < ActionDispatch::IntegrationTest
     25.times do |i|
       CloudFile.create!(
         cloud_integration: @cloud_integration,
-        provider: 'google_drive',
+        provider: "google_drive",
         file_id: "file_#{i}",
         name: "document_#{i}.txt",
-        mime_type: 'text/plain',
+        mime_type: "text/plain",
         size: 1024
       )
     end
-    
+
     get cloud_integration_cloud_files_url(@cloud_integration)
     assert_response :success
     # Should only show 20 files per page (as configured in controller)
@@ -112,11 +112,11 @@ class CloudFilesControllerTest < ActionDispatch::IntegrationTest
     other_user = users(:two)
     other_integration = CloudIntegration.create!(
       user: other_user,
-      provider: 'dropbox',
-      access_token: 'other_token',
+      provider: "dropbox",
+      access_token: "other_token",
       settings: {}
     )
-    
+
     get cloud_integration_cloud_files_url(other_integration)
     assert_response :not_found
   end
@@ -139,18 +139,18 @@ class CloudFilesControllerTest < ActionDispatch::IntegrationTest
     other_user = users(:two)
     other_integration = CloudIntegration.create!(
       user: other_user,
-      provider: 'dropbox',
-      access_token: 'other_token',
+      provider: "dropbox",
+      access_token: "other_token",
       settings: {}
     )
     other_file = CloudFile.create!(
       cloud_integration: other_integration,
-      provider: 'dropbox',
-      file_id: 'other_file',
-      name: 'other.txt',
-      mime_type: 'text/plain'
+      provider: "dropbox",
+      file_id: "other_file",
+      name: "other.txt",
+      mime_type: "text/plain"
     )
-    
+
     get cloud_integration_cloud_file_url(@cloud_integration, other_file)
     assert_response :not_found
   end
@@ -158,9 +158,9 @@ class CloudFilesControllerTest < ActionDispatch::IntegrationTest
   # Import Action Tests
   test "should import importable file" do
     CloudFileImportJob.expects(:perform_later).with(@cloud_file, @user).once
-    
+
     post import_cloud_integration_cloud_file_url(@cloud_integration, @cloud_file)
-    
+
     assert_redirected_to cloud_integration_cloud_files_path(@cloud_integration)
     assert_match /File import queued/, flash[:notice]
   end
@@ -168,17 +168,17 @@ class CloudFilesControllerTest < ActionDispatch::IntegrationTest
   test "should not import non-importable file" do
     non_importable = CloudFile.create!(
       cloud_integration: @cloud_integration,
-      provider: 'google_drive',
-      file_id: 'image_file',
-      name: 'image.jpg',
-      mime_type: 'image/jpeg',
+      provider: "google_drive",
+      file_id: "image_file",
+      name: "image.jpg",
+      mime_type: "image/jpeg",
       size: 2048
     )
-    
+
     CloudFileImportJob.expects(:perform_later).never
-    
+
     post import_cloud_integration_cloud_file_url(@cloud_integration, non_importable)
-    
+
     assert_redirected_to cloud_integration_cloud_files_path(@cloud_integration)
     assert_match /cannot be imported/, flash[:alert]
   end
@@ -193,18 +193,18 @@ class CloudFilesControllerTest < ActionDispatch::IntegrationTest
     other_user = users(:two)
     other_integration = CloudIntegration.create!(
       user: other_user,
-      provider: 'dropbox',
-      access_token: 'other_token',
+      provider: "dropbox",
+      access_token: "other_token",
       settings: {}
     )
     other_file = CloudFile.create!(
       cloud_integration: other_integration,
-      provider: 'dropbox',
-      file_id: 'other_file',
-      name: 'other.txt',
-      mime_type: 'text/plain'
+      provider: "dropbox",
+      file_id: "other_file",
+      name: "other.txt",
+      mime_type: "text/plain"
     )
-    
+
     post import_cloud_integration_cloud_file_url(@cloud_integration, other_file)
     assert_response :not_found
   end
@@ -212,34 +212,34 @@ class CloudFilesControllerTest < ActionDispatch::IntegrationTest
   # Export Action Tests
   test "should export document to cloud" do
     document = documents(:one)
-    service_mock = mock('cloud_service')
+    service_mock = mock("cloud_service")
     service_mock.expects(:export_document).with(document, {}).returns(
-      CloudFile.new(name: 'exported.txt', file_id: 'exported_123')
+      CloudFile.new(name: "exported.txt", file_id: "exported_123")
     )
-    
+
     controller = CloudFilesController.new
     controller.stubs(:cloud_service_for).returns(service_mock)
     CloudFilesController.any_instance.stubs(:cloud_service_for).returns(service_mock)
-    
+
     post export_cloud_integration_cloud_files_url(@cloud_integration), params: {
       document_id: document.id
     }
-    
+
     assert_redirected_to document_path(document)
     assert_match /Document exported/, flash[:notice]
   end
 
   test "should handle export errors gracefully" do
     document = documents(:one)
-    service_mock = mock('cloud_service')
+    service_mock = mock("cloud_service")
     service_mock.expects(:export_document).raises(StandardError.new("Export failed"))
-    
+
     CloudFilesController.any_instance.stubs(:cloud_service_for).returns(service_mock)
-    
+
     post export_cloud_integration_cloud_files_url(@cloud_integration), params: {
       document_id: document.id
     }
-    
+
     assert_redirected_to document_path(document)
     assert_match /Failed to export/, flash[:alert]
   end
@@ -247,7 +247,7 @@ class CloudFilesControllerTest < ActionDispatch::IntegrationTest
   test "export should require authentication" do
     document = documents(:one)
     sign_out
-    
+
     post export_cloud_integration_cloud_files_url(@cloud_integration), params: {
       document_id: document.id
     }
@@ -257,43 +257,43 @@ class CloudFilesControllerTest < ActionDispatch::IntegrationTest
   test "export should not allow access to other users documents" do
     other_user = users(:two)
     other_document = Document.create!(
-      title: 'Other Document',
-      content: 'Other document content',
+      title: "Other Document",
+      content: "Other document content",
       user: other_user
     )
-    
+
     post export_cloud_integration_cloud_files_url(@cloud_integration), params: {
       document_id: other_document.id
     }
-    
+
     # Should raise RecordNotFound because current_user.documents won't include other user's docs
     assert_response :not_found
   end
 
   test "export should pass export options" do
     document = documents(:one)
-    service_mock = mock('cloud_service')
-    
+    service_mock = mock("cloud_service")
+
     expected_options = {
-      folder_id: 'folder123',
-      folder_path: '/my/folder',
-      parent_page_id: 'page456'
+      folder_id: "folder123",
+      folder_path: "/my/folder",
+      parent_page_id: "page456"
     }
-    
+
     service_mock.expects(:export_document).with(document, expected_options).returns(
-      CloudFile.new(name: 'exported.txt', file_id: 'exported_123')  
+      CloudFile.new(name: "exported.txt", file_id: "exported_123")
     )
-    
+
     CloudFilesController.any_instance.stubs(:cloud_service_for).returns(service_mock)
-    
+
     post export_cloud_integration_cloud_files_url(@cloud_integration), params: {
       document_id: document.id,
-      folder_id: 'folder123',
-      folder_path: '/my/folder',
-      parent_page_id: 'page456',
-      ignored_param: 'should_be_ignored'
+      folder_id: "folder123",
+      folder_path: "/my/folder",
+      parent_page_id: "page456",
+      ignored_param: "should_be_ignored"
     }
-    
+
     assert_redirected_to document_path(document)
     assert_match /Document exported/, flash[:notice]
   end
@@ -303,7 +303,7 @@ class CloudFilesControllerTest < ActionDispatch::IntegrationTest
     @cloud_integration.cloud_files.destroy_all
     controller = CloudFilesController.new
     controller.instance_variable_set(:@cloud_integration, @cloud_integration)
-    
+
     assert controller.send(:sync_needed?)
   end
 
@@ -311,7 +311,7 @@ class CloudFilesControllerTest < ActionDispatch::IntegrationTest
     @cloud_file.update!(last_synced_at: 2.hours.ago)
     controller = CloudFilesController.new
     controller.instance_variable_set(:@cloud_integration, @cloud_integration)
-    
+
     assert controller.send(:sync_needed?)
   end
 
@@ -319,36 +319,36 @@ class CloudFilesControllerTest < ActionDispatch::IntegrationTest
     @cloud_file.update!(last_synced_at: 30.minutes.ago)
     controller = CloudFilesController.new
     controller.instance_variable_set(:@cloud_integration, @cloud_integration)
-    
+
     assert_not controller.send(:sync_needed?)
   end
 
   test "cloud_service_for should return correct service class" do
     controller = CloudFilesController.new
-    
+
     # Test Google Drive
-    google_integration = CloudIntegration.new(provider: 'google_drive')
-    CloudServices::GoogleDriveService.expects(:new).with(google_integration).returns('google_service')
+    google_integration = CloudIntegration.new(provider: "google_drive")
+    CloudServices::GoogleDriveService.expects(:new).with(google_integration).returns("google_service")
     result = controller.send(:cloud_service_for, google_integration)
-    assert_equal 'google_service', result
-    
+    assert_equal "google_service", result
+
     # Test Dropbox
-    dropbox_integration = CloudIntegration.new(provider: 'dropbox')
-    CloudServices::DropboxService.expects(:new).with(dropbox_integration).returns('dropbox_service')
+    dropbox_integration = CloudIntegration.new(provider: "dropbox")
+    CloudServices::DropboxService.expects(:new).with(dropbox_integration).returns("dropbox_service")
     result = controller.send(:cloud_service_for, dropbox_integration)
-    assert_equal 'dropbox_service', result
-    
+    assert_equal "dropbox_service", result
+
     # Test Notion
-    notion_integration = CloudIntegration.new(provider: 'notion')
-    CloudServices::NotionService.expects(:new).with(notion_integration).returns('notion_service')
+    notion_integration = CloudIntegration.new(provider: "notion")
+    CloudServices::NotionService.expects(:new).with(notion_integration).returns("notion_service")
     result = controller.send(:cloud_service_for, notion_integration)
-    assert_equal 'notion_service', result
+    assert_equal "notion_service", result
   end
 
   test "cloud_service_for should raise error for unknown provider" do
     controller = CloudFilesController.new
-    unknown_integration = CloudIntegration.new(provider: 'unknown_provider')
-    
+    unknown_integration = CloudIntegration.new(provider: "unknown_provider")
+
     assert_raises(RuntimeError, /Unknown provider/) do
       controller.send(:cloud_service_for, unknown_integration)
     end
@@ -356,42 +356,42 @@ class CloudFilesControllerTest < ActionDispatch::IntegrationTest
 
   test "export_options should permit only allowed parameters" do
     controller = CloudFilesController.new
-    
+
     # Mock params
     allowed_params = {
-      'folder_id' => 'folder123',
-      'folder_path' => '/path',
-      'parent_page_id' => 'page456'
+      "folder_id" => "folder123",
+      "folder_path" => "/path",
+      "parent_page_id" => "page456"
     }
-    
+
     disallowed_params = {
-      'user_id' => '999',
-      'access_token' => 'secret',
-      'malicious' => 'payload'
+      "user_id" => "999",
+      "access_token" => "secret",
+      "malicious" => "payload"
     }
-    
+
     all_params = allowed_params.merge(disallowed_params)
-    
+
     controller.stubs(:params).returns(ActionController::Parameters.new(all_params))
-    
+
     result = controller.send(:export_options)
-    
+
     # Should only include allowed params with symbol keys
     expected = {
-      folder_id: 'folder123',
-      folder_path: '/path',
-      parent_page_id: 'page456'
+      folder_id: "folder123",
+      folder_path: "/path",
+      parent_page_id: "page456"
     }
-    
+
     assert_equal expected, result
   end
 
   # Error Handling Tests
   test "should handle service unavailable errors" do
     CloudFileSyncJob.stubs(:perform_later).raises(StandardError.new("Service unavailable"))
-    
-    get cloud_integration_cloud_files_url(@cloud_integration, sync: 'true')
-    
+
+    get cloud_integration_cloud_files_url(@cloud_integration, sync: "true")
+
     # Should still respond successfully even if sync job fails
     assert_response :success
   end
@@ -399,7 +399,7 @@ class CloudFilesControllerTest < ActionDispatch::IntegrationTest
   test "should handle database connection errors gracefully" do
     # Stub at the model level to ensure the error is raised
     CloudIntegration.any_instance.stubs(:cloud_files).raises(ActiveRecord::ConnectionNotEstablished.new("Database down"))
-    
+
     assert_raises(ActiveRecord::ConnectionNotEstablished) do
       get cloud_integration_cloud_files_url(@cloud_integration)
     end
@@ -410,28 +410,28 @@ class CloudFilesControllerTest < ActionDispatch::IntegrationTest
     # This is more of a model concern, but worth testing at controller level
     post import_cloud_integration_cloud_file_url(@cloud_integration, @cloud_file), params: {
       cloud_file: {
-        file_id: 'malicious_id',
-        access_token: 'stolen_token'
+        file_id: "malicious_id",
+        access_token: "stolen_token"
       }
     }
-    
+
     # Should ignore the malicious params
     @cloud_file.reload
-    assert_not_equal 'malicious_id', @cloud_file.file_id
+    assert_not_equal "malicious_id", @cloud_file.file_id
   end
 
   test "should sanitize file names in responses" do
     malicious_file = CloudFile.create!(
       cloud_integration: @cloud_integration,
-      provider: 'google_drive',
-      file_id: 'malicious_file',
+      provider: "google_drive",
+      file_id: "malicious_file",
       name: '<script>alert("xss")</script>.txt',
-      mime_type: 'text/plain'
+      mime_type: "text/plain"
     )
-    
+
     get cloud_integration_cloud_files_url(@cloud_integration)
     assert_response :success
-    
+
     # HTML should be escaped
     assert_no_match /<script>/, response.body
     assert_match /&lt;script&gt;/, response.body
@@ -443,14 +443,14 @@ class CloudFilesControllerTest < ActionDispatch::IntegrationTest
     5.times do |i|
       CloudFile.create!(
         cloud_integration: @cloud_integration,
-        provider: 'google_drive',
+        provider: "google_drive",
         file_id: "file_#{i}",
         name: "document_#{i}.txt",
-        mime_type: 'text/plain',
+        mime_type: "text/plain",
         document: documents(:one)  # Associate with document
       )
     end
-    
+
     # This test verifies that the controller uses includes(:document)
     # With authentication, integration lookup, and other framework queries,
     # we expect around 13-15 queries total. The key is that we shouldn't have
@@ -458,7 +458,7 @@ class CloudFilesControllerTest < ActionDispatch::IntegrationTest
     assert_queries_count(13) do
       get cloud_integration_cloud_files_url(@cloud_integration)
     end
-    
+
     assert_response :success
   end
 
@@ -466,12 +466,12 @@ class CloudFilesControllerTest < ActionDispatch::IntegrationTest
 
   def assert_queries_count(expected_count)
     queries = []
-    subscription = ActiveSupport::Notifications.subscribe('sql.active_record') do |name, start, finish, id, payload|
+    subscription = ActiveSupport::Notifications.subscribe("sql.active_record") do |name, start, finish, id, payload|
       queries << payload[:sql] unless payload[:sql] =~ /^(BEGIN|COMMIT|ROLLBACK|SAVEPOINT|RELEASE SAVEPOINT)/
     end
-    
+
     yield
-    
+
     assert_equal expected_count, queries.size, "Expected #{expected_count} queries, got #{queries.size}:\n#{queries.join("\n")}"
   ensure
     ActiveSupport::Notifications.unsubscribe(subscription) if subscription

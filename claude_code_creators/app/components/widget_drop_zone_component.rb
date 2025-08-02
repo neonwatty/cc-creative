@@ -2,7 +2,7 @@
 
 class WidgetDropZoneComponent < ViewComponent::Base
   include ActionView::Helpers::TagHelper
-  
+
   def initialize(target_element:, accepted_types: [], options: {})
     @target_element = target_element
     @accepted_types = accepted_types.presence || %w[context_item widget snippet]
@@ -33,21 +33,21 @@ class WidgetDropZoneComponent < ViewComponent::Base
     # Size variants
     case size
     when :small
-      base_classes += ["p-4", "min-h-[100px]"]
+      base_classes += [ "p-4", "min-h-[100px]" ]
     when :large
-      base_classes += ["p-8", "min-h-[300px]"]
+      base_classes += [ "p-8", "min-h-[300px]" ]
     else
-      base_classes += ["p-6", "min-h-[200px]"]
+      base_classes += [ "p-6", "min-h-[200px]" ]
     end
 
     # Position variants
     case position
     when :top
-      base_classes += ["items-start", "justify-center"]
+      base_classes += [ "items-start", "justify-center" ]
     when :bottom
-      base_classes += ["items-end", "justify-center"]
+      base_classes += [ "items-end", "justify-center" ]
     else
-      base_classes += ["items-center", "justify-center"]
+      base_classes += [ "items-center", "justify-center" ]
     end
 
     base_classes += [
@@ -97,11 +97,11 @@ class WidgetDropZoneComponent < ViewComponent::Base
 
     case size
     when :small
-      base_classes += ["text-sm"]
+      base_classes += [ "text-sm" ]
     when :large
-      base_classes += ["text-lg"]
+      base_classes += [ "text-lg" ]
     else
-      base_classes += ["text-base"]
+      base_classes += [ "text-base" ]
     end
 
     base_classes.join(" ")
@@ -118,11 +118,11 @@ class WidgetDropZoneComponent < ViewComponent::Base
 
     case size
     when :small
-      base_classes += ["w-8", "h-8"]
+      base_classes += [ "w-8", "h-8" ]
     when :large
-      base_classes += ["w-16", "h-16"]
+      base_classes += [ "w-16", "h-16" ]
     else
-      base_classes += ["w-12", "h-12"]
+      base_classes += [ "w-12", "h-12" ]
     end
 
     base_classes.join(" ")
@@ -139,11 +139,11 @@ class WidgetDropZoneComponent < ViewComponent::Base
 
     case size
     when :small
-      base_classes += ["text-sm"]
+      base_classes += [ "text-sm" ]
     when :large
-      base_classes += ["text-xl"]
+      base_classes += [ "text-xl" ]
     else
-      base_classes += ["text-lg"]
+      base_classes += [ "text-lg" ]
     end
 
     base_classes.join(" ")
@@ -159,11 +159,11 @@ class WidgetDropZoneComponent < ViewComponent::Base
 
     case size
     when :small
-      base_classes += ["text-xs"]
+      base_classes += [ "text-xs" ]
     when :large
-      base_classes += ["text-base"]
+      base_classes += [ "text-base" ]
     else
-      base_classes += ["text-sm"]
+      base_classes += [ "text-sm" ]
     end
 
     base_classes.join(" ")
@@ -172,20 +172,20 @@ class WidgetDropZoneComponent < ViewComponent::Base
   def accepted_types_list
     accepted_types.map do |type|
       case type
-      when 'context_item'
-        'Context Items'
-      when 'widget'
-        'Widgets'
-      when 'snippet'
-        'Code Snippets'
-      when 'image'
-        'Images'
-      when 'file'
-        'Files'
+      when "context_item"
+        "Context Items"
+      when "widget"
+        "Widgets"
+      when "snippet"
+        "Code Snippets"
+      when "image"
+        "Images"
+      when "file"
+        "Files"
       else
         type.humanize
       end
-    end.join(', ')
+    end.join(", ")
   end
 
   def drop_zone_data_attributes
@@ -197,7 +197,7 @@ class WidgetDropZoneComponent < ViewComponent::Base
       "widget_drop_zone_position_value": position,
       action: [
         "dragover->widget-drop-zone#handleDragOver",
-        "dragenter->widget-drop-zone#handleDragEnter", 
+        "dragenter->widget-drop-zone#handleDragEnter",
         "dragleave->widget-drop-zone#handleDragLeave",
         "drop->widget-drop-zone#handleDrop"
       ].join(" ")

@@ -18,12 +18,12 @@ class CloudProviderComponent < ViewComponent::Base
 
   def provider_name
     case provider
-    when 'google_drive'
-      'Google Drive'
-    when 'dropbox'
-      'Dropbox'
-    when 'notion'
-      'Notion'
+    when "google_drive"
+      "Google Drive"
+    when "dropbox"
+      "Dropbox"
+    when "notion"
+      "Notion"
     else
       provider.humanize
     end
@@ -35,23 +35,23 @@ class CloudProviderComponent < ViewComponent::Base
 
   def status_badge_class
     if connected?
-      'status-badge status-badge--connected'
+      "status-badge status-badge--connected"
     else
-      'status-badge status-badge--disconnected'
+      "status-badge status-badge--disconnected"
     end
   end
 
   def status_text
     if connected?
       if integration.expired?
-        'Token Expired'
+        "Token Expired"
       elsif integration.needs_refresh?
-        'Needs Refresh'
+        "Needs Refresh"
       else
-        'Connected'
+        "Connected"
       end
     else
-      'Not Connected'
+      "Not Connected"
     end
   end
 
@@ -60,12 +60,12 @@ class CloudProviderComponent < ViewComponent::Base
   end
 
   def last_sync_text
-    return 'Never' unless integration&.cloud_files&.any?
-    
+    return "Never" unless integration&.cloud_files&.any?
+
     last_sync = integration.cloud_files.order(:last_synced_at).last&.last_synced_at
-    return 'Never' unless last_sync
-    
-    time_ago_in_words(last_sync) + ' ago'
+    return "Never" unless last_sync
+
+    time_ago_in_words(last_sync) + " ago"
   end
 
   def connect_url
@@ -84,12 +84,12 @@ class CloudProviderComponent < ViewComponent::Base
 
   def provider_description
     case provider
-    when 'google_drive'
-      'Import documents from Google Drive and export your work back to Drive.'
-    when 'dropbox'
-      'Sync files with Dropbox for seamless document management.'
-    when 'notion'
-      'Connect to Notion to import pages and export documents as Notion pages.'
+    when "google_drive"
+      "Import documents from Google Drive and export your work back to Drive."
+    when "dropbox"
+      "Sync files with Dropbox for seamless document management."
+    when "notion"
+      "Connect to Notion to import pages and export documents as Notion pages."
     else
       "Connect your #{provider_name} account to import and export documents."
     end
@@ -97,7 +97,7 @@ class CloudProviderComponent < ViewComponent::Base
 
   def integration_data
     return {} unless integration
-    
+
     {
       id: integration.id,
       provider: integration.provider,
@@ -110,9 +110,9 @@ class CloudProviderComponent < ViewComponent::Base
 
   def oauth_controller_data
     return {} if connected?
-    
+
     {
-      controller: 'cloud-oauth',
+      controller: "cloud-oauth",
       'cloud-oauth-provider-value': provider,
       'cloud-oauth-auth-url-value': connect_url,
       'cloud-oauth-width-value': oauth_popup_width,
@@ -122,35 +122,35 @@ class CloudProviderComponent < ViewComponent::Base
 
   def oauth_popup_width
     case provider
-    when 'google_drive' then 500
-    when 'dropbox' then 600
-    when 'notion' then 700
+    when "google_drive" then 500
+    when "dropbox" then 600
+    when "notion" then 700
     else 600
     end
   end
 
   def oauth_popup_height
     case provider
-    when 'google_drive' then 600
-    when 'dropbox' then 700
-    when 'notion' then 800
+    when "google_drive" then 600
+    when "dropbox" then 700
+    when "notion" then 800
     else 700
     end
   end
 
   def card_css_classes
-    classes = ['provider-card', "provider-card--#{provider}"]
-    classes << (connected? ? 'provider-card--connected' : 'provider-card--disconnected')
-    classes << 'provider-card--expired' if integration&.expired?
-    classes.join(' ')
+    classes = [ "provider-card", "provider-card--#{provider}" ]
+    classes << (connected? ? "provider-card--connected" : "provider-card--disconnected")
+    classes << "provider-card--expired" if integration&.expired?
+    classes.join(" ")
   end
 
   def sync_status_data
     return {} unless connected?
-    
+
     {
       'integration-id': integration.id,
-      target: 'cloud-integration-manager.syncStatus'
+      target: "cloud-integration-manager.syncStatus"
     }
   end
 end

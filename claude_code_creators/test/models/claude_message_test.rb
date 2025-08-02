@@ -72,7 +72,7 @@ class ClaudeMessageTest < ActiveSupport::TestCase
   test "user_messages scope returns only user role messages" do
     user_msg = ClaudeMessage.create!(session_id: @session_id, role: "user", content: "User message")
     assistant_msg = ClaudeMessage.create!(session_id: @session_id, role: "assistant", content: "Assistant message")
-    
+
     results = ClaudeMessage.user_messages
     assert_includes results, user_msg
     assert_not_includes results, assistant_msg
@@ -81,7 +81,7 @@ class ClaudeMessageTest < ActiveSupport::TestCase
   test "assistant_messages scope returns only assistant role messages" do
     user_msg = ClaudeMessage.create!(session_id: @session_id, role: "user", content: "User message")
     assistant_msg = ClaudeMessage.create!(session_id: @session_id, role: "assistant", content: "Assistant message")
-    
+
     results = ClaudeMessage.assistant_messages
     assert_includes results, assistant_msg
     assert_not_includes results, user_msg
@@ -91,7 +91,7 @@ class ClaudeMessageTest < ActiveSupport::TestCase
     msg1 = ClaudeMessage.create!(session_id: "session1", role: "user", content: "Message 1")
     msg2 = ClaudeMessage.create!(session_id: "session2", role: "user", content: "Message 2")
     msg3 = ClaudeMessage.create!(session_id: "session1", role: "assistant", content: "Message 3")
-    
+
     results = ClaudeMessage.by_session("session1")
     assert_includes results, msg1
     assert_includes results, msg3
@@ -102,7 +102,7 @@ class ClaudeMessageTest < ActiveSupport::TestCase
     msg1 = ClaudeMessage.create!(session_id: @session_id, role: "user", content: "Message 1", sub_agent_name: "editor")
     msg2 = ClaudeMessage.create!(session_id: @session_id, role: "user", content: "Message 2", sub_agent_name: "researcher")
     msg3 = ClaudeMessage.create!(session_id: @session_id, role: "user", content: "Message 3", sub_agent_name: "editor")
-    
+
     results = ClaudeMessage.by_sub_agent("editor")
     assert_includes results, msg1
     assert_includes results, msg3
@@ -113,9 +113,9 @@ class ClaudeMessageTest < ActiveSupport::TestCase
     old = ClaudeMessage.create!(session_id: @session_id, role: "user", content: "Old", created_at: 2.days.ago)
     new = ClaudeMessage.create!(session_id: @session_id, role: "user", content: "New", created_at: 1.hour.ago)
     middle = ClaudeMessage.create!(session_id: @session_id, role: "user", content: "Middle", created_at: 1.day.ago)
-    
+
     results = ClaudeMessage.recent.to_a
-    assert_equal [new, middle, old], results.select { |m| [new, middle, old].include?(m) }
+    assert_equal [ new, middle, old ], results.select { |m| [ new, middle, old ].include?(m) }
   end
 
   # Class method tests
@@ -125,25 +125,25 @@ class ClaudeMessageTest < ActiveSupport::TestCase
     msg2 = ClaudeMessage.create!(session_id: @session_id, role: "assistant", content: "Answer 1", created_at: 3.hours.ago)
     msg3 = ClaudeMessage.create!(session_id: @session_id, role: "user", content: "Question 2", created_at: 2.hours.ago)
     msg4 = ClaudeMessage.create!(session_id: @session_id, role: "assistant", content: "Answer 2", created_at: 1.hour.ago)
-    
+
     pairs = ClaudeMessage.conversation_pairs(@session_id, limit: 2)
-    
+
     # Should return most recent pairs first
     assert_equal 2, pairs.size
-    assert_equal [msg4, msg3], pairs[0]
-    assert_equal [msg2, msg1], pairs[1]
+    assert_equal [ msg4, msg3 ], pairs[0]
+    assert_equal [ msg2, msg1 ], pairs[1]
   end
 
   test "conversation_pairs respects limit" do
     10.times do |i|
       ClaudeMessage.create!(
-        session_id: @session_id, 
-        role: i.even? ? "user" : "assistant", 
+        session_id: @session_id,
+        role: i.even? ? "user" : "assistant",
         content: "Message #{i}",
         created_at: i.hours.ago
       )
     end
-    
+
     pairs = ClaudeMessage.conversation_pairs(@session_id, limit: 3)
     assert_equal 3, pairs.size
   end
@@ -152,7 +152,7 @@ class ClaudeMessageTest < ActiveSupport::TestCase
     ClaudeMessage.create!(session_id: @session_id, role: "user", content: "Question 1")
     ClaudeMessage.create!(session_id: @session_id, role: "assistant", content: "Answer 1")
     ClaudeMessage.create!(session_id: @session_id, role: "user", content: "Question 2")
-    
+
     pairs = ClaudeMessage.conversation_pairs(@session_id)
     # Should only return complete pairs
     assert_equal 1, pairs.size
@@ -183,7 +183,7 @@ class ClaudeMessageTest < ActiveSupport::TestCase
   test "token_count returns stored count from metadata" do
     message = ClaudeMessage.new(
       content: "Test content",
-      message_metadata: { 'token_count' => 42 }
+      message_metadata: { "token_count" => 42 }
     )
     assert_equal 42, message.token_count
   end
@@ -197,7 +197,7 @@ class ClaudeMessageTest < ActiveSupport::TestCase
   test "formatted_content returns content for non-assistant messages" do
     user_message = ClaudeMessage.new(role: "user", content: "User content")
     assert_equal "User content", user_message.formatted_content
-    
+
     system_message = ClaudeMessage.new(role: "system", content: "System content")
     assert_equal "System content", system_message.formatted_content
   end
@@ -221,10 +221,10 @@ class ClaudeMessageTest < ActiveSupport::TestCase
       role: "user",
       content: "a" * 100
     )
-    
-    assert_nil message.message_metadata['token_count']
+
+    assert_nil message.message_metadata["token_count"]
     message.save!
-    assert_equal 25, message.message_metadata['token_count']  # 100 / 4
+    assert_equal 25, message.message_metadata["token_count"]  # 100 / 4
   end
 
   test "updates token count when content changes" do
@@ -233,12 +233,12 @@ class ClaudeMessageTest < ActiveSupport::TestCase
       role: "user",
       content: "Short"
     )
-    
+
     initial_tokens = message.token_count
-    
+
     message.content = "a" * 200
     message.save!
-    
+
     assert_equal 50, message.token_count  # 200 / 4
     assert message.token_count > initial_tokens
   end
@@ -256,7 +256,7 @@ class ClaudeMessageTest < ActiveSupport::TestCase
       content: "Test",
       sub_agent_name: "researcher"
     )
-    
+
     assert_equal "researcher", message.sub_agent_name
     assert message.persisted?
   end
@@ -268,7 +268,7 @@ class ClaudeMessageTest < ActiveSupport::TestCase
       content: "Test",
       context: { document_id: 123, reference: "page 5" }
     )
-    
+
     assert_equal 123, message.context["document_id"]
     assert_equal "page 5", message.context["reference"]
   end
@@ -278,13 +278,13 @@ class ClaudeMessageTest < ActiveSupport::TestCase
       session_id: @session_id,
       role: "assistant",
       content: "Test response",
-      message_metadata: { 
-        model: "claude-3-opus", 
+      message_metadata: {
+        model: "claude-3-opus",
         temperature: 0.7,
         processing_time: 1.23
       }
     )
-    
+
     assert_equal "claude-3-opus", message.message_metadata["model"]
     assert_equal 0.7, message.message_metadata["temperature"]
     assert_equal 1.23, message.message_metadata["processing_time"]

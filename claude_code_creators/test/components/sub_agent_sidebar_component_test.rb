@@ -12,14 +12,14 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
       document: @document,
       current_user: @user
     ))
-    
+
     # Check main container
     assert_selector ".sub-agent-sidebar"
-    
+
     # Check header
     assert_selector "h3", text: "Sub-Agents"
     assert_selector "[data-action='click->dropdown#toggle']", text: "New Sub-Agent"
-    
+
     # Check sub agent item
     assert_selector ".sub-agent-item"
     assert_text @sub_agent.name
@@ -30,12 +30,12 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
   test "renders empty state when no sub agents" do
     # Clear existing sub agents
     @document.sub_agents.destroy_all
-    
+
     rendered = render_inline(SubAgentSidebarComponent.new(
       document: @document,
       current_user: @user
     ))
-    
+
     assert_selector ".text-gray-500", text: "No sub-agents created yet"
   end
 
@@ -45,7 +45,7 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
       document: @document,
       current_user: @user
     ))
-    
+
     assert_selector ".bg-green-500"
     assert_text "Active"
   end
@@ -56,7 +56,7 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
       document: @document,
       current_user: @user
     ))
-    
+
     assert_selector ".bg-yellow-500"
     assert_text "Idle"
   end
@@ -67,7 +67,7 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
       document: @document,
       current_user: @user
     ))
-    
+
     assert_selector ".bg-gray-500"
     assert_text "Completed"
   end
@@ -77,12 +77,12 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
     target_agent = @document.sub_agents.first
     target_agent.messages.create!(role: "user", content: "Test", user: @user)
     target_agent.messages.create!(role: "assistant", content: "Response", user: @user)
-    
+
     rendered = render_inline(SubAgentSidebarComponent.new(
       document: @document,
       current_user: @user
     ))
-    
+
     assert_text "2 messages"
   end
 
@@ -90,12 +90,12 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
     # Ensure we're looking at the right sub_agent
     target_agent = @document.sub_agents.first
     target_agent.messages.create!(role: "user", content: "Test", user: @user)
-    
+
     rendered = render_inline(SubAgentSidebarComponent.new(
       document: @document,
       current_user: @user
     ))
-    
+
     assert_text "1 message"
   end
 
@@ -104,14 +104,14 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
       document: @document,
       current_user: @user
     ))
-    
+
     assert_selector "[data-sub-agent-sidebar-target='dragHandle']"
   end
 
   test "renders multiple sub agents" do
     # Clear existing agents and create exactly 2
     @document.sub_agents.destroy_all
-    
+
     agent1 = SubAgent.create!(
       name: "First Agent",
       agent_type: "ruby-rails-expert",
@@ -124,12 +124,12 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
       user: @user,
       document: @document
     )
-    
+
     rendered = render_inline(SubAgentSidebarComponent.new(
       document: @document,
       current_user: @user
     ))
-    
+
     assert_selector ".sub-agent-item", count: 2
     assert_text agent1.name
     assert_text agent2.name
@@ -140,7 +140,7 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
       document: @document,
       current_user: @user
     ))
-    
+
     assert_selector "[data-controller='sub-agent-sidebar']"
     assert_selector "[data-sub-agent-sidebar-document-id-value='#{@document.id}']"
     assert_selector "[data-sub-agent-sidebar-target='agentsList']"
@@ -151,7 +151,7 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
       document: @document,
       current_user: @user
     ))
-    
+
     assert_selector ".sortable-container[data-sub-agent-sidebar-target='agentsList']"
   end
 
@@ -160,7 +160,7 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
       document: @document,
       current_user: @user
     ))
-    
+
     assert_selector "[data-action='click->sub-agent-sidebar#selectAgent']"
     assert_selector "[data-sub-agent-id='#{@sub_agent.id}']"
   end
@@ -168,17 +168,17 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
   test "displays all agent type badges correctly" do
     # Clear existing agents
     @document.sub_agents.destroy_all
-    
+
     agent_types = [
-      ['ruby-rails-expert', 'Rails/Ruby Expert'],
-      ['javascript-package-expert', 'JavaScript Expert'],
-      ['tailwind-css-expert', 'Tailwind CSS Expert'],
-      ['test-runner-fixer', 'Test Runner'],
-      ['error-debugger', 'Error Debugger'],
-      ['project-orchestrator', 'Project Orchestrator'],
-      ['git-auto-commit', 'Git Auto-Commit']
+      [ "ruby-rails-expert", "Rails/Ruby Expert" ],
+      [ "javascript-package-expert", "JavaScript Expert" ],
+      [ "tailwind-css-expert", "Tailwind CSS Expert" ],
+      [ "test-runner-fixer", "Test Runner" ],
+      [ "error-debugger", "Error Debugger" ],
+      [ "project-orchestrator", "Project Orchestrator" ],
+      [ "git-auto-commit", "Git Auto-Commit" ]
     ]
-    
+
     agents = agent_types.map do |(type, label)|
       SubAgent.create!(
         name: "#{type} Agent",
@@ -187,12 +187,12 @@ class SubAgentSidebarComponentTest < ViewComponent::TestCase
         document: @document
       )
     end
-    
+
     rendered = render_inline(SubAgentSidebarComponent.new(
       document: @document,
       current_user: @user
     ))
-    
+
     agent_types.each do |(type, label)|
       assert_text label
     end

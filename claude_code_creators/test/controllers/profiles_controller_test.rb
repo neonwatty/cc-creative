@@ -32,10 +32,10 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
         email_address: "updated@example.com"
       }
     }
-    
+
     assert_redirected_to profile_url
     follow_redirect!
-    
+
     @user.reload
     assert_equal "Updated Name", @user.name
     assert_equal "updated@example.com", @user.email_address
@@ -49,7 +49,7 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
         email_address: "invalid-email"
       }
     }
-    
+
     assert_response :unprocessable_entity
     assert_select "#error_explanation"
     assert_select "li", text: /can't be blank/i
@@ -73,16 +73,16 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
         password_confirmation: "newpassword123"
       }
     }
-    
+
     assert_redirected_to profile_url
     follow_redirect!
     assert_equal "Your password has been changed successfully.", flash[:notice]
-    
+
     # Verify user can sign in with new password
     sign_out
-    post session_url, params: { 
-      email_address: @user.email_address, 
-      password: "newpassword123" 
+    post session_url, params: {
+      email_address: @user.email_address,
+      password: "newpassword123"
     }
     assert_redirected_to root_url
   end
@@ -95,7 +95,7 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
         password_confirmation: "newpassword123"
       }
     }
-    
+
     assert_response :unprocessable_entity
   end
 
@@ -107,19 +107,19 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
         password_confirmation: "differentpassword"
       }
     }
-    
+
     assert_response :unprocessable_entity
   end
 
   test "should require authentication" do
     sign_out
-    
+
     get profile_url
     assert_redirected_to new_session_path
-    
+
     get edit_profile_url
     assert_redirected_to new_session_path
-    
+
     patch profile_url
     assert_redirected_to new_session_path
   end
@@ -127,7 +127,7 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
   test "should show linked OAuth accounts" do
     # Clean up any existing identities to avoid conflicts
     Identity.destroy_all
-    
+
     # Create an identity for the user
     identity = Identity.create!(
       user: @user,
@@ -136,7 +136,7 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
       email: @user.email_address,
       name: @user.name
     )
-    
+
     get profile_url
     assert_response :success
     assert_select "div", text: /Google/

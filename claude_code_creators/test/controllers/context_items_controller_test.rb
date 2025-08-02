@@ -6,7 +6,7 @@ class ContextItemsControllerTest < ActionDispatch::IntegrationTest
     @other_user = users(:two)
     @document = documents(:one)
     @context_item = context_items(:one)
-    
+
     # Sign in as the document owner
     sign_in_as(@user)
   end
@@ -20,7 +20,7 @@ class ContextItemsControllerTest < ActionDispatch::IntegrationTest
     # Sign in as different user
     sign_out
     sign_in_as(@other_user)
-    
+
     get document_context_items_url(@document)
     assert_redirected_to documents_url
     assert_equal "You are not authorized to access this document.", flash[:alert]
@@ -33,13 +33,13 @@ class ContextItemsControllerTest < ActionDispatch::IntegrationTest
 
   test "should create context_item" do
     assert_difference("ContextItem.count") do
-      post document_context_items_url(@document), params: { 
-        context_item: { 
+      post document_context_items_url(@document), params: {
+        context_item: {
           content: "New context content",
           item_type: "snippet",
           title: "New Context Item",
           metadata: { key: "value" }.to_json
-        } 
+        }
       }
     end
 
@@ -49,13 +49,13 @@ class ContextItemsControllerTest < ActionDispatch::IntegrationTest
 
   test "should create context_item via AJAX" do
     assert_difference("ContextItem.count") do
-      post document_context_items_url(@document), params: { 
-        context_item: { 
+      post document_context_items_url(@document), params: {
+        context_item: {
           content: "AJAX content",
           item_type: "draft",
           title: "AJAX Item",
           metadata: nil
-        } 
+        }
       }, as: :json
     end
 
@@ -71,7 +71,7 @@ class ContextItemsControllerTest < ActionDispatch::IntegrationTest
     # Sign in as different user
     sign_out
     sign_in_as(@other_user)
-    
+
     get document_context_item_url(@document, @context_item)
     assert_redirected_to documents_url
   end
@@ -82,23 +82,23 @@ class ContextItemsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update context_item" do
-    patch document_context_item_url(@document, @context_item), params: { 
-      context_item: { 
+    patch document_context_item_url(@document, @context_item), params: {
+      context_item: {
         content: "Updated content",
         title: "Updated Title"
-      } 
+      }
     }
     assert_redirected_to document_context_item_url(@document, @context_item)
     assert_equal "Context item was successfully updated.", flash[:notice]
   end
 
   test "should update context_item via AJAX" do
-    patch document_context_item_url(@document, @context_item), params: { 
-      context_item: { 
+    patch document_context_item_url(@document, @context_item), params: {
+      context_item: {
         content: "AJAX updated content"
-      } 
+      }
     }, as: :json
-    
+
     assert_response :success
   end
 
@@ -120,26 +120,26 @@ class ContextItemsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should not allow invalid item_type" do
-    post document_context_items_url(@document), params: { 
-      context_item: { 
+    post document_context_items_url(@document), params: {
+      context_item: {
         content: "Invalid type content",
         item_type: "invalid",
         title: "Invalid Type"
-      } 
+      }
     }
-    
+
     assert_response :unprocessable_entity
   end
 
   test "should handle turbo stream requests" do
-    post document_context_items_url(@document), params: { 
-      context_item: { 
+    post document_context_items_url(@document), params: {
+      context_item: {
         content: "Turbo content",
         item_type: "snippet",
         title: "Turbo Item"
-      } 
+      }
     }, headers: { "Accept" => "text/vnd.turbo-stream.html" }
-    
+
     assert_response :success
     assert_match "turbo-stream", response.body
   end

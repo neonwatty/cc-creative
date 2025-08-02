@@ -12,7 +12,7 @@ class CreateContextItems < ActiveRecord::Migration[8.0]
     end
 
     add_index :context_items, :item_type
-    add_index :context_items, [:document_id, :user_id]
+    add_index :context_items, [ :document_id, :user_id ]
     add_index :context_items, :created_at
   end
 end

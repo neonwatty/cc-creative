@@ -8,16 +8,16 @@ class CreateSubAgents < ActiveRecord::Migration[8.0]
       t.string :status, default: 'pending'
       t.string :external_id
       t.json :metadata, default: {}
-      
+
       t.timestamps
     end
-    
+
     # Add indexes for performance
     add_index :sub_agents, :agent_type
     add_index :sub_agents, :status
     add_index :sub_agents, :external_id
-    add_index :sub_agents, [:document_id, :user_id]
-    add_index :sub_agents, [:document_id, :agent_type]
+    add_index :sub_agents, [ :document_id, :user_id ]
+    add_index :sub_agents, [ :document_id, :agent_type ]
     add_index :sub_agents, :created_at
   end
 end

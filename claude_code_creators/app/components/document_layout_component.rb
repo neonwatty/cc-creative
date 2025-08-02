@@ -28,9 +28,9 @@ class DocumentLayoutComponent < ViewComponent::Base
 
     case @layout_type
     when :focused
-      base_classes += ["bg-white", "dark:bg-creative-neutral-800"]
+      base_classes += [ "bg-white", "dark:bg-creative-neutral-800" ]
     when :minimal
-      base_classes += ["bg-creative-neutral-25", "dark:bg-creative-neutral-950"]
+      base_classes += [ "bg-creative-neutral-25", "dark:bg-creative-neutral-950" ]
     end
 
     base_classes.join(" ")
@@ -45,11 +45,11 @@ class DocumentLayoutComponent < ViewComponent::Base
 
     case @layout_type
     when :focused
-      base_classes += ["max-w-none"]
+      base_classes += [ "max-w-none" ]
     when :minimal
-      base_classes += ["max-w-4xl", "mx-auto"]
+      base_classes += [ "max-w-4xl", "mx-auto" ]
     else
-      base_classes += ["max-w-none"]
+      base_classes += [ "max-w-none" ]
     end
 
     base_classes.join(" ")
@@ -68,17 +68,17 @@ class DocumentLayoutComponent < ViewComponent::Base
 
     # Adjust margins based on sidebar state
     if @sidebar_collapsed
-      base_classes += ["ml-16"]
+      base_classes += [ "ml-16" ]
     else
-      base_classes += ["ml-80"]
+      base_classes += [ "ml-80" ]
     end
 
     # Layout type adjustments
     case @layout_type
     when :focused
-      base_classes += ["ml-0"] # Override sidebar margins for focused mode
+      base_classes += [ "ml-0" ] # Override sidebar margins for focused mode
     when :minimal
-      base_classes += ["mx-8"]
+      base_classes += [ "mx-8" ]
     end
 
     base_classes.join(" ")
@@ -101,7 +101,7 @@ class DocumentLayoutComponent < ViewComponent::Base
     ]
 
     unless @show_toolbar
-      base_classes += ["hidden"]
+      base_classes += [ "hidden" ]
     end
 
     base_classes.join(" ")
@@ -116,9 +116,9 @@ class DocumentLayoutComponent < ViewComponent::Base
 
     case @layout_type
     when :focused
-      base_classes += ["p-8", "max-w-4xl", "mx-auto"]
+      base_classes += [ "p-8", "max-w-4xl", "mx-auto" ]
     when :minimal
-      base_classes += ["p-4", "max-w-3xl", "mx-auto"]
+      base_classes += [ "p-4", "max-w-3xl", "mx-auto" ]
     end
 
     base_classes.join(" ")
@@ -153,7 +153,7 @@ class DocumentLayoutComponent < ViewComponent::Base
 
   def should_show_onboarding_for_user?
     # Check if user should see onboarding
-    return false if current_user.attributes.key?('onboarding_completed_at') && current_user.onboarding_completed_at.present?
+    return false if current_user.attributes.key?("onboarding_completed_at") && current_user.onboarding_completed_at.present?
     return true if current_user.created_at > 24.hours.ago
     false
   end
@@ -241,7 +241,7 @@ class DocumentLayoutComponent < ViewComponent::Base
 
     # Hide on minimal layout
     if @layout_type == :minimal
-      base_classes += ["hidden"]
+      base_classes += [ "hidden" ]
     end
 
     base_classes.join(" ")
@@ -285,7 +285,7 @@ class DocumentLayoutComponent < ViewComponent::Base
         }
       else
         {
-          color: "creative-primary-500", 
+          color: "creative-primary-500",
           text: "Editing",
           pulse: false
         }

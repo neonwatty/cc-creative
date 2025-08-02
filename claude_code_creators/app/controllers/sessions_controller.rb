@@ -10,7 +10,7 @@ class SessionsController < ApplicationController
     if user = User.authenticate_by(params.permit(:email_address, :password))
       if user.email_confirmed?
         start_new_session_for user
-        
+
         # Check if there's a pending OAuth identity to link
         if session[:pending_identity]
           identity = Identity.find_or_initialize_by(
@@ -20,14 +20,14 @@ class SessionsController < ApplicationController
           identity.user = user
           identity.email = session[:pending_identity]["email"]
           identity.name = session[:pending_identity]["name"]
-          
+
           if identity.save
             session.delete(:pending_identity)
             redirect_to profile_path, notice: "Successfully linked your #{identity.provider.titleize} account!"
             return
           end
         end
-        
+
         redirect_to after_authentication_url
       else
         redirect_to new_session_path, alert: "Please confirm your email address before signing in. Check your inbox for the confirmation email."
@@ -43,9 +43,9 @@ class SessionsController < ApplicationController
   end
 
   def omniauth
-    auth = request.env['omniauth.auth']
+    auth = request.env["omniauth.auth"]
     identity = Identity.find_or_create_from_auth(auth)
-    
+
     if identity.user
       # Existing user with this OAuth account
       start_new_session_for identity.user
@@ -75,7 +75,7 @@ class SessionsController < ApplicationController
           email_confirmed: true,
           email_confirmed_at: Time.current
         )
-        
+
         if user.save
           identity.user = user
           identity.save!

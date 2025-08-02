@@ -10,14 +10,14 @@ class CloudSyncStatusComponentTest < ViewComponent::TestCase
   test "renders global sync status" do
     integration = CloudIntegration.create!(
       user: @user,
-      provider: 'google_drive',
-      access_token: 'test_token',
+      provider: "google_drive",
+      access_token: "test_token",
       expires_at: 1.hour.from_now,
       settings: {}
     )
 
     rendered = render_inline(CloudSyncStatusComponent.new(
-      integrations: [integration],
+      integrations: [ integration ],
       current_user: @user,
       show_global: true,
       show_details: false
@@ -43,23 +43,23 @@ class CloudSyncStatusComponentTest < ViewComponent::TestCase
   test "renders integration details when show_details is true" do
     integration = CloudIntegration.create!(
       user: @user,
-      provider: 'google_drive',
-      access_token: 'test_token',
+      provider: "google_drive",
+      access_token: "test_token",
       expires_at: 1.hour.from_now,
       settings: {}
     )
 
     # Create some cloud files
     integration.cloud_files.create!(
-      provider: 'google_drive',
-      file_id: 'file_1',
-      name: 'Test File',
-      mime_type: 'text/plain',
+      provider: "google_drive",
+      file_id: "file_1",
+      name: "Test File",
+      mime_type: "text/plain",
       last_synced_at: 30.minutes.ago
     )
 
     rendered = render_inline(CloudSyncStatusComponent.new(
-      integrations: [integration],
+      integrations: [ integration ],
       current_user: @user,
       show_global: false,
       show_details: true
@@ -74,22 +74,22 @@ class CloudSyncStatusComponentTest < ViewComponent::TestCase
   test "shows sync status for multiple integrations" do
     google_integration = CloudIntegration.create!(
       user: @user,
-      provider: 'google_drive',
-      access_token: 'test_token',
+      provider: "google_drive",
+      access_token: "test_token",
       expires_at: 1.hour.from_now,
       settings: {}
     )
 
     dropbox_integration = CloudIntegration.create!(
       user: @user,
-      provider: 'dropbox',
-      access_token: 'test_token',
+      provider: "dropbox",
+      access_token: "test_token",
       expires_at: 1.hour.from_now,
       settings: {}
     )
 
     rendered = render_inline(CloudSyncStatusComponent.new(
-      integrations: [google_integration, dropbox_integration],
+      integrations: [ google_integration, dropbox_integration ],
       current_user: @user,
       show_global: true,
       show_details: false
@@ -102,14 +102,14 @@ class CloudSyncStatusComponentTest < ViewComponent::TestCase
   test "handles expired integrations" do
     expired_integration = CloudIntegration.create!(
       user: @user,
-      provider: 'google_drive',
-      access_token: 'test_token',
+      provider: "google_drive",
+      access_token: "test_token",
       expires_at: 1.hour.ago,
       settings: {}
     )
 
     rendered = render_inline(CloudSyncStatusComponent.new(
-      integrations: [expired_integration],
+      integrations: [ expired_integration ],
       current_user: @user,
       show_global: true,
       show_details: false
@@ -123,31 +123,31 @@ class CloudSyncStatusComponentTest < ViewComponent::TestCase
   test "shows last sync information" do
     integration = CloudIntegration.create!(
       user: @user,
-      provider: 'google_drive',
-      access_token: 'test_token',
+      provider: "google_drive",
+      access_token: "test_token",
       expires_at: 1.hour.from_now,
       settings: {}
     )
 
     # Create cloud files with different sync times
     integration.cloud_files.create!(
-      provider: 'google_drive',
-      file_id: 'file_1',
-      name: 'Recent File',
-      mime_type: 'text/plain',
+      provider: "google_drive",
+      file_id: "file_1",
+      name: "Recent File",
+      mime_type: "text/plain",
       last_synced_at: 5.minutes.ago
     )
 
     integration.cloud_files.create!(
-      provider: 'google_drive',
-      file_id: 'file_2',
-      name: 'Older File',
-      mime_type: 'text/plain',
+      provider: "google_drive",
+      file_id: "file_2",
+      name: "Older File",
+      mime_type: "text/plain",
       last_synced_at: 2.hours.ago
     )
 
     rendered = render_inline(CloudSyncStatusComponent.new(
-      integrations: [integration],
+      integrations: [ integration ],
       current_user: @user,
       show_global: false,
       show_details: true

@@ -67,12 +67,12 @@ class ContextItemPolicyTest < ActiveSupport::TestCase
 
   test "scope returns only user's context items" do
     scope = ContextItemPolicy::Scope.new(@user, ContextItem).resolve
-    
+
     # All returned context items should belong to user's documents
     scope.each do |context_item|
       assert_equal @user.id, context_item.document.user_id
     end
-    
+
     # Should not include context items from other users' documents
     other_user_context_items = ContextItem.joins(:document).where(documents: { user_id: @other_user.id })
     assert_empty scope & other_user_context_items

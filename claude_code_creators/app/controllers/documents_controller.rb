@@ -1,5 +1,5 @@
 class DocumentsController < ApplicationController
-  before_action :set_document, only: [:show, :edit, :update, :destroy, :duplicate, :autosave]
+  before_action :set_document, only: [ :show, :edit, :update, :destroy, :duplicate, :autosave ]
   # Authorization is handled per action using Pundit
 
   def index
@@ -14,9 +14,9 @@ class DocumentsController < ApplicationController
   def create
     @document = Current.user.documents.build(document_params)
     authorize @document
-    
+
     if @document.save
-      redirect_to @document, notice: 'Document was successfully created.'
+      redirect_to @document, notice: "Document was successfully created."
     else
       render :new, status: :unprocessable_entity
     end
@@ -34,15 +34,15 @@ class DocumentsController < ApplicationController
     authorize @document
     if @document.update(document_params)
       respond_to do |format|
-        format.html { redirect_to @document, notice: 'Document was successfully updated.' }
+        format.html { redirect_to @document, notice: "Document was successfully updated." }
         format.turbo_stream { render turbo_stream: turbo_stream_update_response }
-        format.json { render json: { status: 'success', updated_at: @document.updated_at } }
+        format.json { render json: { status: "success", updated_at: @document.updated_at } }
       end
     else
       respond_to do |format|
         format.html { render :edit, status: :unprocessable_entity }
         format.turbo_stream { render turbo_stream: turbo_stream_error_response, status: :unprocessable_entity }
-        format.json { render json: { status: 'error', errors: @document.errors.full_messages }, status: :unprocessable_entity }
+        format.json { render json: { status: "error", errors: @document.errors.full_messages }, status: :unprocessable_entity }
       end
     end
   end
@@ -50,26 +50,26 @@ class DocumentsController < ApplicationController
   def destroy
     authorize @document
     @document.destroy!
-    redirect_to documents_url, notice: 'Document was successfully deleted.'
+    redirect_to documents_url, notice: "Document was successfully deleted."
   end
 
   def duplicate
     authorize @document, :show?
     @new_document = @document.duplicate_for(Current.user)
-    
+
     if @new_document.save
-      redirect_to edit_document_url(@new_document), notice: 'Document was successfully duplicated.'
+      redirect_to edit_document_url(@new_document), notice: "Document was successfully duplicated."
     else
-      redirect_to @document, alert: 'Failed to duplicate document.'
+      redirect_to @document, alert: "Failed to duplicate document."
     end
   end
 
   def autosave
     authorize @document, :update?
     if @document.update(autosave_params)
-      render json: { status: 'saved', updated_at: @document.updated_at }
+      render json: { status: "saved", updated_at: @document.updated_at }
     else
-      render json: { status: 'error', errors: @document.errors.full_messages }, status: :unprocessable_entity
+      render json: { status: "error", errors: @document.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
@@ -78,7 +78,7 @@ class DocumentsController < ApplicationController
   def set_document
     @document = Document.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    redirect_to documents_url, alert: 'Document not found.'
+    redirect_to documents_url, alert: "Document not found."
   end
 
   def document_params
@@ -91,13 +91,12 @@ class DocumentsController < ApplicationController
 
   def turbo_stream_update_response
     [
-      turbo_stream.replace("document_status", partial: "documents/status", locals: { document: @document, status: 'saved' }),
+      turbo_stream.replace("document_status", partial: "documents/status", locals: { document: @document, status: "saved" }),
       turbo_stream.replace("document_last_saved", partial: "documents/last_saved", locals: { document: @document })
     ]
   end
 
   def turbo_stream_error_response
-    turbo_stream.replace("document_status", partial: "documents/status", locals: { document: @document, status: 'error' })
+    turbo_stream.replace("document_status", partial: "documents/status", locals: { document: @document, status: "error" })
   end
-
 end

@@ -8,7 +8,7 @@ class CloudFileBrowserComponentTest < ViewComponent::TestCase
 
   test "renders with default parameters" do
     rendered = render_inline(CloudFileBrowserComponent.new(integration: @integration))
-    
+
     assert_selector ".cloud-file-browser"
     assert_selector ".cloud-file-browser--grid"
     assert_selector ".cloud-file-browser--loading"
@@ -20,13 +20,13 @@ class CloudFileBrowserComponentTest < ViewComponent::TestCase
 
   test "renders grid view mode" do
     file = OpenStruct.new(importable?: true, synced?: false, size: 1024)
-    files = [file]
+    files = [ file ]
     rendered = render_inline(CloudFileBrowserComponent.new(
       integration: @integration,
       files: files,
-      view_mode: 'grid'
+      view_mode: "grid"
     ))
-    
+
     assert_selector ".cloud-file-browser--grid"
     assert_selector ".file-list--grid"
     assert_selector ".file-grid"
@@ -34,13 +34,13 @@ class CloudFileBrowserComponentTest < ViewComponent::TestCase
 
   test "renders list view mode" do
     file = OpenStruct.new(importable?: true, synced?: false, size: 1024)
-    files = [file]
+    files = [ file ]
     rendered = render_inline(CloudFileBrowserComponent.new(
       integration: @integration,
-      files: files,  
-      view_mode: 'list'
+      files: files,
+      view_mode: "list"
     ))
-    
+
     assert_selector ".cloud-file-browser--list"
     assert_selector ".file-list--table"
     assert_selector "table.file-table"
@@ -54,24 +54,24 @@ class CloudFileBrowserComponentTest < ViewComponent::TestCase
   test "renders search query" do
     rendered = render_inline(CloudFileBrowserComponent.new(
       integration: @integration,
-      search_query: 'test query'
+      search_query: "test query"
     ))
-    
+
     assert_selector "[data-cloud-file-browser-search-query-value='test query']"
   end
 
   test "renders filter value" do
     rendered = render_inline(CloudFileBrowserComponent.new(
       integration: @integration,
-      filter: 'synced'
+      filter: "synced"
     ))
-    
+
     assert_selector "[data-cloud-file-browser-filter-value='synced']"
   end
 
   test "renders empty state with no files" do
     rendered = render_inline(CloudFileBrowserComponent.new(integration: @integration))
-    
+
     assert_text "No files found. Click \"Sync\" to load files from #{@integration.provider_name}."
     assert_selector "button", text: "Sync #{@integration.provider_name}"
   end
@@ -79,9 +79,9 @@ class CloudFileBrowserComponentTest < ViewComponent::TestCase
   test "renders empty state with search query" do
     rendered = render_inline(CloudFileBrowserComponent.new(
       integration: @integration,
-      search_query: 'missing file'
+      search_query: "missing file"
     ))
-    
+
     assert_text 'No files found matching "missing file"'
     assert_selector "button", text: "Clear Search"
   end
@@ -89,22 +89,22 @@ class CloudFileBrowserComponentTest < ViewComponent::TestCase
   test "renders empty state with filter" do
     rendered = render_inline(CloudFileBrowserComponent.new(
       integration: @integration,
-      filter: 'synced'
+      filter: "synced"
     ))
-    
+
     assert_text "No synced files found"
   end
 
   test "renders view toggle options" do
     rendered = render_inline(CloudFileBrowserComponent.new(integration: @integration))
-    
+
     assert_selector "[data-action='click->cloud-file-browser#changeView'][data-view='grid']"
     assert_selector "[data-action='click->cloud-file-browser#changeView'][data-view='list']"
   end
 
   test "renders sort dropdown" do
     rendered = render_inline(CloudFileBrowserComponent.new(integration: @integration))
-    
+
     assert_selector "select[data-action='change->cloud-file-browser#sortFiles']"
     assert_selector "option[value='name:asc']", text: "Name A-Z"
     assert_selector "option[value='date:desc']", text: "Newest First"
@@ -113,7 +113,7 @@ class CloudFileBrowserComponentTest < ViewComponent::TestCase
 
   test "renders filter tabs" do
     rendered = render_inline(CloudFileBrowserComponent.new(integration: @integration))
-    
+
     assert_selector "[data-action='click->cloud-file-browser#changeFilter'][data-filter='all']"
     assert_selector "[data-action='click->cloud-file-browser#changeFilter'][data-filter='importable']"
     assert_selector "[data-action='click->cloud-file-browser#changeFilter'][data-filter='synced']"
@@ -122,7 +122,7 @@ class CloudFileBrowserComponentTest < ViewComponent::TestCase
 
   test "renders batch actions when files selected" do
     rendered = render_inline(CloudFileBrowserComponent.new(integration: @integration))
-    
+
     # Batch actions are hidden by default, check they exist but aren't visible
     assert_selector "[data-action='click->cloud-file-browser#batchImport']", text: "Import Selected", visible: false
     assert_selector "[data-action='click->cloud-file-browser#batchDownload']", text: "Download Selected", visible: false
@@ -132,7 +132,7 @@ class CloudFileBrowserComponentTest < ViewComponent::TestCase
     integration = @integration
     integration.stubs(:cloud_files).returns(CloudFile.none)
     rendered = render_inline(CloudFileBrowserComponent.new(integration: integration))
-    
+
     assert_text "No files synced"
   end
 
@@ -145,12 +145,12 @@ class CloudFileBrowserComponentTest < ViewComponent::TestCase
       prev_page: 1,
       next_page: 3
     }
-    
+
     rendered = render_inline(CloudFileBrowserComponent.new(
       integration: @integration,
       pagination: pagination
     ))
-    
+
     assert_text "Showing 21-40 of 100 files"
     assert_text "Page 2 of 5"
     assert_selector "button", text: "← Previous"
@@ -164,12 +164,12 @@ class CloudFileBrowserComponentTest < ViewComponent::TestCase
       total_count: 10,
       per_page: 20
     }
-    
+
     rendered = render_inline(CloudFileBrowserComponent.new(
       integration: @integration,
       pagination: pagination
     ))
-    
+
     refute_selector ".pagination-container"
   end
 end

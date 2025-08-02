@@ -34,11 +34,11 @@ class DocumentVersion < ApplicationRecord
       is_auto_version: options[:is_auto_version] || false,
       word_count: document.word_count
     )
-    
+
     if version.save
       document.update(current_version_number: version.version_number)
     end
-    
+
     version
   end
 
@@ -48,9 +48,9 @@ class DocumentVersion < ApplicationRecord
                               .where("version_number < ?", version_number)
                               .order(:version_number)
                               .last
-    
+
     return true if previous_version.nil?
-    
+
     content_snapshot != previous_version.content_snapshot
   end
 
@@ -59,9 +59,9 @@ class DocumentVersion < ApplicationRecord
                               .where("version_number < ?", version_number)
                               .order(:version_number)
                               .last
-    
+
     return nil if previous_version.nil?
-    
+
     {
       previous_content: previous_version.content_snapshot,
       current_content: content_snapshot,
@@ -76,9 +76,9 @@ class DocumentVersion < ApplicationRecord
                               .where("version_number < ?", version_number)
                               .order(:version_number)
                               .last
-    
+
     return true if previous_version.nil?
-    
+
     tags_snapshot.sort != previous_version.tags_snapshot.sort
   end
 
@@ -98,19 +98,19 @@ class DocumentVersion < ApplicationRecord
   # JSON serialization for API responses
   def as_json(options = {})
     super(options.merge(
-      methods: [:version_type, :display_name],
-      except: [:content_snapshot],
+      methods: [ :version_type, :display_name ],
+      except: [ :content_snapshot ],
       include: {
-        created_by_user: { only: [:id, :name, :email_address] }
+        created_by_user: { only: [ :id, :name, :email_address ] }
       }
     ))
   end
 
   def to_json_with_content(options = {})
     as_json(options.merge(
-      methods: [:version_type, :display_name, :short_content_preview],
+      methods: [ :version_type, :display_name, :short_content_preview ],
       include: {
-        created_by_user: { only: [:id, :name, :email_address] }
+        created_by_user: { only: [ :id, :name, :email_address ] }
       }
     ))
   end

@@ -3,18 +3,18 @@ require "test_helper"
 class CloudIntegrationTest < ActiveSupport::TestCase
   setup do
     @user = users(:one)
-    
+
     # Clean up existing integrations to avoid conflicts
     CloudIntegration.destroy_all
-    
+
     # Create a fresh integration instead of using fixtures to avoid encryption issues
     @cloud_integration = CloudIntegration.create!(
       user: @user,
-      provider: 'google_drive',
-      access_token: 'test_token',
-      refresh_token: 'test_refresh_token',
+      provider: "google_drive",
+      access_token: "test_token",
+      refresh_token: "test_refresh_token",
       expires_at: 1.hour.from_now,
-      settings: { scope: 'drive.readonly' }
+      settings: { scope: "drive.readonly" }
     )
   end
 
@@ -22,8 +22,8 @@ class CloudIntegrationTest < ActiveSupport::TestCase
   test "should be valid with valid attributes" do
     integration = CloudIntegration.new(
       user: users(:two),  # Use a different user to avoid conflicts
-      provider: 'google_drive',
-      access_token: 'test_token'
+      provider: "google_drive",
+      access_token: "test_token"
     )
     assert integration.valid?
   end
@@ -41,7 +41,7 @@ class CloudIntegrationTest < ActiveSupport::TestCase
   end
 
   test "should require a valid provider" do
-    @cloud_integration.provider = 'invalid_provider'
+    @cloud_integration.provider = "invalid_provider"
     assert_not @cloud_integration.valid?
     assert_includes @cloud_integration.errors[:provider], "is not included in the list"
   end
@@ -50,11 +50,11 @@ class CloudIntegrationTest < ActiveSupport::TestCase
     CloudIntegration::PROVIDERS.each_with_index do |provider, index|
       # Use different users or destroy existing to avoid conflicts
       CloudIntegration.where(provider: provider).destroy_all
-      
+
       integration = CloudIntegration.new(
         user: @user,
         provider: provider,
-        access_token: 'test_token'
+        access_token: "test_token"
       )
       assert integration.valid?, "#{provider} should be valid"
     end
@@ -70,7 +70,7 @@ class CloudIntegrationTest < ActiveSupport::TestCase
     duplicate = CloudIntegration.new(
       user: @cloud_integration.user,
       provider: @cloud_integration.provider,
-      access_token: 'different_token'
+      access_token: "different_token"
     )
     assert_not duplicate.valid?
     assert_includes duplicate.errors[:user_id], "already has an integration for this provider"
@@ -81,7 +81,7 @@ class CloudIntegrationTest < ActiveSupport::TestCase
     integration = CloudIntegration.new(
       user: different_user,
       provider: @cloud_integration.provider,
-      access_token: 'test_token'
+      access_token: "test_token"
     )
     assert integration.valid?
   end
@@ -96,10 +96,10 @@ class CloudIntegrationTest < ActiveSupport::TestCase
     assert_respond_to @cloud_integration, :cloud_files
     # Create a cloud file to test the association
     cloud_file = @cloud_integration.cloud_files.create!(
-      provider: 'google_drive',
-      file_id: 'test_file_id',
-      name: 'test.txt',
-      mime_type: 'text/plain'
+      provider: "google_drive",
+      file_id: "test_file_id",
+      name: "test.txt",
+      mime_type: "text/plain"
     )
     assert_includes @cloud_integration.cloud_files, cloud_file
   end
@@ -107,15 +107,15 @@ class CloudIntegrationTest < ActiveSupport::TestCase
   test "should destroy dependent cloud files" do
     # Ensure clean state
     CloudFile.destroy_all
-    
+
     cloud_file = @cloud_integration.cloud_files.create!(
-      provider: 'google_drive',
-      file_id: 'test_file_id',
-      name: 'test.txt',
-      mime_type: 'text/plain'
+      provider: "google_drive",
+      file_id: "test_file_id",
+      name: "test.txt",
+      mime_type: "text/plain"
     )
-    
-    assert_difference('CloudFile.count', -1) do
+
+    assert_difference("CloudFile.count", -1) do
       @cloud_integration.destroy
     end
   end
@@ -125,16 +125,16 @@ class CloudIntegrationTest < ActiveSupport::TestCase
     # Create expired integration
     expired = CloudIntegration.create!(
       user: users(:two),
-      provider: 'dropbox',
-      access_token: 'expired_token',
+      provider: "dropbox",
+      access_token: "expired_token",
       expires_at: 1.hour.ago
     )
-    
+
     # Create active integration
     active = CloudIntegration.create!(
       user: users(:two),
-      provider: 'notion',
-      access_token: 'active_token',
+      provider: "notion",
+      access_token: "active_token",
       expires_at: 1.hour.from_now
     )
 
@@ -147,16 +147,16 @@ class CloudIntegrationTest < ActiveSupport::TestCase
     # Create expired integration
     expired = CloudIntegration.create!(
       user: users(:two),
-      provider: 'dropbox',
-      access_token: 'expired_token',
+      provider: "dropbox",
+      access_token: "expired_token",
       expires_at: 1.hour.ago
     )
-    
+
     # Create active integration
     active = CloudIntegration.create!(
       user: users(:two),
-      provider: 'notion',
-      access_token: 'active_token',
+      provider: "notion",
+      access_token: "active_token",
       expires_at: 1.hour.from_now
     )
 
@@ -168,11 +168,11 @@ class CloudIntegrationTest < ActiveSupport::TestCase
   test "for_provider scope should filter by provider" do
     google_integration = CloudIntegration.create!(
       user: users(:two),
-      provider: 'google_drive',
-      access_token: 'google_token'
+      provider: "google_drive",
+      access_token: "google_token"
     )
 
-    google_integrations = CloudIntegration.for_provider('google_drive')
+    google_integrations = CloudIntegration.for_provider("google_drive")
     assert_includes google_integrations, google_integration
   end
 
@@ -195,7 +195,7 @@ class CloudIntegrationTest < ActiveSupport::TestCase
   test "expired? should be inverse of active?" do
     @cloud_integration.expires_at = 1.hour.from_now
     assert_not @cloud_integration.expired?
-    
+
     @cloud_integration.expires_at = 1.hour.ago
     assert @cloud_integration.expired?
   end
@@ -217,54 +217,54 @@ class CloudIntegrationTest < ActiveSupport::TestCase
 
   # Settings Methods Tests
   test "get_setting should return setting value" do
-    @cloud_integration.settings = { 'key' => 'value', 'nested' => { 'inner' => 'data' } }
-    assert_equal 'value', @cloud_integration.get_setting('key')
-    assert_equal({ 'inner' => 'data' }, @cloud_integration.get_setting('nested'))
+    @cloud_integration.settings = { "key" => "value", "nested" => { "inner" => "data" } }
+    assert_equal "value", @cloud_integration.get_setting("key")
+    assert_equal({ "inner" => "data" }, @cloud_integration.get_setting("nested"))
   end
 
   test "get_setting should return nil for non-existent key" do
-    @cloud_integration.settings = { 'key' => 'value' }
-    assert_nil @cloud_integration.get_setting('nonexistent')
+    @cloud_integration.settings = { "key" => "value" }
+    assert_nil @cloud_integration.get_setting("nonexistent")
   end
 
   test "set_setting should set setting value" do
-    @cloud_integration.set_setting('new_key', 'new_value')
-    assert_equal 'new_value', @cloud_integration.settings['new_key']
+    @cloud_integration.set_setting("new_key", "new_value")
+    assert_equal "new_value", @cloud_integration.settings["new_key"]
   end
 
   test "set_setting should initialize settings if nil" do
     @cloud_integration.settings = nil
-    @cloud_integration.set_setting('key', 'value')
-    assert_equal({ 'key' => 'value' }, @cloud_integration.settings)
+    @cloud_integration.set_setting("key", "value")
+    assert_equal({ "key" => "value" }, @cloud_integration.settings)
   end
 
   # Provider Helper Tests
   test "provider helper methods should work correctly" do
-    @cloud_integration.provider = 'google_drive'
+    @cloud_integration.provider = "google_drive"
     assert @cloud_integration.google_drive?
     assert_not @cloud_integration.dropbox?
     assert_not @cloud_integration.notion?
 
-    @cloud_integration.provider = 'dropbox'
+    @cloud_integration.provider = "dropbox"
     assert_not @cloud_integration.google_drive?
     assert @cloud_integration.dropbox?
     assert_not @cloud_integration.notion?
 
-    @cloud_integration.provider = 'notion'
+    @cloud_integration.provider = "notion"
     assert_not @cloud_integration.google_drive?
     assert_not @cloud_integration.dropbox?
     assert @cloud_integration.notion?
   end
 
   test "provider_name should return human readable names" do
-    @cloud_integration.provider = 'google_drive'
-    assert_equal 'Google Drive', @cloud_integration.provider_name
+    @cloud_integration.provider = "google_drive"
+    assert_equal "Google Drive", @cloud_integration.provider_name
 
-    @cloud_integration.provider = 'dropbox'
-    assert_equal 'Dropbox', @cloud_integration.provider_name
+    @cloud_integration.provider = "dropbox"
+    assert_equal "Dropbox", @cloud_integration.provider_name
 
-    @cloud_integration.provider = 'notion'
-    assert_equal 'Notion', @cloud_integration.provider_name
+    @cloud_integration.provider = "notion"
+    assert_equal "Notion", @cloud_integration.provider_name
   end
 
   # Encryption Tests
@@ -272,41 +272,41 @@ class CloudIntegrationTest < ActiveSupport::TestCase
     # Use a different provider to avoid conflicts
     integration = CloudIntegration.create!(
       user: @user,
-      provider: 'dropbox',
-      access_token: 'secret_token'
+      provider: "dropbox",
+      access_token: "secret_token"
     )
-    
+
     # The stored value should be encrypted (different from plain text)
-    raw_value = integration.attributes_before_type_cast['access_token']
-    assert_not_equal 'secret_token', raw_value
-    
+    raw_value = integration.attributes_before_type_cast["access_token"]
+    assert_not_equal "secret_token", raw_value
+
     # But the decrypted value should match
-    assert_equal 'secret_token', integration.access_token
+    assert_equal "secret_token", integration.access_token
   end
 
   test "should encrypt refresh token" do
     # Use a different provider to avoid conflicts
     integration = CloudIntegration.create!(
       user: @user,
-      provider: 'notion',
-      access_token: 'access_token',
-      refresh_token: 'secret_refresh'
+      provider: "notion",
+      access_token: "access_token",
+      refresh_token: "secret_refresh"
     )
-    
+
     # The stored value should be encrypted (different from plain text)
-    raw_value = integration.attributes_before_type_cast['refresh_token']
-    assert_not_equal 'secret_refresh', raw_value
-    
+    raw_value = integration.attributes_before_type_cast["refresh_token"]
+    assert_not_equal "secret_refresh", raw_value
+
     # But the decrypted value should match
-    assert_equal 'secret_refresh', integration.refresh_token
+    assert_equal "secret_refresh", integration.refresh_token
   end
 
   # JSON Serialization Tests
   test "should serialize settings as JSON" do
-    settings_hash = { 'scope' => 'read_write', 'permissions' => ['files', 'folders'] }
+    settings_hash = { "scope" => "read_write", "permissions" => [ "files", "folders" ] }
     @cloud_integration.settings = settings_hash
     @cloud_integration.save!
-    
+
     @cloud_integration.reload
     assert_equal settings_hash, @cloud_integration.settings
   end

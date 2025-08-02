@@ -47,7 +47,7 @@ Rails.application.configure do
 
   # Annotate rendered view with file names.
   # config.action_view.annotate_rendered_view_with_filenames = true
-  
+
   # Configure encryption for tests
   config.active_record.encryption.primary_key = "test_primary_key_that_is_at_least_32_characters_long"
   config.active_record.encryption.deterministic_key = "test_deterministic_key_at_least_32_chars"

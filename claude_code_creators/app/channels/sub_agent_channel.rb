@@ -1,7 +1,7 @@
 class SubAgentChannel < ApplicationCable::Channel
   def subscribed
     sub_agent = SubAgent.find_by(id: params[:sub_agent_id])
-    
+
     if sub_agent && authorized?(sub_agent)
       stream_from "sub_agent_#{sub_agent.id}"
     else
@@ -20,7 +20,7 @@ class SubAgentChannel < ApplicationCable::Channel
     if data["message"]
       service = SubAgentService.new(sub_agent)
       message = service.send_message(current_user, data["message"]["content"])
-      
+
       if message
         broadcast_message(message)
       end
@@ -30,7 +30,7 @@ class SubAgentChannel < ApplicationCable::Channel
   def update_status(data)
     sub_agent = SubAgent.find_by(id: params[:sub_agent_id])
     return unless sub_agent && authorized?(sub_agent)
-    
+
     if sub_agent.update(status: data["status"])
       ActionCable.server.broadcast("sub_agent_#{sub_agent.id}", {
         type: "status_change",
@@ -42,7 +42,7 @@ class SubAgentChannel < ApplicationCable::Channel
   def typing(data)
     sub_agent = SubAgent.find_by(id: params[:sub_agent_id])
     return unless sub_agent && authorized?(sub_agent)
-    
+
     ActionCable.server.broadcast("sub_agent_#{sub_agent.id}", {
       type: "typing",
       user_id: current_user.id,
@@ -54,7 +54,7 @@ class SubAgentChannel < ApplicationCable::Channel
   def update_context(data)
     sub_agent = SubAgent.find_by(id: params[:sub_agent_id])
     return unless sub_agent && authorized?(sub_agent)
-    
+
     if sub_agent.update(context: data["context"])
       ActionCable.server.broadcast("sub_agent_#{sub_agent.id}", {
         type: "context_update",
@@ -66,7 +66,7 @@ class SubAgentChannel < ApplicationCable::Channel
   def delete_agent
     sub_agent = SubAgent.find_by(id: params[:sub_agent_id])
     return unless sub_agent && authorized?(sub_agent)
-    
+
     ActionCable.server.broadcast("sub_agent_#{sub_agent.id}", {
       type: "agent_deleted",
       agent_id: sub_agent.id
@@ -76,7 +76,7 @@ class SubAgentChannel < ApplicationCable::Channel
   private
 
   def authorized?(sub_agent)
-    sub_agent.user_id == current_user.id || 
+    sub_agent.user_id == current_user.id ||
     sub_agent.document.user_id == current_user.id
   end
 

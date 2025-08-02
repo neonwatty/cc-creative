@@ -41,7 +41,7 @@ class SubAgentSidebarComponent < ViewComponent::Base
 
   def status_badge_classes(status)
     base_classes = "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium badge"
-    
+
     case status
     when "active"
       "#{base_classes} bg-green-500 text-white"
@@ -85,7 +85,7 @@ class SubAgentSidebarComponent < ViewComponent::Base
 
   def format_timestamp(timestamp)
     return "" unless timestamp
-    
+
     if timestamp.today?
       timestamp.strftime("%l:%M %p")
     elsif timestamp.yesterday?

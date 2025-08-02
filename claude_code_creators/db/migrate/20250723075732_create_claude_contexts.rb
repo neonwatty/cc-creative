@@ -8,9 +8,9 @@ class CreateClaudeContexts < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    
+
     add_index :claude_contexts, :session_id
     add_index :claude_contexts, :context_type
-    add_index :claude_contexts, [:session_id, :context_type]
+    add_index :claude_contexts, [ :session_id, :context_type ]
   end
 end

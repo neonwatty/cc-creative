@@ -32,8 +32,8 @@ class SidebarNavigationComponent < ViewComponent::Base
       "flex-col"
     ]
 
-    width_classes = @collapsed ? ["w-16"] : ["w-80"]
-    
+    width_classes = @collapsed ? [ "w-16" ] : [ "w-80" ]
+
     (base_classes + width_classes).join(" ")
   end
 
@@ -129,7 +129,7 @@ class SidebarNavigationComponent < ViewComponent::Base
   def icon_class
     size_class = @collapsed ? "w-5 h-5" : "w-4 h-4"
     margin_class = @collapsed ? "" : "mr-3"
-    
+
     [
       size_class,
       margin_class,
@@ -173,7 +173,7 @@ class SidebarNavigationComponent < ViewComponent::Base
     return [] unless current_document
 
     @active_sub_agents ||= current_document.sub_agents
-                                           .where.not(status: 'completed')
+                                           .where.not(status: "completed")
                                            .order(updated_at: :desc)
   end
 
@@ -259,7 +259,7 @@ class SidebarNavigationComponent < ViewComponent::Base
 
   def document_item_class(document)
     active = current_document&.id == document.id
-    
+
     base_classes = [
       "flex",
       "items-center",

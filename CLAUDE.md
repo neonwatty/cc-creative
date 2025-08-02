@@ -9,10 +9,6 @@
 - 📋 Planning → `project-orchestrator`
 - 🔀 Git → `git-auto-commit`
 
-## Task Master AI Instructions
-**Import Task Master's development workflow commands and guidelines, treat as if import is in the main CLAUDE.md file.**
-@./.taskmaster/CLAUDE.md
-
 ## Agent Assignment Guidelines
 
 ### Task Type to Agent Mapping
@@ -65,7 +61,7 @@ When working on tasks, use the appropriate specialized agent based on the task d
   - Analyzing changes for commit messages
 
 ### Before Starting a Task
-1. Read the task details carefully using `task-master show <id>`
+1. Read the task details carefully
 2. Identify the primary technology domain (Rails, JS, CSS, etc.)
 3. Check if the task involves multiple domains
 4. Assign the appropriate agent(s) based on the mapping above
@@ -149,12 +145,12 @@ For complex tasks requiring multiple agents, use the `project-orchestrator` to c
 Task(description="Implement feature with automatic handoffs", 
      subagent_type="project-orchestrator", 
      prompt="Create automatic delegation chain for [feature description]. 
-             Include Task Master integration and agent handoff protocols.")
+             Include agent handoff protocols.")
 
 # Orchestrator creates delegation plan and launches first agent
 # Each agent automatically:
 # 1. Completes their work
-# 2. Updates Task Master status
+# 2. Updates task status
 # 3. Signals completion with structured report
 # 4. Recommends next agent
 # 5. Project orchestrator launches next phase
@@ -198,13 +194,11 @@ All specialist agents now follow automatic handoff protocols:
 **Handoff Instructions:**
 - [Guidance for next agent]
 
-**Task Master Status:** Updated to [status]
+**Task Status:** Updated to [status]
 ```
 
 #### Automatic Status Updates
-Agents automatically call Task Master MCP tools:
-- `mcp__task-master-ai__set_task_status` - Mark tasks complete
-- `mcp__task-master-ai__update_subtask` - Log implementation notes
+Agents automatically update task status and log implementation notes.
 
 #### Next Agent Recommendations
 Each agent suggests the next logical step:
@@ -233,29 +227,20 @@ Each agent suggests the next logical step:
 **Recommendation:** [Suggested next steps]
 ```
 
-### Task Master Integration Patterns
+### Automatic Progress Tracking
 
-#### Automatic Progress Tracking
 ```bash
-# Agents automatically update Task Master throughout workflow:
+# Agents automatically update progress throughout workflow:
 1. project-orchestrator → Creates delegation plan, updates task
-2. specialist-agent → Updates subtask with progress, marks complete
+2. specialist-agent → Updates with progress, marks complete
 3. next-agent → Auto-triggered based on completion report
 4. git-auto-commit → Final status update and task closure
-```
-
-#### Structured Logging
-```bash
-# Each phase automatically logs to Task Master:
-task-master update-subtask --id=4.6 --prompt="Rails models created, ready for UI work"
-task-master update-subtask --id=4.6 --prompt="UI components styled, ready for testing"
-task-master set-status --id=4.6 --status=done
 ```
 
 ### Benefits of Automatic Workflows
 
 1. **Zero Manual Intervention** - Once started, workflow completes automatically
-2. **Consistent Task Tracking** - All progress logged to Task Master
+2. **Consistent Task Tracking** - All progress logged automatically
 3. **Structured Handoffs** - Clear communication between agents
 4. **Error Recovery** - Automatic escalation and coordination
 5. **Audit Trail** - Complete history of work and decisions

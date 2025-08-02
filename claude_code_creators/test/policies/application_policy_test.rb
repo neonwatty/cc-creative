@@ -46,7 +46,7 @@ class ApplicationPolicyTest < ActiveSupport::TestCase
   test "Scope initializes with user and scope" do
     scope = ActiveRecord::Relation
     policy_scope = ApplicationPolicy::Scope.new(@user, scope)
-    
+
     # Use send to access private methods
     assert_equal @user, policy_scope.send(:user)
     assert_equal scope, policy_scope.send(:scope)
@@ -55,11 +55,11 @@ class ApplicationPolicyTest < ActiveSupport::TestCase
   test "Scope#resolve raises NoMethodError" do
     scope = ActiveRecord::Relation
     policy_scope = ApplicationPolicy::Scope.new(@user, scope)
-    
+
     error = assert_raises(NoMethodError) do
       policy_scope.resolve
     end
-    
+
     assert_match /You must define #resolve in/, error.message
   end
 

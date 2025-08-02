@@ -18,10 +18,10 @@ class SubAgentMergeComponent < ViewComponent::Base
   def extract_mergeable_content
     # Get all assistant messages that could be merged
     assistant_messages = sub_agent.messages
-                                  .where(role: 'assistant')
+                                  .where(role: "assistant")
                                   .order(created_at: :desc)
                                   .limit(10)
-    
+
     # Combine recent assistant responses
     assistant_messages.map(&:content).join("\n\n---\n\n")
   end
@@ -48,7 +48,7 @@ class SubAgentMergeComponent < ViewComponent::Base
 
   def button_classes(variant = :primary)
     base_classes = "inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
-    
+
     case variant
     when :primary
       "#{base_classes} bg-green-600 text-white hover:bg-green-700 focus:ring-green-500"
@@ -75,9 +75,9 @@ class SubAgentMergeComponent < ViewComponent::Base
   end
 
   def merge_summary
-    message_count = sub_agent.messages.where(role: 'assistant').count
+    message_count = sub_agent.messages.where(role: "assistant").count
     word_count_value = word_count(merge_content)
-    
+
     "Merging #{message_count} assistant #{'response'.pluralize(message_count)} (#{word_count_value} words)"
   end
 
@@ -86,7 +86,7 @@ class SubAgentMergeComponent < ViewComponent::Base
   end
 
   def assistant_message_count
-    sub_agent.messages.where(role: 'assistant').count
+    sub_agent.messages.where(role: "assistant").count
   end
 
   def has_content_to_merge?
