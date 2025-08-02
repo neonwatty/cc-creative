@@ -29,11 +29,19 @@ export default class extends Controller {
       this.boundHandleFocus = this.handleFocus.bind(this)
       this.boundHandleBlur = this.handleBlur.bind(this)
       this.boundHandleMouseMove = throttle(100, this.handleMouseMove.bind(this))
+      this.boundHandleAttachment = this.handleAttachment.bind(this)
+      this.boundHandleContextItemInsert = this.handleContextItemInsert.bind(this)
+      this.boundHandleContextItemClosed = this.handleContextItemClosed.bind(this)
+      this.boundAutosaveBlur = () => {
+        if (this.contentChanged) {
+          this.performAutosave()
+        }
+      }
       
       // Setup event listeners
       this.editor.addEventListener("trix-change", this.boundHandleChange)
       this.editor.addEventListener("trix-selection-change", this.boundHandleSelection)
-      this.editor.addEventListener("trix-attachment-add", this.handleAttachment.bind(this))
+      this.editor.addEventListener("trix-attachment-add", this.boundHandleAttachment)
       this.editor.addEventListener("trix-focus", this.boundHandleFocus)
       this.editor.addEventListener("trix-blur", this.boundHandleBlur)
       this.editor.addEventListener("mousemove", this.boundHandleMouseMove)
@@ -205,11 +213,7 @@ export default class extends Controller {
     }, this.autosaveIntervalValue)
     
     // Autosave on blur
-    this.editor.addEventListener("trix-blur", () => {
-      if (this.contentChanged) {
-        this.performAutosave()
-      }
-    })
+    this.editor.addEventListener("trix-blur", this.boundAutosaveBlur)
   }
   
   async performAutosave() {
@@ -247,8 +251,8 @@ export default class extends Controller {
   
   setupContextItemListeners() {
     // Listen for context item preview events
-    document.addEventListener('context-item-preview:insert', this.handleContextItemInsert.bind(this))
-    document.addEventListener('context-item-preview:closed', this.handleContextItemClosed.bind(this))
+    document.addEventListener('context-item-preview:insert', this.boundHandleContextItemInsert)
+    document.addEventListener('context-item-preview:closed', this.boundHandleContextItemClosed)
   }
   
   handleContextItemInsert(event) {
@@ -492,15 +496,16 @@ export default class extends Controller {
     if (this.editor) {
       this.editor.removeEventListener("trix-change", this.boundHandleChange)
       this.editor.removeEventListener("trix-selection-change", this.boundHandleSelection)
-      this.editor.removeEventListener("trix-attachment-add", this.handleAttachment.bind(this))
+      this.editor.removeEventListener("trix-attachment-add", this.boundHandleAttachment)
       this.editor.removeEventListener("trix-focus", this.boundHandleFocus)
       this.editor.removeEventListener("trix-blur", this.boundHandleBlur)
       this.editor.removeEventListener("mousemove", this.boundHandleMouseMove)
+      this.editor.removeEventListener("trix-blur", this.boundAutosaveBlur)
     }
     
     // Remove context item listeners
-    document.removeEventListener('context-item-preview:insert', this.handleContextItemInsert.bind(this))
-    document.removeEventListener('context-item-preview:closed', this.handleContextItemClosed.bind(this))
+    document.removeEventListener('context-item-preview:insert', this.boundHandleContextItemInsert)
+    document.removeEventListener('context-item-preview:closed', this.boundHandleContextItemClosed)
     
     // Disconnect presence channel
     if (this.presenceChannel) {

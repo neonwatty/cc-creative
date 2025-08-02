@@ -140,26 +140,14 @@ export default class extends Controller {
     const itemIds = Array.from(this.listTarget.querySelectorAll('[data-context-item-id]'))
       .map(item => item.dataset.contextItemId)
     
-    // Send reorder request to server
-    fetch(this.reorderUrlValue, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-Token': document.querySelector('[name="csrf-token"]')?.content
-      },
-      body: JSON.stringify({ item_ids: itemIds })
-    })
-    .then(response => {
-      if (!response.ok) {
-        // Revert the order if the request failed
-        this.sortable.sort(evt.oldIndicies)
-      }
-    })
-    .catch(error => {
-      console.error('Failed to reorder items:', error)
-      // Revert the order
-      this.sortable.sort(evt.oldIndicies)
-    })
+    // Store original order for rollback
+    const originalOrder = [...itemIds]
+    
+    // Optimistically update UI
+    this.updateReorderUI('saving')
+    
+    // Send reorder request with retry logic
+    this.sendReorderRequest(itemIds, originalOrder)
   }
   
   highlightDropZones() {
@@ -325,20 +313,6 @@ export default class extends Controller {
   }
 
   // Enhanced reorder with optimistic updates
-  handleReorder(evt) {
-    const itemIds = Array.from(this.listTarget.querySelectorAll('[data-context-item-id]'))
-      .map(item => item.dataset.contextItemId)
-    
-    // Store original order for rollback
-    const originalOrder = [...itemIds]
-    
-    // Optimistically update UI
-    this.updateReorderUI('saving')
-    
-    // Send reorder request with retry logic
-    this.sendReorderRequest(itemIds, originalOrder)
-  }
-
   async sendReorderRequest(itemIds, originalOrder, retryCount = 0) {
     const maxRetries = 3
     

@@ -1,17 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-
-// Helper function for auto-saving drafts
-function debounce(func, wait) {
-  let timeout
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout)
-      func(...args)
-    }
-    clearTimeout(timeout)
-    timeout = setTimeout(later, wait)
-  }
-}
+import { debounce } from "throttle-debounce"
 
 export default class extends Controller {
   static targets = ["messageForm", "messageInput", "messagesList", "sendButton", "loadingIndicator", "errorMessage", "retryButton"]
@@ -241,13 +229,13 @@ export default class extends Controller {
   
   // Draft management
   setupAutoSave() {
-    this.saveDraft = debounce(() => {
+    this.saveDraft = debounce(1000, () => {
       const content = this.messageInputTarget?.value
       if (content) {
         const draftKey = `sub-agent-draft-${this.documentIdValue}-${this.subAgentIdValue}`
         localStorage.setItem(draftKey, content)
       }
-    }, 1000)
+    })
     
     if (this.hasMessageInputTarget) {
       this.messageInputTarget.addEventListener('input', this.saveDraft)
@@ -333,6 +321,26 @@ export default class extends Controller {
     div.textContent = text
     return div.innerHTML
   }
+
+  insertTextAtCursor(text) {
+    if (!this.hasMessageInputTarget) return
+
+    const textarea = this.messageInputTarget
+    const start = textarea.selectionStart
+    const end = textarea.selectionEnd
+    const currentValue = textarea.value
+
+    // Insert text at cursor position
+    const newValue = currentValue.slice(0, start) + text + currentValue.slice(end)
+    textarea.value = newValue
+
+    // Move cursor to end of inserted text
+    const newCursorPosition = start + text.length
+    textarea.setSelectionRange(newCursorPosition, newCursorPosition)
+
+    // Focus the textarea
+    textarea.focus()
+  }
   
   // Drag and drop support
   setupDragAndDrop() {
@@ -398,7 +406,7 @@ export default class extends Controller {
         // Handle text drop
         const text = event.dataTransfer.getData('text/plain')
         if (text) {
-          document.execCommand('insertText', false, text)
+          this.insertTextAtCursor(text)
           this.saveDraft()
         }
       }
