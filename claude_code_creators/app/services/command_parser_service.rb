@@ -50,6 +50,33 @@ class CommandParserService
       required_params: 0,
       max_params: 1,
       permission_level: :user
+    },
+    "review" => {
+      description: "AI-powered code review with comprehensive analysis",
+      parameters: [ "mode", "focus" ],
+      category: :ai_review,
+      required_params: 0,
+      max_params: 2,
+      permission_level: :user,
+      valid_values: [ "quick", "thorough", "security", "performance", "style" ]
+    },
+    "suggest" => {
+      description: "Get AI suggestions for improvements and optimizations",
+      parameters: [ "type", "context" ],
+      category: :ai_review,
+      required_params: 0,
+      max_params: 2,
+      permission_level: :user,
+      valid_values: [ "refactor", "optimize", "enhance", "fix", "extend" ]
+    },
+    "critique" => {
+      description: "Critical analysis of code architecture and design patterns",
+      parameters: [ "aspect", "level" ],
+      category: :ai_review,
+      required_params: 0,
+      max_params: 2,
+      permission_level: :user,
+      valid_values: [ "architecture", "patterns", "maintainability", "scalability", "testability" ]
     }
   }.freeze
 

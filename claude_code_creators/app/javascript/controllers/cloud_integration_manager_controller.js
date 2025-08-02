@@ -54,23 +54,23 @@ export default class extends Controller {
   // Setup event listeners
   setupEventListeners() {
     // Listen for OAuth completion events
-    this.element.addEventListener('oauth:success', this.handleOAuthSuccess.bind(this))
-    this.element.addEventListener('oauth:error', this.handleOAuthError.bind(this))
+    this.element.addEventListener("oauth:success", this.handleOAuthSuccess.bind(this))
+    this.element.addEventListener("oauth:error", this.handleOAuthError.bind(this))
     
     // Listen for sync events
-    this.element.addEventListener('sync:started', this.handleSyncStarted.bind(this))
-    this.element.addEventListener('sync:completed', this.handleSyncCompleted.bind(this))
-    this.element.addEventListener('sync:error', this.handleSyncError.bind(this))
+    this.element.addEventListener("sync:started", this.handleSyncStarted.bind(this))
+    this.element.addEventListener("sync:completed", this.handleSyncCompleted.bind(this))
+    this.element.addEventListener("sync:error", this.handleSyncError.bind(this))
     
     // Listen for file operation events
-    this.element.addEventListener('file:imported', this.handleFileImported.bind(this))
-    this.element.addEventListener('file:exported', this.handleFileExported.bind(this))
+    this.element.addEventListener("file:imported", this.handleFileImported.bind(this))
+    this.element.addEventListener("file:exported", this.handleFileExported.bind(this))
   }
 
   cleanupEventListeners() {
     // Remove event listeners to prevent memory leaks
-    this.element.removeEventListener('oauth:success', this.handleOAuthSuccess.bind(this))
-    this.element.removeEventListener('oauth:error', this.handleOAuthError.bind(this))
+    this.element.removeEventListener("oauth:success", this.handleOAuthSuccess.bind(this))
+    this.element.removeEventListener("oauth:error", this.handleOAuthError.bind(this))
   }
 
   // Load all integrations
@@ -78,10 +78,10 @@ export default class extends Controller {
     try {
       this.showLoading(true)
       
-      const response = await fetch('/cloud_integrations', {
+      const response = await fetch("/cloud_integrations", {
         headers: {
-          'Accept': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest'
+          "Accept": "application/json",
+          "X-Requested-With": "XMLHttpRequest"
         }
       })
 
@@ -102,7 +102,7 @@ export default class extends Controller {
   // Render integrations in the UI
   renderIntegrations(data) {
     if (!data.integrations || !data.available_providers) {
-      this.showError('Invalid integration data received')
+      this.showError("Invalid integration data received")
       return
     }
 
@@ -129,9 +129,9 @@ export default class extends Controller {
       const fileCount = integration?.cloud_files_count || 0
 
       return `
-        <div class="provider-card provider-card--${provider.name} ${isConnected ? 'provider-card--connected' : 'provider-card--disconnected'}" 
+        <div class="provider-card provider-card--${provider.name} ${isConnected ? "provider-card--connected" : "provider-card--disconnected"}" 
              data-provider="${provider.name}"
-             data-integration-id="${integration?.id || ''}">
+             data-integration-id="${integration?.id || ""}">
           
           <div class="provider-card__header">
             <div class="provider-card__icon">
@@ -141,9 +141,9 @@ export default class extends Controller {
               <h3 class="provider-card__name">${provider.display_name}</h3>
               <div class="provider-card__status">
                 ${isConnected ? 
-                  `<span class="status-badge status-badge--connected">Connected</span>` :
-                  `<span class="status-badge status-badge--disconnected">Not Connected</span>`
-                }
+    "<span class=\"status-badge status-badge--connected\">Connected</span>" :
+    "<span class=\"status-badge status-badge--disconnected\">Not Connected</span>"
+}
               </div>
             </div>
           </div>
@@ -157,7 +157,7 @@ export default class extends Controller {
                 </div>
                 <div class="stat">
                   <span class="stat__label">Last Sync</span>
-                  <span class="stat__value">${lastSync ? this.formatDate(lastSync) : 'Never'}</span>
+                  <span class="stat__value">${lastSync ? this.formatDate(lastSync) : "Never"}</span>
                 </div>
               </div>
               
@@ -201,7 +201,7 @@ export default class extends Controller {
           </div>
         </div>
       `
-    }).join('')
+    }).join("")
 
     this.providerCardsTarget.innerHTML = cardsHtml
   }
@@ -211,13 +211,13 @@ export default class extends Controller {
     const provider = event.target.dataset.provider
     
     if (!provider) {
-      this.showError('Provider not specified')
+      this.showError("Provider not specified")
       return
     }
 
     try {
       // This will be handled by the cloud-oauth controller
-      this.dispatch('provider:connecting', { detail: { provider } })
+      this.dispatch("provider:connecting", { detail: { provider } })
       
     } catch (error) {
       this.showError(`Failed to connect to ${provider}: ${error.message}`)
@@ -229,7 +229,7 @@ export default class extends Controller {
     event.preventDefault()
     
     const integrationId = event.target.dataset.integrationId
-    const providerName = this.integrations.get(integrationId)?.provider_name || 'provider'
+    const providerName = this.integrations.get(integrationId)?.provider_name || "provider"
     
     if (!confirm(`Are you sure you want to disconnect from ${providerName}? This will remove access to your files.`)) {
       return
@@ -237,19 +237,19 @@ export default class extends Controller {
 
     try {
       const response = await fetch(`/cloud_integrations/${integrationId}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content,
-          'Accept': 'application/json'
+          "X-CSRF-Token": document.querySelector("[name=\"csrf-token\"]").content,
+          "Accept": "application/json"
         }
       })
 
       if (response.ok) {
         this.integrations.delete(integrationId)
-        this.showNotification(`Disconnected from ${providerName}`, 'success')
+        this.showNotification(`Disconnected from ${providerName}`, "success")
         this.loadIntegrations() // Refresh the display
       } else {
-        throw new Error('Failed to disconnect')
+        throw new Error("Failed to disconnect")
       }
       
     } catch (error) {
@@ -265,30 +265,30 @@ export default class extends Controller {
     const integration = this.integrations.get(integrationId)
     
     if (!integration) {
-      this.showError('Integration not found')
+      this.showError("Integration not found")
       return
     }
 
-    this.updateSyncStatus(integrationId, 'syncing', 'Syncing...')
+    this.updateSyncStatus(integrationId, "syncing", "Syncing...")
     
     try {
       const response = await fetch(`/cloud_integrations/${integrationId}/cloud_files?sync=true`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content,
-          'Accept': 'application/json'
+          "X-CSRF-Token": document.querySelector("[name=\"csrf-token\"]").content,
+          "Accept": "application/json"
         }
       })
 
       if (response.ok) {
-        this.showNotification(`Sync started for ${integration.provider_name}`, 'success')
+        this.showNotification(`Sync started for ${integration.provider_name}`, "success")
         this.startSyncPolling(integrationId)
       } else {
-        throw new Error('Sync request failed')
+        throw new Error("Sync request failed")
       }
       
     } catch (error) {
-      this.updateSyncStatus(integrationId, 'error', 'Sync failed')
+      this.updateSyncStatus(integrationId, "error", "Sync failed")
       this.showError(`Sync failed: ${error.message}`)
     }
   }
@@ -298,29 +298,29 @@ export default class extends Controller {
     const connectedIntegrations = Array.from(this.integrations.values()).filter(i => i.active)
     
     if (connectedIntegrations.length === 0) {
-      this.showNotification('No connected integrations to sync', 'info')
+      this.showNotification("No connected integrations to sync", "info")
       return
     }
 
-    this.showNotification(`Starting sync for ${connectedIntegrations.length} integrations...`, 'info')
+    this.showNotification(`Starting sync for ${connectedIntegrations.length} integrations...`, "info")
     
     // Sync all integrations
     for (const integration of connectedIntegrations) {
-      this.updateSyncStatus(integration.id, 'syncing', 'Syncing...')
+      this.updateSyncStatus(integration.id, "syncing", "Syncing...")
       
       try {
         await fetch(`/cloud_integrations/${integration.id}/cloud_files?sync=true`, {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content,
-            'Accept': 'application/json'
+            "X-CSRF-Token": document.querySelector("[name=\"csrf-token\"]").content,
+            "Accept": "application/json"
           }
         })
         
         this.startSyncPolling(integration.id)
         
       } catch (error) {
-        this.updateSyncStatus(integration.id, 'error', 'Sync failed')
+        this.updateSyncStatus(integration.id, "error", "Sync failed")
       }
     }
   }
@@ -333,7 +333,7 @@ export default class extends Controller {
     const integration = this.integrations.get(integrationId)
     
     if (!integration) {
-      this.showError('Integration not found')
+      this.showError("Integration not found")
       return
     }
 
@@ -349,7 +349,7 @@ export default class extends Controller {
     const statusElement = this.element.querySelector(`[data-integration-id="${integrationId}"] .provider-card__sync-status`)
     if (statusElement) {
       statusElement.className = `provider-card__sync-status sync-status--${status}`
-      const textElement = statusElement.querySelector('.sync-text')
+      const textElement = statusElement.querySelector(".sync-text")
       if (textElement) {
         textElement.textContent = message
       }
@@ -364,15 +364,15 @@ export default class extends Controller {
     if (!this.hasSyncStatusGlobalTarget) return
 
     const allIntegrations = integrations || Array.from(this.integrations.values())
-    const activeSyncs = Array.from(this.syncStatus.values()).filter(s => s.status === 'syncing')
+    const activeSyncs = Array.from(this.syncStatus.values()).filter(s => s.status === "syncing")
     
     if (activeSyncs.length > 0) {
-      this.syncStatusGlobalTarget.className = 'global-sync-status sync-status--syncing'
-      this.syncStatusGlobalTarget.textContent = `Syncing ${activeSyncs.length} integration${activeSyncs.length > 1 ? 's' : ''}...`
+      this.syncStatusGlobalTarget.className = "global-sync-status sync-status--syncing"
+      this.syncStatusGlobalTarget.textContent = `Syncing ${activeSyncs.length} integration${activeSyncs.length > 1 ? "s" : ""}...`
     } else {
       const connectedCount = allIntegrations.filter(i => i.active).length
-      this.syncStatusGlobalTarget.className = 'global-sync-status sync-status--ready'
-      this.syncStatusGlobalTarget.textContent = `${connectedCount} integration${connectedCount !== 1 ? 's' : ''} connected`
+      this.syncStatusGlobalTarget.className = "global-sync-status sync-status--ready"
+      this.syncStatusGlobalTarget.textContent = `${connectedCount} integration${connectedCount !== 1 ? "s" : ""} connected`
     }
   }
 
@@ -382,7 +382,7 @@ export default class extends Controller {
     const pollInterval = setInterval(async () => {
       try {
         const response = await fetch(`/cloud_integrations/${integrationId}/sync_status`, {
-          headers: { 'Accept': 'application/json' }
+          headers: { "Accept": "application/json" }
         })
         
         if (response.ok) {
@@ -390,11 +390,11 @@ export default class extends Controller {
           
           if (!data.syncing) {
             clearInterval(pollInterval)
-            this.updateSyncStatus(integrationId, 'complete', `Synced ${data.files_count} files`)
+            this.updateSyncStatus(integrationId, "complete", `Synced ${data.files_count} files`)
             
             // Reset status after delay
             setTimeout(() => {
-              this.updateSyncStatus(integrationId, 'ready', 'Ready')
+              this.updateSyncStatus(integrationId, "ready", "Ready")
             }, 3000)
             
             // Refresh integration data
@@ -403,7 +403,7 @@ export default class extends Controller {
         }
       } catch (error) {
         clearInterval(pollInterval)
-        this.updateSyncStatus(integrationId, 'error', 'Sync failed')
+        this.updateSyncStatus(integrationId, "error", "Sync failed")
       }
     }, 5000)
 
@@ -416,7 +416,7 @@ export default class extends Controller {
   async refreshIntegration(integrationId) {
     try {
       const response = await fetch(`/cloud_integrations/${integrationId}`, {
-        headers: { 'Accept': 'application/json' }
+        headers: { "Accept": "application/json" }
       })
       
       if (response.ok) {
@@ -424,7 +424,7 @@ export default class extends Controller {
         this.integrations.set(integrationId, integration)
       }
     } catch (error) {
-      console.error('Failed to refresh integration:', error)
+      console.error("Failed to refresh integration:", error)
     }
   }
 
@@ -453,7 +453,7 @@ export default class extends Controller {
   // Event handlers
   handleOAuthSuccess(event) {
     const { provider } = event.detail
-    this.showNotification(`Successfully connected to ${provider}`, 'success')
+    this.showNotification(`Successfully connected to ${provider}`, "success")
     
     // Refresh integrations after short delay
     setTimeout(() => {
@@ -468,34 +468,34 @@ export default class extends Controller {
 
   handleSyncStarted(event) {
     const { integrationId } = event.detail
-    this.updateSyncStatus(integrationId, 'syncing', 'Syncing...')
+    this.updateSyncStatus(integrationId, "syncing", "Syncing...")
   }
 
   handleSyncCompleted(event) {
     const { integrationId, filesCount } = event.detail
-    this.updateSyncStatus(integrationId, 'complete', `Synced ${filesCount} files`)
+    this.updateSyncStatus(integrationId, "complete", `Synced ${filesCount} files`)
   }
 
   handleSyncError(event) {
     const { integrationId, error } = event.detail
-    this.updateSyncStatus(integrationId, 'error', `Error: ${error}`)
+    this.updateSyncStatus(integrationId, "error", `Error: ${error}`)
   }
 
   handleFileImported(event) {
     const { fileName, integrationId } = event.detail
-    this.showNotification(`Imported "${fileName}"`, 'success')
+    this.showNotification(`Imported "${fileName}"`, "success")
   }
 
   handleFileExported(event) {
     const { fileName, integrationId } = event.detail
-    this.showNotification(`Exported "${fileName}"`, 'success')
+    this.showNotification(`Exported "${fileName}"`, "success")
   }
 
   // UI helper methods
   showLoading(show) {
     this.element.classList.toggle(this.loadingClass, show)
     if (this.hasLoadingSpinnerTarget) {
-      this.loadingSpinnerTarget.style.display = show ? 'block' : 'none'
+      this.loadingSpinnerTarget.style.display = show ? "block" : "none"
     }
   }
 
@@ -504,28 +504,28 @@ export default class extends Controller {
     
     if (this.hasErrorContainerTarget) {
       this.errorContainerTarget.textContent = message
-      this.errorContainerTarget.style.display = 'block'
+      this.errorContainerTarget.style.display = "block"
       
       setTimeout(() => {
-        this.errorContainerTarget.style.display = 'none'
+        this.errorContainerTarget.style.display = "none"
         this.element.classList.remove(this.errorClass)
       }, 5000)
     }
     
     // Also dispatch as notification
-    this.showNotification(message, 'error')
+    this.showNotification(message, "error")
   }
 
-  showNotification(message, type = 'info') {
+  showNotification(message, type = "info") {
     // Dispatch notification event for global notification system
-    this.dispatch('notification', {
+    this.dispatch("notification", {
       detail: { message, type }
     })
   }
 
   // Utility methods
   formatDate(dateString) {
-    if (!dateString) return 'Never'
+    if (!dateString) return "Never"
     
     const date = new Date(dateString)
     const now = new Date()
@@ -534,7 +534,7 @@ export default class extends Controller {
     const diffHours = Math.floor(diffMs / 3600000)
     const diffDays = Math.floor(diffMs / 86400000)
     
-    if (diffMins < 1) return 'Just now'
+    if (diffMins < 1) return "Just now"
     if (diffMins < 60) return `${diffMins}m ago`
     if (diffHours < 24) return `${diffHours}h ago`
     if (diffDays < 7) return `${diffDays}d ago`
@@ -549,12 +549,12 @@ export default class extends Controller {
       window.cloudSyncChannel.connect(this.userIdValue)
       
       // Listen for sync events
-      window.cloudSyncChannel.on('sync_started', this.handleCableSyncStarted.bind(this))
-      window.cloudSyncChannel.on('sync_completed', this.handleCableSyncCompleted.bind(this))
-      window.cloudSyncChannel.on('sync_error', this.handleCableSyncError.bind(this))
-      window.cloudSyncChannel.on('sync_progress', this.handleCableSyncProgress.bind(this))
-      window.cloudSyncChannel.on('status_update', this.handleCableStatusUpdate.bind(this))
-      window.cloudSyncChannel.on('error', this.handleCableError.bind(this))
+      window.cloudSyncChannel.on("sync_started", this.handleCableSyncStarted.bind(this))
+      window.cloudSyncChannel.on("sync_completed", this.handleCableSyncCompleted.bind(this))
+      window.cloudSyncChannel.on("sync_error", this.handleCableSyncError.bind(this))
+      window.cloudSyncChannel.on("sync_progress", this.handleCableSyncProgress.bind(this))
+      window.cloudSyncChannel.on("status_update", this.handleCableStatusUpdate.bind(this))
+      window.cloudSyncChannel.on("error", this.handleCableError.bind(this))
     }
   }
 
@@ -567,18 +567,18 @@ export default class extends Controller {
   // Action Cable event handlers
   handleCableSyncStarted(data) {
     const { integration_id, provider } = data
-    this.updateSyncStatus(integration_id, 'syncing', 'Syncing...')
-    this.showNotification(`Sync started for ${provider}`, 'info')
+    this.updateSyncStatus(integration_id, "syncing", "Syncing...")
+    this.showNotification(`Sync started for ${provider}`, "info")
   }
 
   handleCableSyncCompleted(data) {
     const { integration_id, provider, files_count } = data
-    this.updateSyncStatus(integration_id, 'complete', `Synced ${files_count} files`)
-    this.showNotification(`Sync completed for ${provider}: ${files_count} files`, 'success')
+    this.updateSyncStatus(integration_id, "complete", `Synced ${files_count} files`)
+    this.showNotification(`Sync completed for ${provider}: ${files_count} files`, "success")
     
     // Reset status after delay
     setTimeout(() => {
-      this.updateSyncStatus(integration_id, 'ready', 'Ready')
+      this.updateSyncStatus(integration_id, "ready", "Ready")
     }, 3000)
     
     // Refresh integration data
@@ -587,13 +587,13 @@ export default class extends Controller {
 
   handleCableSyncError(data) {
     const { integration_id, provider, error } = data
-    this.updateSyncStatus(integration_id, 'error', `Error: ${error}`)
-    this.showNotification(`Sync failed for ${provider}: ${error}`, 'error')
+    this.updateSyncStatus(integration_id, "error", `Error: ${error}`)
+    this.showNotification(`Sync failed for ${provider}: ${error}`, "error")
   }
 
   handleCableSyncProgress(data) {
     const { integration_id, progress, message } = data
-    this.updateSyncStatus(integration_id, 'syncing', message || `${progress}% complete`)
+    this.updateSyncStatus(integration_id, "syncing", message || `${progress}% complete`)
   }
 
   handleCableStatusUpdate(data) {
@@ -603,11 +603,11 @@ export default class extends Controller {
         const { integration_id, syncing, files_count, error } = status
         
         if (error) {
-          this.updateSyncStatus(integration_id, 'error', error)
+          this.updateSyncStatus(integration_id, "error", error)
         } else if (syncing) {
-          this.updateSyncStatus(integration_id, 'syncing', 'Syncing...')
+          this.updateSyncStatus(integration_id, "syncing", "Syncing...")
         } else {
-          this.updateSyncStatus(integration_id, 'ready', 'Ready')
+          this.updateSyncStatus(integration_id, "ready", "Ready")
         }
       })
     }
@@ -618,7 +618,7 @@ export default class extends Controller {
     this.showError(`Real-time sync error: ${error}`)
     
     if (integration_id) {
-      this.updateSyncStatus(integration_id, 'error', error)
+      this.updateSyncStatus(integration_id, "error", error)
     }
   }
 
@@ -630,7 +630,7 @@ export default class extends Controller {
     const integration = this.integrations.get(integrationId)
     
     if (!integration) {
-      this.showError('Integration not found')
+      this.showError("Integration not found")
       return
     }
 
@@ -645,26 +645,26 @@ export default class extends Controller {
 
   // Original sync method as fallback
   async syncIntegrationDirect(integrationId, integration) {
-    this.updateSyncStatus(integrationId, 'syncing', 'Syncing...')
+    this.updateSyncStatus(integrationId, "syncing", "Syncing...")
     
     try {
       const response = await fetch(`/cloud_integrations/${integrationId}/cloud_files?sync=true`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content,
-          'Accept': 'application/json'
+          "X-CSRF-Token": document.querySelector("[name=\"csrf-token\"]").content,
+          "Accept": "application/json"
         }
       })
 
       if (response.ok) {
-        this.showNotification(`Sync started for ${integration.provider_name}`, 'success')
+        this.showNotification(`Sync started for ${integration.provider_name}`, "success")
         this.startSyncPolling(integrationId)
       } else {
-        throw new Error('Sync request failed')
+        throw new Error("Sync request failed")
       }
       
     } catch (error) {
-      this.updateSyncStatus(integrationId, 'error', 'Sync failed')
+      this.updateSyncStatus(integrationId, "error", "Sync failed")
       this.showError(`Sync failed: ${error.message}`)
     }
   }

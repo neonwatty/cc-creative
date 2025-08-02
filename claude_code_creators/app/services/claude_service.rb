@@ -206,6 +206,215 @@ class ClaudeService
     Rails.logger.error "Failed to store Claude interaction: #{e.message}"
   end
 
+  # AI Code Review Methods for Plugin System
+  def analyze_code_for_review(content, mode: "thorough", focus: nil)
+    raise ConfigurationError, "Anthropic client not configured" unless @client
+
+    system_prompt = build_review_system_prompt(mode, focus)
+    user_prompt = build_review_user_prompt(content, mode, focus)
+
+    begin
+      response = @client.messages(
+        model: Rails.application.config.anthropic[:model],
+        max_tokens: Rails.application.config.anthropic[:max_tokens],
+        temperature: 0.2,
+        system: system_prompt,
+        messages: [{ role: "user", content: user_prompt }]
+      )
+
+      parse_review_response(response.content.first.text)
+    rescue Anthropic::Error => e
+      raise APIError, "Claude API error during review: #{e.message}"
+    end
+  end
+
+  def generate_code_suggestions(content, type: "enhance", context: nil)
+    raise ConfigurationError, "Anthropic client not configured" unless @client
+
+    system_prompt = build_suggestion_system_prompt(type, context)
+    user_prompt = build_suggestion_user_prompt(content, type, context)
+
+    begin
+      response = @client.messages(
+        model: Rails.application.config.anthropic[:model],
+        max_tokens: Rails.application.config.anthropic[:max_tokens],
+        temperature: 0.3,
+        system: system_prompt,
+        messages: [{ role: "user", content: user_prompt }]
+      )
+
+      parse_suggestion_response(response.content.first.text)
+    rescue Anthropic::Error => e
+      raise APIError, "Claude API error during suggestion generation: #{e.message}"
+    end
+  end
+
+  def provide_code_critique(content, aspect: "architecture", level: "intermediate")
+    raise ConfigurationError, "Anthropic client not configured" unless @client
+
+    system_prompt = build_critique_system_prompt(aspect, level)
+    user_prompt = build_critique_user_prompt(content, aspect, level)
+
+    begin
+      response = @client.messages(
+        model: Rails.application.config.anthropic[:model],
+        max_tokens: Rails.application.config.anthropic[:max_tokens],
+        temperature: 0.2,
+        system: system_prompt,
+        messages: [{ role: "user", content: user_prompt }]
+      )
+
+      parse_critique_response(response.content.first.text)
+    rescue Anthropic::Error => e
+      raise APIError, "Claude API error during critique: #{e.message}"
+    end
+  end
+
+  private
+
+  # Review system prompts
+  def build_review_system_prompt(mode, focus)
+    base_prompt = "You are an expert code reviewer with extensive experience in software development best practices."
+    
+    case mode
+    when "quick"
+      "#{base_prompt} Provide a quick but thorough code review focusing on the most critical issues."
+    when "security"
+      "#{base_prompt} Focus specifically on security vulnerabilities, potential exploits, and secure coding practices."
+    when "performance"
+      "#{base_prompt} Focus on performance optimizations, efficiency, and scalability concerns."
+    when "style"
+      "#{base_prompt} Focus on code style, readability, and maintainability standards."
+    else # thorough
+      "#{base_prompt} Provide a comprehensive code review covering all aspects of code quality."
+    end
+  end
+
+  def build_review_user_prompt(content, mode, focus)
+    prompt = "Please review the following code:\n\n```\n#{content}\n```\n\n"
+    prompt += "Focus areas: #{focus}\n\n" if focus.present?
+    prompt += "Please provide your analysis in JSON format with the following structure:\n"
+    prompt += '{"analysis": "overall analysis", "suggestions": ["suggestion1", "suggestion2"], "issues": [{"type": "issue_type", "severity": "high|medium|low", "description": "description"}], "score": numeric_score_0_to_100}'
+  end
+
+  def build_suggestion_system_prompt(type, context)
+    base_prompt = "You are a senior software engineer providing code improvement suggestions."
+    
+    case type
+    when "refactor"
+      "#{base_prompt} Focus on refactoring opportunities to improve code structure and maintainability."
+    when "optimize"
+      "#{base_prompt} Focus on performance optimizations and efficiency improvements."
+    when "enhance"
+      "#{base_prompt} Focus on feature enhancements and functionality improvements."
+    when "fix"
+      "#{base_prompt} Focus on identifying and suggesting fixes for potential bugs and issues."
+    when "extend"
+      "#{base_prompt} Focus on extensibility and ways to make the code more flexible and reusable."
+    else
+      "#{base_prompt} Provide general improvement suggestions for the code."
+    end
+  end
+
+  def build_suggestion_user_prompt(content, type, context)
+    prompt = "Please analyze the following code and provide #{type} suggestions:\n\n```\n#{content}\n```\n\n"
+    prompt += "Additional context: #{context}\n\n" if context.present?
+    prompt += "Please provide your suggestions in JSON format with the following structure:\n"
+    prompt += '{"suggestions": ["suggestion1", "suggestion2"], "improvements": [{"change": "description", "benefit": "benefit", "example": "code_example"}], "examples": ["example1"], "priority": "high|medium|low"}'
+  end
+
+  def build_critique_system_prompt(aspect, level)
+    base_prompt = "You are a software architecture expert providing critical analysis of code design."
+    
+    case aspect
+    when "architecture"
+      "#{base_prompt} Focus on overall architecture, design patterns, and structural decisions."
+    when "patterns"
+      "#{base_prompt} Focus on design patterns, their usage, and appropriateness for the context."
+    when "maintainability"
+      "#{base_prompt} Focus on code maintainability, readability, and long-term sustainability."
+    when "scalability"
+      "#{base_prompt} Focus on scalability concerns and how the code will handle growth."
+    when "testability"
+      "#{base_prompt} Focus on testability, testing strategies, and code structure for testing."
+    else
+      "#{base_prompt} Provide a comprehensive critique of the code design and architecture."
+    end
+  end
+
+  def build_critique_user_prompt(content, aspect, level)
+    prompt = "Please provide a critical analysis of the following code focusing on #{aspect}:\n\n```\n#{content}\n```\n\n"
+    prompt += "Analysis level: #{level}\n\n"
+    prompt += "Please provide your critique in JSON format with the following structure:\n"
+    prompt += '{"strengths": ["strength1"], "weaknesses": ["weakness1"], "recommendations": ["recommendation1"], "design_patterns": ["pattern1"], "best_practices": ["practice1"]}'
+  end
+
+  # Response parsers
+  def parse_review_response(response_text)
+    json_match = response_text.match(/\{.*\}/m)
+    if json_match
+      JSON.parse(json_match[0]).symbolize_keys
+    else
+      {
+        analysis: response_text,
+        suggestions: [],
+        issues: [],
+        score: 75
+      }
+    end
+  rescue JSON::ParserError
+    {
+      analysis: response_text,
+      suggestions: [],
+      issues: [],
+      score: 75
+    }
+  end
+
+  def parse_suggestion_response(response_text)
+    json_match = response_text.match(/\{.*\}/m)
+    if json_match
+      JSON.parse(json_match[0]).symbolize_keys
+    else
+      {
+        suggestions: [response_text],
+        improvements: [],
+        examples: [],
+        priority: "medium"
+      }
+    end
+  rescue JSON::ParserError
+    {
+      suggestions: [response_text],
+      improvements: [],
+      examples: [],
+      priority: "medium"
+    }
+  end
+
+  def parse_critique_response(response_text)
+    json_match = response_text.match(/\{.*\}/m)
+    if json_match
+      JSON.parse(json_match[0]).symbolize_keys
+    else
+      {
+        strengths: [],
+        weaknesses: [],
+        recommendations: [response_text],
+        design_patterns: [],
+        best_practices: []
+      }
+    end
+  rescue JSON::ParserError
+    {
+      strengths: [],
+      weaknesses: [],
+      recommendations: [response_text],
+      design_patterns: [],
+      best_practices: []
+    }
+  end
+
   # Internal context manager
   class ContextManager
     def initialize(session_id)

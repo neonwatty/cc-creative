@@ -82,8 +82,8 @@ export default class extends Controller {
     }
     
     // Handle context item insertions
-    if (event && event.detail && event.detail.insertedFrom === 'context-item') {
-      console.log('Context item inserted:', event.detail.insertedContent)
+    if (event && event.detail && event.detail.insertedFrom === "context-item") {
+      console.log("Context item inserted:", event.detail.insertedContent)
       
       // You could add additional logic here for context item tracking
       // For example, tracking which context items have been used
@@ -100,8 +100,8 @@ export default class extends Controller {
 
   handleFocus(event) {
     if (this.hasFormatBarTarget) {
-      this.formatBarTarget.classList.remove('opacity-0')
-      this.formatBarTarget.classList.add('opacity-100')
+      this.formatBarTarget.classList.remove("opacity-0")
+      this.formatBarTarget.classList.add("opacity-100")
     }
   }
 
@@ -112,8 +112,8 @@ export default class extends Controller {
     }
     
     if (this.hasFormatBarTarget) {
-      this.formatBarTarget.classList.add('opacity-0')
-      this.formatBarTarget.classList.remove('opacity-100')
+      this.formatBarTarget.classList.add("opacity-0")
+      this.formatBarTarget.classList.remove("opacity-100")
     }
   }
 
@@ -151,26 +151,26 @@ export default class extends Controller {
     const text = statusElement.querySelector("span:last-child")
     
     switch(status) {
-      case "editing":
-        indicator.classList.remove("bg-green-500", "bg-yellow-500", "bg-red-500")
-        indicator.classList.add("bg-yellow-500")
-        text.textContent = "Editing..."
-        break
-      case "saved":
-        indicator.classList.remove("bg-green-500", "bg-yellow-500", "bg-red-500")
-        indicator.classList.add("bg-green-500")
-        text.textContent = "Saved"
-        this.updateLastSaved()
-        break
-      case "error":
-        indicator.classList.remove("bg-green-500", "bg-yellow-500", "bg-red-500")
-        indicator.classList.add("bg-red-500")
-        text.textContent = "Error saving"
-        break
-      default:
-        indicator.classList.remove("bg-green-500", "bg-yellow-500", "bg-red-500")
-        indicator.classList.add("bg-green-500")
-        text.textContent = "Ready"
+    case "editing":
+      indicator.classList.remove("bg-green-500", "bg-yellow-500", "bg-red-500")
+      indicator.classList.add("bg-yellow-500")
+      text.textContent = "Editing..."
+      break
+    case "saved":
+      indicator.classList.remove("bg-green-500", "bg-yellow-500", "bg-red-500")
+      indicator.classList.add("bg-green-500")
+      text.textContent = "Saved"
+      this.updateLastSaved()
+      break
+    case "error":
+      indicator.classList.remove("bg-green-500", "bg-yellow-500", "bg-red-500")
+      indicator.classList.add("bg-red-500")
+      text.textContent = "Error saving"
+      break
+    default:
+      indicator.classList.remove("bg-green-500", "bg-yellow-500", "bg-red-500")
+      indicator.classList.add("bg-green-500")
+      text.textContent = "Ready"
     }
   }
 
@@ -178,7 +178,7 @@ export default class extends Controller {
     if (!this.hasLastSavedTarget) return
     
     const now = new Date()
-    const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    const timeString = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     this.lastSavedTarget.textContent = timeString
   }
 
@@ -224,11 +224,11 @@ export default class extends Controller {
     
     try {
       const response = await fetch(this.autosaveUrlValue, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content,
-          'Accept': 'application/json'
+          "Content-Type": "application/json",
+          "X-CSRF-Token": document.querySelector("[name=\"csrf-token\"]").content,
+          "Accept": "application/json"
         },
         body: JSON.stringify({
           document: { content: content }
@@ -241,18 +241,18 @@ export default class extends Controller {
         this.updateStatus("saved")
       } else {
         this.updateStatus("error")
-        console.error('Autosave failed:', await response.text())
+        console.error("Autosave failed:", await response.text())
       }
     } catch (error) {
       this.updateStatus("error")
-      console.error('Autosave error:', error)
+      console.error("Autosave error:", error)
     }
   }
   
   setupContextItemListeners() {
     // Listen for context item preview events
-    document.addEventListener('context-item-preview:insert', this.boundHandleContextItemInsert)
-    document.addEventListener('context-item-preview:closed', this.boundHandleContextItemClosed)
+    document.addEventListener("context-item-preview:insert", this.boundHandleContextItemInsert)
+    document.addEventListener("context-item-preview:closed", this.boundHandleContextItemClosed)
   }
   
   handleContextItemInsert(event) {
@@ -261,17 +261,17 @@ export default class extends Controller {
     // Format content based on type before insertion
     let formattedContent = content
     
-    if (contentType === 'code') {
+    if (contentType === "code") {
       // Wrap code in appropriate formatting
       formattedContent = `\n\`\`\`\n${content}\n\`\`\`\n`
-    } else if (itemType === 'note') {
+    } else if (itemType === "note") {
       // Add some context for notes
       formattedContent = `\n> ${content}\n`
     }
     
     // Insert at current cursor position
     if (this.editor && this.editor.editor) {
-      this.editor.editor.recordUndoEntry('Insert Context Item')
+      this.editor.editor.recordUndoEntry("Insert Context Item")
       
       const position = this.editor.editor.getPosition()
       this.editor.editor.insertString(formattedContent)
@@ -296,50 +296,50 @@ export default class extends Controller {
 
   // Setup keyboard shortcuts for enhanced editing
   setupKeyboardShortcuts() {
-    const scope = `editor-${this.element.id || 'default'}`
+    const scope = `editor-${this.element.id || "default"}`
     hotkeys.setScope(scope)
 
     // Format shortcuts
-    hotkeys('cmd+b,ctrl+b', scope, (event) => {
+    hotkeys("cmd+b,ctrl+b", scope, (event) => {
       event.preventDefault()
       this.toggleBold()
     })
 
-    hotkeys('cmd+i,ctrl+i', scope, (event) => {
+    hotkeys("cmd+i,ctrl+i", scope, (event) => {
       event.preventDefault()
       this.toggleItalic()
     })
 
-    hotkeys('cmd+u,ctrl+u', scope, (event) => {
+    hotkeys("cmd+u,ctrl+u", scope, (event) => {
       event.preventDefault()
       this.toggleUnderline()
     })
 
-    hotkeys('cmd+k,ctrl+k', scope, (event) => {
+    hotkeys("cmd+k,ctrl+k", scope, (event) => {
       event.preventDefault()
       this.toggleLink()
     })
 
     // Save shortcut
-    hotkeys('cmd+s,ctrl+s', scope, (event) => {
+    hotkeys("cmd+s,ctrl+s", scope, (event) => {
       event.preventDefault()
       this.performAutosave()
     })
 
     // Help shortcut
-    hotkeys('cmd+?,ctrl+?', scope, (event) => {
+    hotkeys("cmd+?,ctrl+?", scope, (event) => {
       event.preventDefault()
       this.toggleShortcutsHelp()
     })
 
     // Focus editor
-    hotkeys('cmd+e,ctrl+e', scope, (event) => {
+    hotkeys("cmd+e,ctrl+e", scope, (event) => {
       event.preventDefault()
       this.editor.focus()
     })
 
     // Insert timestamp
-    hotkeys('cmd+t,ctrl+t', scope, (event) => {
+    hotkeys("cmd+t,ctrl+t", scope, (event) => {
       event.preventDefault()
       this.insertTimestamp()
     })
@@ -352,8 +352,8 @@ export default class extends Controller {
     const formatBar = this.formatBarTarget
     
     // Add event listeners to format buttons
-    formatBar.querySelectorAll('[data-format-action]').forEach(button => {
-      button.addEventListener('click', (event) => {
+    formatBar.querySelectorAll("[data-format-action]").forEach(button => {
+      button.addEventListener("click", (event) => {
         event.preventDefault()
         const action = button.dataset.formatAction
         this.performFormatAction(action)
@@ -366,16 +366,16 @@ export default class extends Controller {
     if (!this.documentIdValue || !this.currentUserIdValue) return
 
     // Import and setup presence channel
-    import('../channels/presence_channel').then(({ default: PresenceChannel }) => {
+    import("../channels/presence_channel").then(({ default: PresenceChannel }) => {
       this.presenceChannel = PresenceChannel.create(
         this.documentIdValue,
         this.currentUserIdValue,
         {
           onConnected: () => {
-            console.log('Editor connected to presence channel')
+            console.log("Editor connected to presence channel")
           },
           onDisconnected: () => {
-            console.log('Editor disconnected from presence channel')
+            console.log("Editor disconnected from presence channel")
           }
         }
       )
@@ -385,62 +385,62 @@ export default class extends Controller {
   // Format actions
   toggleBold() {
     if (this.editor.editor) {
-      this.editor.editor.activateAttribute('bold')
+      this.editor.editor.activateAttribute("bold")
     }
   }
 
   toggleItalic() {
     if (this.editor.editor) {
-      this.editor.editor.activateAttribute('italic')
+      this.editor.editor.activateAttribute("italic")
     }
   }
 
   toggleUnderline() {
     if (this.editor.editor) {
-      this.editor.editor.activateAttribute('underline')
+      this.editor.editor.activateAttribute("underline")
     }
   }
 
   toggleLink() {
     if (this.editor.editor) {
       const selectedText = this.editor.editor.getSelectedDocument().toString()
-      const url = prompt('Enter URL:', 'https://')
+      const url = prompt("Enter URL:", "https://")
       
       if (url && url.trim()) {
-        this.editor.editor.activateAttribute('href', url.trim())
+        this.editor.editor.activateAttribute("href", url.trim())
       }
     }
   }
 
   performFormatAction(action) {
     switch (action) {
-      case 'bold':
-        this.toggleBold()
-        break
-      case 'italic':
-        this.toggleItalic()
-        break
-      case 'underline':
-        this.toggleUnderline()
-        break
-      case 'link':
-        this.toggleLink()
-        break
-      case 'heading':
-        this.insertHeading()
-        break
-      case 'bullet-list':
-        this.insertBulletList()
-        break
-      case 'number-list':
-        this.insertNumberList()
-        break
-      case 'quote':
-        this.insertQuote()
-        break
-      case 'code':
-        this.insertCodeBlock()
-        break
+    case "bold":
+      this.toggleBold()
+      break
+    case "italic":
+      this.toggleItalic()
+      break
+    case "underline":
+      this.toggleUnderline()
+      break
+    case "link":
+      this.toggleLink()
+      break
+    case "heading":
+      this.insertHeading()
+      break
+    case "bullet-list":
+      this.insertBulletList()
+      break
+    case "number-list":
+      this.insertNumberList()
+      break
+    case "quote":
+      this.insertQuote()
+      break
+    case "code":
+      this.insertCodeBlock()
+      break
     }
     
     // Keep focus on editor
@@ -449,31 +449,31 @@ export default class extends Controller {
 
   insertHeading() {
     if (this.editor.editor) {
-      this.editor.editor.activateAttribute('heading1')
+      this.editor.editor.activateAttribute("heading1")
     }
   }
 
   insertBulletList() {
     if (this.editor.editor) {
-      this.editor.editor.activateAttribute('bulletList')
+      this.editor.editor.activateAttribute("bulletList")
     }
   }
 
   insertNumberList() {
     if (this.editor.editor) {
-      this.editor.editor.activateAttribute('numberList')
+      this.editor.editor.activateAttribute("numberList")
     }
   }
 
   insertQuote() {
     if (this.editor.editor) {
-      this.editor.editor.activateAttribute('quote')
+      this.editor.editor.activateAttribute("quote")
     }
   }
 
   insertCodeBlock() {
     if (this.editor.editor) {
-      this.editor.editor.activateAttribute('code')
+      this.editor.editor.activateAttribute("code")
     }
   }
 
@@ -488,7 +488,7 @@ export default class extends Controller {
   toggleShortcutsHelp() {
     if (this.hasShortcutsHelpTarget) {
       const help = this.shortcutsHelpTarget
-      help.classList.toggle('hidden')
+      help.classList.toggle("hidden")
     }
   }
   
@@ -504,8 +504,8 @@ export default class extends Controller {
     }
     
     // Remove context item listeners
-    document.removeEventListener('context-item-preview:insert', this.boundHandleContextItemInsert)
-    document.removeEventListener('context-item-preview:closed', this.boundHandleContextItemClosed)
+    document.removeEventListener("context-item-preview:insert", this.boundHandleContextItemInsert)
+    document.removeEventListener("context-item-preview:closed", this.boundHandleContextItemClosed)
     
     // Disconnect presence channel
     if (this.presenceChannel) {
@@ -514,7 +514,7 @@ export default class extends Controller {
     
     // Clear keyboard shortcuts
     if (this.enableShortcutsValue) {
-      const scope = `editor-${this.element.id || 'default'}`
+      const scope = `editor-${this.element.id || "default"}`
       hotkeys.deleteScope(scope)
     }
     

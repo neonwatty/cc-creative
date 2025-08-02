@@ -19,7 +19,7 @@ export default class extends Controller {
   }
 
   toggle() {
-    const newTheme = this.themeValue === 'dark' ? 'light' : 'dark'
+    const newTheme = this.themeValue === "dark" ? "light" : "dark"
     this.themeValue = newTheme
     localStorage.setItem(this.storageKeyValue, newTheme)
   }
@@ -27,20 +27,20 @@ export default class extends Controller {
   initializeTheme() {
     // Priority: 1. Stored preference, 2. System preference, 3. Light default
     const storedTheme = localStorage.getItem(this.storageKeyValue)
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
     
     if (storedTheme) {
       this.themeValue = storedTheme
     } else if (systemPrefersDark) {
-      this.themeValue = 'dark'
+      this.themeValue = "dark"
     } else {
-      this.themeValue = 'light'
+      this.themeValue = "light"
     }
 
     // Listen for system theme changes
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
       if (!localStorage.getItem(this.storageKeyValue)) {
-        this.themeValue = e.matches ? 'dark' : 'light'
+        this.themeValue = e.matches ? "dark" : "light"
       }
     })
   }
@@ -48,44 +48,44 @@ export default class extends Controller {
   applyTheme() {
     const html = document.documentElement
     
-    if (this.themeValue === 'dark') {
-      html.classList.add('dark')
+    if (this.themeValue === "dark") {
+      html.classList.add("dark")
     } else {
-      html.classList.remove('dark')
+      html.classList.remove("dark")
     }
 
     // Dispatch custom event for other components
-    this.dispatch('changed', { 
+    this.dispatch("changed", { 
       detail: { 
         theme: this.themeValue,
-        isDark: this.themeValue === 'dark'
+        isDark: this.themeValue === "dark"
       } 
     })
   }
 
   updateToggleState() {
     if (this.hasToggleTarget) {
-      const isDark = this.themeValue === 'dark'
+      const isDark = this.themeValue === "dark"
       const toggle = this.toggleTarget
       
       // Update aria-pressed for accessibility
-      toggle.setAttribute('aria-pressed', isDark.toString())
+      toggle.setAttribute("aria-pressed", isDark.toString())
       
       // Update visual state
-      toggle.classList.toggle('active', isDark)
-      toggle.classList.toggle('bg-creative-primary-500', isDark)
-      toggle.classList.toggle('bg-creative-neutral-300', !isDark)
+      toggle.classList.toggle("active", isDark)
+      toggle.classList.toggle("bg-creative-primary-500", isDark)
+      toggle.classList.toggle("bg-creative-neutral-300", !isDark)
       
       // Update icon or text if present
-      const icon = toggle.querySelector('[data-theme-icon]')
-      const text = toggle.querySelector('[data-theme-text]')
+      const icon = toggle.querySelector("[data-theme-icon]")
+      const text = toggle.querySelector("[data-theme-text]")
       
       if (icon) {
         icon.innerHTML = isDark ? this.moonIcon() : this.sunIcon()
       }
       
       if (text) {
-        text.textContent = isDark ? 'Dark' : 'Light'
+        text.textContent = isDark ? "Dark" : "Light"
       }
     }
   }
@@ -110,12 +110,12 @@ export default class extends Controller {
 
   // Helper method to get current theme for other controllers
   get isDark() {
-    return this.themeValue === 'dark'
+    return this.themeValue === "dark"
   }
 
   // Method to programmatically set theme
   setTheme(theme) {
-    if (['light', 'dark'].includes(theme)) {
+    if (["light", "dark"].includes(theme)) {
       this.themeValue = theme
       localStorage.setItem(this.storageKeyValue, theme)
     }

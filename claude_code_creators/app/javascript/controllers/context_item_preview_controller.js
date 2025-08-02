@@ -26,7 +26,7 @@ export default class extends Controller {
     this.dispatch("closed", { detail: { contextItemId: this.idValue } })
     
     // Also dispatch on document for global listeners
-    document.dispatchEvent(new CustomEvent('context-item-preview:closed', {
+    document.dispatchEvent(new CustomEvent("context-item-preview:closed", {
       detail: { contextItemId: this.idValue }
     }))
   }
@@ -51,7 +51,7 @@ export default class extends Controller {
     })
     
     // Also dispatch on document for global listeners
-    document.dispatchEvent(new CustomEvent('context-item-preview:insert', {
+    document.dispatchEvent(new CustomEvent("context-item-preview:insert", {
       detail: {
         content: content,
         contextItemId: this.idValue,
@@ -75,7 +75,7 @@ export default class extends Controller {
         this.showCopyFeedback()
         this.dispatch("copied", { detail: { contextItemId: this.idValue } })
       }).catch(err => {
-        console.error('Failed to copy content:', err)
+        console.error("Failed to copy content:", err)
         this.fallbackCopy(content)
       })
     } else {
@@ -90,9 +90,9 @@ export default class extends Controller {
     // Get the raw content from the context item
     const contentElement = this.contentTarget
     
-    if (this.contentTypeValue === 'code') {
+    if (this.contentTypeValue === "code") {
       // For code content, get text from the code element
-      const codeElement = contentElement.querySelector('code')
+      const codeElement = contentElement.querySelector("code")
       return codeElement ? codeElement.textContent : contentElement.textContent
     } else {
       // For other content types, get plain text
@@ -106,43 +106,43 @@ export default class extends Controller {
     
     // Format content based on type and context
     switch (this.contentTypeValue) {
-      case 'code':
-        // Detect language and wrap in code block
-        const language = this.detectLanguageFromContent()
-        return `\n\`\`\`${language}\n${rawContent}\n\`\`\`\n`
+    case "code":
+      // Detect language and wrap in code block
+      const language = this.detectLanguageFromContent()
+      return `\n\`\`\`${language}\n${rawContent}\n\`\`\`\n`
         
-      case 'snippet':
-        // Wrap in inline code
-        return `\`${rawContent}\``
+    case "snippet":
+      // Wrap in inline code
+      return `\`${rawContent}\``
         
-      case 'note':
-      case 'reference':
-        // Add as blockquote for notes and references
-        return `\n> ${rawContent}\n`
+    case "note":
+    case "reference":
+      // Add as blockquote for notes and references
+      return `\n> ${rawContent}\n`
         
-      case 'text':
-      default:
-        // Insert as plain text with line breaks
-        return `\n${rawContent}\n`
+    case "text":
+    default:
+      // Insert as plain text with line breaks
+      return `\n${rawContent}\n`
     }
   }
   
   detectLanguageFromContent() {
     // Try to detect language from the context item
     const contentElement = this.contentTarget
-    const codeElement = contentElement.querySelector('code')
+    const codeElement = contentElement.querySelector("code")
     
     if (codeElement) {
       // Check for language class
       const classList = Array.from(codeElement.classList)
       for (const className of classList) {
-        if (className.startsWith('language-')) {
-          return className.replace('language-', '')
+        if (className.startsWith("language-")) {
+          return className.replace("language-", "")
         }
       }
       
       // Check data attributes
-      const dataLang = codeElement.getAttribute('data-language')
+      const dataLang = codeElement.getAttribute("data-language")
       if (dataLang) {
         return dataLang
       }
@@ -151,12 +151,12 @@ export default class extends Controller {
     // Check the item type for hints
     if (this.typeValue) {
       const typeHints = {
-        'javascript': 'javascript',
-        'ruby': 'ruby',
-        'python': 'python',
-        'html': 'html',
-        'css': 'css',
-        'sql': 'sql'
+        "javascript": "javascript",
+        "ruby": "ruby",
+        "python": "python",
+        "html": "html",
+        "css": "css",
+        "sql": "sql"
       }
       
       for (const [hint, lang] of Object.entries(typeHints)) {
@@ -167,18 +167,18 @@ export default class extends Controller {
     }
     
     // Default fallback
-    return ''
+    return ""
   }
 
   insertIntoTrixEditor(content) {
     // Look for active Trix editor
-    const trixEditor = document.querySelector('trix-editor')
+    const trixEditor = document.querySelector("trix-editor")
     if (trixEditor && trixEditor.editor) {
       // Store the current state for undo functionality
       const currentPosition = trixEditor.editor.getPosition()
       
       // Create an undo entry before making changes
-      trixEditor.editor.recordUndoEntry('Insert Context Item')
+      trixEditor.editor.recordUndoEntry("Insert Context Item")
       
       // Insert the content
       trixEditor.editor.insertString(content)
@@ -187,9 +187,9 @@ export default class extends Controller {
       trixEditor.editor.setSelectedRange([currentPosition, currentPosition + content.length])
       
       // Trigger change event to notify other controllers
-      trixEditor.dispatchEvent(new CustomEvent('trix-change', {
+      trixEditor.dispatchEvent(new CustomEvent("trix-change", {
         bubbles: true,
-        detail: { insertedContent: content, insertedFrom: 'context-item' }
+        detail: { insertedContent: content, insertedFrom: "context-item" }
       }))
       
       // Focus the editor
@@ -199,20 +199,20 @@ export default class extends Controller {
 
   fallbackCopy(content) {
     // Create temporary textarea for copying
-    const textarea = document.createElement('textarea')
+    const textarea = document.createElement("textarea")
     textarea.value = content
-    textarea.style.position = 'fixed'
-    textarea.style.left = '-999999px'
-    textarea.style.top = '-999999px'
+    textarea.style.position = "fixed"
+    textarea.style.left = "-999999px"
+    textarea.style.top = "-999999px"
     document.body.appendChild(textarea)
     textarea.select()
     
     try {
-      document.execCommand('copy')
+      document.execCommand("copy")
       this.showCopyFeedback()
       this.dispatch("copied", { detail: { contextItemId: this.idValue } })
     } catch (err) {
-      console.error('Fallback copy failed:', err)
+      console.error("Fallback copy failed:", err)
     } finally {
       document.body.removeChild(textarea)
     }
@@ -222,40 +222,40 @@ export default class extends Controller {
     const button = this.copyButtonTarget
     const originalText = button.textContent
     
-    button.textContent = 'Copied!'
-    button.classList.add('bg-green-50', 'text-green-700')
+    button.textContent = "Copied!"
+    button.classList.add("bg-green-50", "text-green-700")
     
     setTimeout(() => {
       button.textContent = originalText
-      button.classList.remove('bg-green-50', 'text-green-700')
+      button.classList.remove("bg-green-50", "text-green-700")
     }, 2000)
   }
 
   setupKeyboardHandlers() {
     this.keydownHandler = this.handleKeydown.bind(this)
-    document.addEventListener('keydown', this.keydownHandler)
+    document.addEventListener("keydown", this.keydownHandler)
   }
 
   removeKeyboardHandlers() {
     if (this.keydownHandler) {
-      document.removeEventListener('keydown', this.keydownHandler)
+      document.removeEventListener("keydown", this.keydownHandler)
     }
   }
 
   handleKeydown(event) {
-    if (event.key === 'Escape') {
+    if (event.key === "Escape") {
       event.preventDefault()
       this.close()
     }
     
     // Handle Cmd/Ctrl+Shift+I for insert
-    if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key === 'I') {
+    if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key === "I") {
       event.preventDefault()
       this.insertContent()
     }
     
     // Handle Tab key for focus trapping
-    if (event.key === 'Tab') {
+    if (event.key === "Tab") {
       this.trapFocus(event)
     }
   }
@@ -277,7 +277,7 @@ export default class extends Controller {
 
   trapFocus(event) {
     const focusableElements = this.panelTarget.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      "button, [href], input, select, textarea, [tabindex]:not([tabindex=\"-1\"])"
     )
     
     const firstElement = focusableElements[0]
@@ -297,9 +297,9 @@ export default class extends Controller {
   }
 
   highlightCodeIfNeeded() {
-    if (this.contentTypeValue === 'code' && window.Prism) {
+    if (this.contentTypeValue === "code" && window.Prism) {
       // Use Prism.js for syntax highlighting
-      const codeBlocks = this.contentTarget.querySelectorAll('pre code')
+      const codeBlocks = this.contentTarget.querySelectorAll("pre code")
       codeBlocks.forEach(block => {
         // Detect language from class or data attribute
         const language = this.detectLanguage(block)
@@ -311,8 +311,8 @@ export default class extends Controller {
         try {
           window.Prism.highlightElement(block)
         } catch (error) {
-          console.warn('Prism highlighting failed:', error)
-          block.classList.add('syntax-ready')
+          console.warn("Prism highlighting failed:", error)
+          block.classList.add("syntax-ready")
         }
       })
     }
@@ -324,29 +324,29 @@ export default class extends Controller {
     
     // Look for language- prefixed classes
     for (const className of classList) {
-      if (className.startsWith('language-')) {
-        return className.replace('language-', '')
+      if (className.startsWith("language-")) {
+        return className.replace("language-", "")
       }
     }
     
     // Look for data-language attribute
-    const dataLang = codeElement.getAttribute('data-language')
+    const dataLang = codeElement.getAttribute("data-language")
     if (dataLang) {
       return dataLang
     }
     
     // Look for parent pre element with language class
-    const parent = codeElement.closest('pre')
+    const parent = codeElement.closest("pre")
     if (parent) {
       const parentClasses = Array.from(parent.classList)
       for (const className of parentClasses) {
-        if (className.startsWith('language-')) {
-          return className.replace('language-', '')
+        if (className.startsWith("language-")) {
+          return className.replace("language-", "")
         }
       }
     }
     
     // Default fallback
-    return 'javascript'
+    return "javascript"
   }
 }

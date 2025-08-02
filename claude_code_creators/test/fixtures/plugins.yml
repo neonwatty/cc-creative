@@ -1,0 +1,25 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  version: MyString
+  description: MyText
+  author: MyString
+  category: MyString
+  status: MyString
+  metadata: 
+  permissions: 
+  sandbox_config: 
+  installed_at: 2025-08-02 13:59:07
+
+two:
+  name: MyString
+  version: MyString
+  description: MyText
+  author: MyString
+  category: MyString
+  status: MyString
+  metadata: 
+  permissions: 
+  sandbox_config: 
+  installed_at: 2025-08-02 13:59:07

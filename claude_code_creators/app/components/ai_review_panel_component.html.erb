@@ -1,0 +1,274 @@
+<%= content_tag :div, class: panel_class, data: panel_data_attributes,
+                role: "complementary", 
+                aria_label: "AI Code Review Panel" do %>
+  
+  <!-- Panel Header -->
+  <div class="<%= header_class %>">
+    <div class="<%= title_class %>">
+      <!-- AI Icon -->
+      <div class="w-6 h-6 text-creative-primary-600 dark:text-creative-primary-400">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-full h-full">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+        </svg>
+      </div>
+      
+      <span>AI Review</span>
+      
+      <!-- Status Badge -->
+      <div class="<%= status_class("analyzing") %>" data-ai-review-panel-target="statusBadge">
+        <div class="w-2 h-2 bg-current rounded-full animate-pulse"></div>
+        <span data-ai-review-panel-target="statusText">Analyzing</span>
+      </div>
+    </div>
+    
+    <!-- Header Actions -->
+    <div class="flex items-center space-x-2">
+      <!-- Refresh Button -->
+      <button type="button" 
+              class="w-8 h-8 flex items-center justify-center text-creative-neutral-500 
+                     dark:text-creative-neutral-400 hover:text-creative-primary-600 
+                     dark:hover:text-creative-primary-400 rounded-lg hover:bg-white/50 
+                     dark:hover:bg-creative-neutral-700/50 transition-all duration-200"
+              data-action="click->ai-review-panel#refreshAnalysis"
+              title="Refresh Analysis"
+              aria-label="Refresh AI analysis">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+      </button>
+      
+      <!-- Settings Button -->
+      <button type="button" 
+              class="w-8 h-8 flex items-center justify-center text-creative-neutral-500 
+                     dark:text-creative-neutral-400 hover:text-creative-neutral-700 
+                     dark:hover:text-creative-neutral-300 rounded-lg hover:bg-white/50 
+                     dark:hover:bg-creative-neutral-700/50 transition-all duration-200"
+              data-action="click->ai-review-panel#showSettings"
+              title="AI Review Settings"
+              aria-label="AI review settings">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+      </button>
+      
+      <!-- Collapse Button (if collapsible) -->
+      <% if collapsible %>
+        <button type="button" 
+                class="<%= collapse_button_class %>"
+                data-action="click->ai-review-panel#toggleCollapse"
+                data-ai-review-panel-target="collapseButton"
+                title="Collapse Panel"
+                aria-label="Collapse AI review panel">
+          <svg class="w-4 h-4 transform transition-transform duration-200" 
+               data-ai-review-panel-target="collapseIcon" 
+               fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+      <% end %>
+    </div>
+  </div>
+  
+  <!-- Collapsible Content -->
+  <div class="panel-content transition-all duration-300" data-ai-review-panel-target="panelContent">
+    
+    <!-- Filters Section -->
+    <% if show_filters %>
+      <div class="<%= filters_class %>">
+        <div class="flex items-center space-x-2 flex-1">
+          <span class="text-xs font-medium text-creative-neutral-600 dark:text-creative-neutral-400">
+            Filter:
+          </span>
+          
+          <div class="flex items-center space-x-1" data-ai-review-panel-target="filterButtons">
+            <% filter_options.each do |filter| %>
+              <button type="button" 
+                      class="<%= filter_button_class(filter[:id] == "all") %>"
+                      data-action="click->ai-review-panel#setFilter"
+                      data-filter="<%= filter[:id] %>"
+                      data-ai-review-panel-target="filterButton">
+                <%= filter[:label] %>
+                <span class="ml-1 opacity-75"><%= filter[:count] %></span>
+              </button>
+            <% end %>
+          </div>
+        </div>
+        
+        <!-- Auto-refresh Toggle -->
+        <div class="flex items-center space-x-2">
+          <label class="inline-flex items-center">
+            <input type="checkbox" 
+                   class="sr-only"
+                   <%= "checked" if auto_refresh %>
+                   data-action="change->ai-review-panel#toggleAutoRefresh"
+                   data-ai-review-panel-target="autoRefreshToggle">
+            <div class="relative w-8 h-4 bg-creative-neutral-200 dark:bg-creative-neutral-600 
+                        rounded-full transition-colors duration-200 cursor-pointer
+                        <%= auto_refresh ? "bg-creative-primary-600" : "" %>">
+              <div class="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full 
+                          transition-transform duration-200 transform
+                          <%= auto_refresh ? "translate-x-4" : "" %>">
+              </div>
+            </div>
+            <span class="ml-2 text-xs text-creative-neutral-600 dark:text-creative-neutral-400">
+              Auto-refresh
+            </span>
+          </label>
+        </div>
+      </div>
+    <% end %>
+    
+    <!-- Content Area -->
+    <div class="<%= content_class %>">
+      
+      <!-- Loading State -->
+      <div class="<%= loading_state_class %> hidden" data-ai-review-panel-target="loadingState">
+        <div class="w-8 h-8 border-3 border-creative-primary-200 dark:border-creative-primary-800 
+                    border-t-creative-primary-600 dark:border-t-creative-primary-400 
+                    rounded-full animate-spin"></div>
+        <div class="text-sm text-creative-neutral-600 dark:text-creative-neutral-400">
+          Analyzing your code...
+        </div>
+      </div>
+      
+      <!-- Suggestions List -->
+      <div class="<%= suggestions_list_class %>" data-ai-review-panel-target="suggestionsList">
+        <% sample_suggestions.each do |suggestion| %>
+          <div class="<%= suggestion_class(suggestion[:severity]) %>"
+               data-action="click->ai-review-panel#showSuggestionDetails"
+               data-suggestion-id="<%= suggestion[:id] %>"
+               role="article"
+               tabindex="0"
+               aria-label="<%= suggestion[:title] %>">
+            
+            <!-- Suggestion Icon -->
+            <div class="<%= severity_icon_class(suggestion[:severity]) %>">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-full h-full">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="<%= get_severity_icon(suggestion[:severity]) %>"/>
+              </svg>
+            </div>
+            
+            <!-- Suggestion Content -->
+            <div class="<%= suggestion_content_class %>">
+              <!-- Title -->
+              <h3 class="<%= suggestion_title_class %>">
+                <%= suggestion[:title] %>
+              </h3>
+              
+              <!-- Description -->
+              <p class="<%= suggestion_description_class %>">
+                <%= suggestion[:description] %>
+              </p>
+              
+              <!-- Meta Information -->
+              <div class="<%= suggestion_meta_class %>">
+                <div class="flex items-center space-x-3">
+                  <% if suggestion[:file] && suggestion[:line] %>
+                    <span class="flex items-center space-x-1">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                      </svg>
+                      <span><%= suggestion[:file] %>:<%= suggestion[:line] %></span>
+                    </span>
+                  <% end %>
+                  
+                  <span class="flex items-center space-x-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span><%= format_timestamp(suggestion[:timestamp]) %></span>
+                  </span>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex items-center space-x-1" 
+                     onclick="event.stopPropagation()">
+                  <% suggestion[:actions].each_with_index do |action, index| %>
+                    <button type="button" 
+                            class="<%= action_button_class(index == 0 ? "primary" : "secondary") %>"
+                            data-action="click->ai-review-panel#handleSuggestionAction"
+                            data-suggestion-id="<%= suggestion[:id] %>"
+                            data-action-type="<%= action.downcase.gsub(" ", "_") %>">
+                      <%= action %>
+                    </button>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      
+      <!-- Empty State -->
+      <div class="<%= empty_state_class %> hidden" data-ai-review-panel-target="emptyState">
+        <div class="w-16 h-16 text-creative-neutral-300 dark:text-creative-neutral-600">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-full h-full">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" 
+                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+          </svg>
+        </div>
+        
+        <div class="text-center">
+          <h3 class="text-lg font-semibold text-creative-neutral-700 dark:text-creative-neutral-300 mb-2">
+            No Issues Found
+          </h3>
+          <p class="text-creative-neutral-500 dark:text-creative-neutral-400 mb-6 max-w-sm">
+            Your code looks great! The AI hasn't found any issues or suggestions at the moment.
+          </p>
+          
+          <button type="button" 
+                  class="btn btn-primary"
+                  data-action="click->ai-review-panel#triggerAnalysis">
+            Run Analysis
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- AI Chat Section (if enabled) -->
+    <% if enable_ai_chat %>
+      <div class="<%= chat_section_class %>" data-ai-review-panel-target="chatSection">
+        <div class="p-3 border-b border-creative-neutral-200 dark:border-creative-neutral-700">
+          <div class="flex items-center space-x-2 text-sm font-medium 
+                      text-creative-neutral-700 dark:text-creative-neutral-300">
+            <div class="w-4 h-4 text-creative-primary-600 dark:text-creative-primary-400">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-full h-full">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+              </svg>
+            </div>
+            <span>Ask AI</span>
+          </div>
+        </div>
+        
+        <div class="p-3">
+          <div class="flex space-x-2">
+            <textarea class="<%= chat_input_class %>"
+                      placeholder="Ask about the code review suggestions..."
+                      rows="2"
+                      data-ai-review-panel-target="chatInput"
+                      data-action="keydown->ai-review-panel#handleChatInput"></textarea>
+            
+            <button type="button" 
+                    class="<%= action_button_class("primary") %> h-fit self-end"
+                    data-action="click->ai-review-panel#sendChatMessage"
+                    data-ai-review-panel-target="sendButton">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  
+<% end %>

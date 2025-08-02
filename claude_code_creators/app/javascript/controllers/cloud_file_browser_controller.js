@@ -56,11 +56,11 @@ export default class extends Controller {
     this.loadFiles()
     
     // Listen for file selection events
-    this.element.addEventListener('file:selected', this.handleFileSelection.bind(this))
-    this.element.addEventListener('file:deselected', this.handleFileDeselection.bind(this))
+    this.element.addEventListener("file:selected", this.handleFileSelection.bind(this))
+    this.element.addEventListener("file:deselected", this.handleFileDeselection.bind(this))
     
     // Listen for sync completion events
-    this.element.addEventListener('sync:completed', this.handleSyncCompleted.bind(this))
+    this.element.addEventListener("sync:completed", this.handleSyncCompleted.bind(this))
   }
 
   disconnect() {
@@ -92,8 +92,8 @@ export default class extends Controller {
 
       const response = await fetch(`/cloud_integrations/${this.integrationIdValue}/cloud_files?${params}`, {
         headers: {
-          'Accept': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest'
+          "Accept": "application/json",
+          "X-Requested-With": "XMLHttpRequest"
         }
       })
 
@@ -121,7 +121,7 @@ export default class extends Controller {
 
     this.hideEmptyState()
     
-    const filesHtml = data.files.map(file => this.renderFileItem(file)).join('')
+    const filesHtml = data.files.map(file => this.renderFileItem(file)).join("")
     this.fileListTarget.innerHTML = filesHtml
     
     // Clear selection
@@ -133,10 +133,10 @@ export default class extends Controller {
   renderFileItem(file) {
     const sizeDisplay = this.formatFileSize(file.size)
     const dateDisplay = this.formatDate(file.updated_at)
-    const isImportable = file.importable ? 'importable' : ''
-    const syncStatus = file.synced ? 'synced' : 'needs-sync'
+    const isImportable = file.importable ? "importable" : ""
+    const syncStatus = file.synced ? "synced" : "needs-sync"
     
-    if (this.viewModeValue === 'grid') {
+    if (this.viewModeValue === "grid") {
       return `
         <div class="file-item file-item--grid" data-file-id="${file.id}" data-action="click->cloud-file-browser#toggleFileSelection">
           <div class="file-item__thumbnail">
@@ -146,13 +146,13 @@ export default class extends Controller {
             <h3 class="file-item__name" title="${file.name}">${file.name}</h3>
             <p class="file-item__meta">${sizeDisplay} • ${dateDisplay}</p>
             <div class="file-item__badges">
-              ${file.importable ? '<span class="badge badge--importable">Importable</span>' : ''}
-              <span class="badge badge--${syncStatus}">${file.synced ? 'Synced' : 'Needs Sync'}</span>
+              ${file.importable ? "<span class=\"badge badge--importable\">Importable</span>" : ""}
+              <span class="badge badge--${syncStatus}">${file.synced ? "Synced" : "Needs Sync"}</span>
             </div>
           </div>
           <div class="file-item__actions">
             <input type="checkbox" class="file-checkbox" data-file-id="${file.id}">
-            ${file.importable ? `<button class="btn btn--sm btn--primary" data-action="click->cloud-file-browser#importFile" data-file-id="${file.id}">Import</button>` : ''}
+            ${file.importable ? `<button class="btn btn--sm btn--primary" data-action="click->cloud-file-browser#importFile" data-file-id="${file.id}">Import</button>` : ""}
             <button class="btn btn--sm btn--secondary" data-action="click->cloud-file-browser#previewFile" data-file-id="${file.id}">Preview</button>
           </div>
         </div>
@@ -172,11 +172,11 @@ export default class extends Controller {
           <td class="file-item__size">${sizeDisplay}</td>
           <td class="file-item__date">${dateDisplay}</td>
           <td class="file-item__status">
-            <span class="badge badge--${syncStatus}">${file.synced ? 'Synced' : 'Needs Sync'}</span>
-            ${file.importable ? '<span class="badge badge--importable">Importable</span>' : ''}
+            <span class="badge badge--${syncStatus}">${file.synced ? "Synced" : "Needs Sync"}</span>
+            ${file.importable ? "<span class=\"badge badge--importable\">Importable</span>" : ""}
           </td>
           <td class="file-item__actions">
-            ${file.importable ? `<button class="btn btn--sm btn--primary" data-action="click->cloud-file-browser#importFile" data-file-id="${file.id}">Import</button>` : ''}
+            ${file.importable ? `<button class="btn btn--sm btn--primary" data-action="click->cloud-file-browser#importFile" data-file-id="${file.id}">Import</button>` : ""}
             <button class="btn btn--sm btn--secondary" data-action="click->cloud-file-browser#previewFile" data-file-id="${file.id}">Preview</button>
           </td>
         </tr>
@@ -204,19 +204,19 @@ export default class extends Controller {
   }
 
   updateViewMode() {
-    this.element.classList.toggle('file-browser--grid', this.viewModeValue === 'grid')
-    this.element.classList.toggle('file-browser--list', this.viewModeValue === 'list')
+    this.element.classList.toggle("file-browser--grid", this.viewModeValue === "grid")
+    this.element.classList.toggle("file-browser--list", this.viewModeValue === "list")
     
     if (this.hasViewToggleTarget) {
-      this.viewToggleTarget.querySelectorAll('[data-view-mode]').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.viewMode === this.viewModeValue)
+      this.viewToggleTarget.querySelectorAll("[data-view-mode]").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.viewMode === this.viewModeValue)
       })
     }
   }
 
   // Sorting
   changeSort(event) {
-    const [sortBy, sortOrder] = event.target.value.split(':')
+    const [sortBy, sortOrder] = event.target.value.split(":")
     this.sortByValue = sortBy
     this.sortOrderValue = sortOrder
     this.updateSortIndicators()
@@ -238,20 +238,20 @@ export default class extends Controller {
 
   // File selection
   toggleFileSelection(event) {
-    const fileItem = event.currentTarget.closest('.file-item')
+    const fileItem = event.currentTarget.closest(".file-item")
     const fileId = fileItem.dataset.fileId
-    const checkbox = fileItem.querySelector('.file-checkbox')
+    const checkbox = fileItem.querySelector(".file-checkbox")
     
     if (this.selectedFiles.has(fileId)) {
       this.selectedFiles.delete(fileId)
       fileItem.classList.remove(this.selectedClass)
       checkbox.checked = false
-      this.dispatch('file:deselected', { detail: { fileId } })
+      this.dispatch("file:deselected", { detail: { fileId } })
     } else {
       this.selectedFiles.add(fileId)
       fileItem.classList.add(this.selectedClass)
       checkbox.checked = true
-      this.dispatch('file:selected', { detail: { fileId } })
+      this.dispatch("file:selected", { detail: { fileId } })
     }
     
     this.updateSelectedCount()
@@ -259,12 +259,12 @@ export default class extends Controller {
 
   // Select all files
   selectAll(event) {
-    const checkboxes = this.fileListTarget.querySelectorAll('.file-checkbox')
+    const checkboxes = this.fileListTarget.querySelectorAll(".file-checkbox")
     const isSelectAll = event.target.checked
     
     checkboxes.forEach(checkbox => {
       const fileId = checkbox.dataset.fileId
-      const fileItem = checkbox.closest('.file-item')
+      const fileItem = checkbox.closest(".file-item")
       
       if (isSelectAll && !this.selectedFiles.has(fileId)) {
         this.selectedFiles.add(fileId)
@@ -289,7 +289,7 @@ export default class extends Controller {
     }
     
     if (this.hasBatchActionsTarget) {
-      this.batchActionsTarget.style.display = count > 0 ? 'block' : 'none'
+      this.batchActionsTarget.style.display = count > 0 ? "block" : "none"
     }
   }
 
@@ -324,28 +324,28 @@ export default class extends Controller {
   async importSingleFile(fileId) {
     try {
       const response = await fetch(`/cloud_integrations/${this.integrationIdValue}/cloud_files/${fileId}/import`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content,
-          'Accept': 'application/json'
+          "X-CSRF-Token": document.querySelector("[name=\"csrf-token\"]").content,
+          "Accept": "application/json"
         }
       })
       
       if (response.ok) {
-        this.showNotification('File import started', 'success')
+        this.showNotification("File import started", "success")
         // Optionally refresh the file list
         this.loadFiles()
       } else {
-        throw new Error('Import failed')
+        throw new Error("Import failed")
       }
     } catch (error) {
-      this.showNotification(`Import failed: ${error.message}`, 'error')
+      this.showNotification(`Import failed: ${error.message}`, "error")
     }
   }
 
   async importMultipleFiles(fileIds) {
     // Implementation for batch import
-    this.showNotification(`Importing ${fileIds.length} files...`, 'info')
+    this.showNotification(`Importing ${fileIds.length} files...`, "info")
     
     for (const fileId of fileIds) {
       await this.importSingleFile(fileId)
@@ -362,7 +362,7 @@ export default class extends Controller {
     
     const fileId = event.target.dataset.fileId
     // Dispatch event for file preview
-    this.dispatch('file:preview', { detail: { fileId } })
+    this.dispatch("file:preview", { detail: { fileId } })
   }
 
   // Sync operations
@@ -376,21 +376,21 @@ export default class extends Controller {
     
     try {
       const response = await fetch(`/cloud_integrations/${this.integrationIdValue}/cloud_files?sync=true`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content,
-          'Accept': 'application/json'
+          "X-CSRF-Token": document.querySelector("[name=\"csrf-token\"]").content,
+          "Accept": "application/json"
         }
       })
       
       if (response.ok) {
-        this.showNotification('File sync started', 'success')
+        this.showNotification("File sync started", "success")
         this.startSyncPolling()
       } else {
-        throw new Error('Sync failed to start')
+        throw new Error("Sync failed to start")
       }
     } catch (error) {
-      this.showNotification(`Sync failed: ${error.message}`, 'error')
+      this.showNotification(`Sync failed: ${error.message}`, "error")
       this.syncInProgressValue = false
       this.updateSyncButton()
     }
@@ -406,7 +406,7 @@ export default class extends Controller {
   async checkSyncStatus() {
     try {
       const response = await fetch(`/cloud_integrations/${this.integrationIdValue}/sync_status`, {
-        headers: { 'Accept': 'application/json' }
+        headers: { "Accept": "application/json" }
       })
       
       if (response.ok) {
@@ -416,7 +416,7 @@ export default class extends Controller {
         }
       }
     } catch (error) {
-      console.error('Sync status check failed:', error)
+      console.error("Sync status check failed:", error)
     }
   }
 
@@ -429,18 +429,18 @@ export default class extends Controller {
       this.syncPollingInterval = null
     }
     
-    this.showNotification('File sync completed', 'success')
+    this.showNotification("File sync completed", "success")
     this.loadFiles() // Refresh file list
   }
 
   updateSyncButton() {
     if (this.hasSyncButtonTarget) {
       this.syncButtonTarget.disabled = this.syncInProgressValue
-      this.syncButtonTarget.classList.toggle('loading', this.syncInProgressValue)
+      this.syncButtonTarget.classList.toggle("loading", this.syncInProgressValue)
     }
     
     if (this.hasSyncStatusTarget) {
-      this.syncStatusTarget.textContent = this.syncInProgressValue ? 'Syncing...' : 'Last synced: just now'
+      this.syncStatusTarget.textContent = this.syncInProgressValue ? "Syncing..." : "Last synced: just now"
     }
   }
 
@@ -464,7 +464,7 @@ export default class extends Controller {
   renderPagination(pagination) {
     const { current_page, total_pages, prev_page, next_page } = pagination
     
-    let html = '<div class="pagination">'
+    let html = "<div class=\"pagination\">"
     
     if (prev_page) {
       html += `<button class="pagination__btn" data-action="click->cloud-file-browser#changePage" data-page="${prev_page}">Previous</button>`
@@ -476,7 +476,7 @@ export default class extends Controller {
       html += `<button class="pagination__btn" data-action="click->cloud-file-browser#changePage" data-page="${next_page}">Next</button>`
     }
     
-    html += '</div>'
+    html += "</div>"
     return html
   }
 
@@ -484,53 +484,53 @@ export default class extends Controller {
   showLoading(show) {
     this.element.classList.toggle(this.loadingClass, show)
     if (this.hasLoadingSpinnerTarget) {
-      this.loadingSpinnerTarget.style.display = show ? 'block' : 'none'
+      this.loadingSpinnerTarget.style.display = show ? "block" : "none"
     }
   }
 
   showError(message) {
     this.element.classList.add(this.errorClass)
-    this.showNotification(message, 'error')
+    this.showNotification(message, "error")
   }
 
   showEmptyState() {
     if (this.hasEmptyStateTarget) {
-      this.emptyStateTarget.style.display = 'block'
+      this.emptyStateTarget.style.display = "block"
     }
     if (this.hasFileListTarget) {
-      this.fileListTarget.style.display = 'none'
+      this.fileListTarget.style.display = "none"
     }
   }
 
   hideEmptyState() {
     if (this.hasEmptyStateTarget) {
-      this.emptyStateTarget.style.display = 'none'
+      this.emptyStateTarget.style.display = "none"
     }
     if (this.hasFileListTarget) {
-      this.fileListTarget.style.display = 'block'
+      this.fileListTarget.style.display = "block"
     }
   }
 
-  showNotification(message, type = 'info') {
+  showNotification(message, type = "info") {
     // Dispatch notification event for global notification system
-    this.dispatch('notification', {
+    this.dispatch("notification", {
       detail: { message, type }
     })
   }
 
   // Utility methods
   formatFileSize(bytes) {
-    if (!bytes) return 'Unknown'
+    if (!bytes) return "Unknown"
     
-    const sizes = ['B', 'KB', 'MB', 'GB']
+    const sizes = ["B", "KB", "MB", "GB"]
     const i = Math.floor(Math.log(bytes) / Math.log(1024))
     return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`
   }
 
   formatDate(dateString) {
-    if (!dateString) return 'Unknown'
+    if (!dateString) return "Unknown"
     
     const date = new Date(dateString)
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    return date.toLocaleDateString() + " " + date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
   }
 }

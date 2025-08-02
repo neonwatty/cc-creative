@@ -50,6 +50,12 @@ class CommandExecutionService
                  execute_include_command(parameters, options)
       when "snippet"
                  execute_snippet_command(parameters, options)
+      when "review"
+                 execute_review_command(parameters, options)
+      when "suggest"
+                 execute_suggest_command(parameters, options)
+      when "critique"
+                 execute_critique_command(parameters, options)
       else
                  raise CommandExecutionError, "Command handler not implemented: #{command}"
       end
@@ -299,6 +305,130 @@ class CommandExecutionService
       snippet_name: snippet_name,
       snippet_id: snippet.id
     }
+  end
+
+  # AI Review Commands Implementation
+  def execute_review_command(parameters, options)
+    selected_content = options[:selected_content]
+    mode = parameters.first || "thorough"
+    focus = parameters.second
+
+    content_to_review = selected_content.presence || @document.content.to_plain_text
+
+    return { error: "No content available for review" } if content_to_review.blank?
+
+    begin
+      claude_service = ClaudeService.new
+      review_result = claude_service.analyze_code_for_review(content_to_review, mode: mode, focus: focus)
+
+      # Add review to Claude context
+      add_to_claude_context("code_review", {
+        content: content_to_review,
+        mode: mode,
+        focus: focus,
+        review: review_result,
+        reviewed_at: Time.current.iso8601
+      })
+
+      {
+        review_mode: mode,
+        focus_area: focus,
+        analysis: review_result[:analysis],
+        suggestions: review_result[:suggestions],
+        issues: review_result[:issues],
+        score: review_result[:score],
+        claude_context_updated: true
+      }
+    rescue ClaudeService::APIError => e
+      { error: "Claude API error: #{e.message}" }
+    rescue Timeout::Error
+      { error: "Review operation timeout" }
+    end
+  end
+
+  def execute_suggest_command(parameters, options)
+    selected_content = options[:selected_content]
+    suggestion_type = parameters.first || "enhance"
+    context = parameters.second
+
+    content_to_analyze = selected_content.presence || @document.content.to_plain_text
+
+    return { error: "No content available for suggestions" } if content_to_analyze.blank?
+
+    begin
+      claude_service = ClaudeService.new
+      suggestion_result = claude_service.generate_code_suggestions(
+        content_to_analyze, 
+        type: suggestion_type, 
+        context: context
+      )
+
+      # Add suggestions to Claude context
+      add_to_claude_context("code_suggestions", {
+        content: content_to_analyze,
+        type: suggestion_type,
+        context: context,
+        suggestions: suggestion_result,
+        generated_at: Time.current.iso8601
+      })
+
+      {
+        suggestion_type: suggestion_type,
+        context_provided: context,
+        suggestions: suggestion_result[:suggestions],
+        improvements: suggestion_result[:improvements],
+        examples: suggestion_result[:examples],
+        priority: suggestion_result[:priority],
+        claude_context_updated: true
+      }
+    rescue ClaudeService::APIError => e
+      { error: "Claude API error: #{e.message}" }
+    rescue Timeout::Error
+      { error: "Suggestion generation timeout" }
+    end
+  end
+
+  def execute_critique_command(parameters, options)
+    selected_content = options[:selected_content]
+    aspect = parameters.first || "architecture"
+    level = parameters.second || "intermediate"
+
+    content_to_critique = selected_content.presence || @document.content.to_plain_text
+
+    return { error: "No content available for critique" } if content_to_critique.blank?
+
+    begin
+      claude_service = ClaudeService.new
+      critique_result = claude_service.provide_code_critique(
+        content_to_critique, 
+        aspect: aspect, 
+        level: level
+      )
+
+      # Add critique to Claude context
+      add_to_claude_context("code_critique", {
+        content: content_to_critique,
+        aspect: aspect,
+        level: level,
+        critique: critique_result,
+        critiqued_at: Time.current.iso8601
+      })
+
+      {
+        critique_aspect: aspect,
+        analysis_level: level,
+        strengths: critique_result[:strengths],
+        weaknesses: critique_result[:weaknesses],
+        recommendations: critique_result[:recommendations],
+        design_patterns: critique_result[:design_patterns],
+        best_practices: critique_result[:best_practices],
+        claude_context_updated: true
+      }
+    rescue ClaudeService::APIError => e
+      { error: "Claude API error: #{e.message}" }
+    rescue Timeout::Error
+      { error: "Critique operation timeout" }
+    end
   end
 
   # Helper methods

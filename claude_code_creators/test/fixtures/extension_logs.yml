@@ -1,0 +1,21 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  plugin: one
+  user: one
+  action: MyString
+  status: MyString
+  error_message: MyText
+  execution_time: 1
+  resource_usage: 
+  created_at: 2025-08-02 13:59:17
+
+two:
+  plugin: two
+  user: two
+  action: MyString
+  status: MyString
+  error_message: MyText
+  execution_time: 1
+  resource_usage: 
+  created_at: 2025-08-02 13:59:17

@@ -35,6 +35,31 @@ export default class extends Controller {
       description: "Save selected content as reusable snippet",
       parameters: ["name"],
       category: "content"
+    },
+    "review": {
+      description: "AI code review of selected content",
+      parameters: [],
+      category: "ai-tools"
+    },
+    "suggest": {
+      description: "AI suggestions for code improvements",
+      parameters: [],
+      category: "ai-tools"
+    },
+    "critique": {
+      description: "AI critique and analysis of code",
+      parameters: [],
+      category: "ai-tools"
+    },
+    "widget": {
+      description: "Create a new widget",
+      parameters: ["type"],
+      category: "widgets"
+    },
+    "marketplace": {
+      description: "Open plugin marketplace",
+      parameters: [],
+      category: "plugins"
     }
   }
 
@@ -467,6 +492,12 @@ export default class extends Controller {
   async executeCommand() {
     if (!this.currentCommand) return
 
+    // Handle special widget and plugin commands locally
+    if (this.isLocalCommand(this.currentCommand)) {
+      await this.executeLocalCommand()
+      return
+    }
+
     this.showStatus("Executing command...", "loading")
 
     try {
@@ -487,6 +518,12 @@ export default class extends Controller {
 
       if (response.ok && result.status === "success") {
         this.showStatus(`Command '${this.currentCommand}' executed successfully`, "success")
+        
+        // For AI commands, offer to create widget
+        if (this.isAICommand(this.currentCommand)) {
+          this.offerAIWidgetCreation(result.result)
+        }
+        
         this.dispatch("command-executed", { 
           detail: { 
             command: this.currentCommand, 
@@ -500,6 +537,114 @@ export default class extends Controller {
     } catch {
       this.showStatus("Network error: Could not execute command", "error")
     }
+  }
+
+  isLocalCommand(command) {
+    return ["widget", "marketplace"].includes(command)
+  }
+
+  isAICommand(command) {
+    return ["review", "suggest", "critique"].includes(command)
+  }
+
+  async executeLocalCommand() {
+    try {
+      switch (this.currentCommand) {
+      case "widget":
+        await this.handleWidgetCommand()
+        break
+      case "marketplace":
+        await this.handleMarketplaceCommand()
+        break
+      default:
+        throw new Error(`Unknown local command: ${this.currentCommand}`)
+      }
+    } catch (error) {
+      this.showStatus(`Command failed: ${error.message}`, "error")
+    }
+  }
+
+  async handleWidgetCommand() {
+    const widgetType = this.commandParameters[0] || "text"
+    
+    // Dispatch event to create widget
+    const event = new CustomEvent("create-widget", {
+      detail: {
+        type: widgetType,
+        options: {
+          title: `${widgetType} Widget`,
+          content: this.getSelectedContent()
+        }
+      },
+      bubbles: true
+    })
+    
+    document.dispatchEvent(event)
+    this.showStatus(`Creating ${widgetType} widget...`, "success")
+  }
+
+  async handleMarketplaceCommand() {
+    if (window.PluginMarketplace) {
+      window.PluginMarketplace.open()
+      this.showStatus("Opening plugin marketplace...", "success")
+    } else {
+      this.showStatus("Plugin marketplace not available", "error")
+    }
+  }
+
+  offerAIWidgetCreation(result) {
+    // Create a temporary notification to offer widget creation
+    const notification = document.createElement("div")
+    notification.className = "ai-result-notification"
+    notification.innerHTML = `
+      <div class="notification-content">
+        <span>AI analysis complete! Create widget to save results?</span>
+        <button type="button" class="btn btn-sm btn-primary" data-action="create-ai-widget">Create Widget</button>
+        <button type="button" class="btn btn-sm btn-secondary" data-action="dismiss">Dismiss</button>
+      </div>
+    `
+    
+    // Position near the input
+    const inputRect = this.inputTarget.getBoundingClientRect()
+    notification.style.position = "fixed"
+    notification.style.top = `${inputRect.bottom + 10}px`
+    notification.style.left = `${inputRect.left}px`
+    notification.style.zIndex = "1000"
+    
+    document.body.appendChild(notification)
+    
+    // Bind events
+    notification.addEventListener("click", (e) => {
+      const action = e.target.dataset.action
+      if (action === "create-ai-widget") {
+        this.createAIResultWidget(result)
+      }
+      notification.remove()
+    })
+    
+    // Auto-dismiss after 10 seconds
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.remove()
+      }
+    }, 10000)
+  }
+
+  createAIResultWidget(result) {
+    const event = new CustomEvent("create-ai-review-widget", {
+      detail: {
+        code: this.getSelectedContent() || "",
+        reviewType: this.currentCommand,
+        options: {
+          title: `AI ${this.currentCommand} Result`,
+          prefilledResult: result
+        }
+      },
+      bubbles: true
+    })
+    
+    document.dispatchEvent(event)
+    this.showStatus(`Creating ${this.currentCommand} result widget...`, "success")
   }
 
   getSelectedContent() {

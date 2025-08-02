@@ -53,22 +53,22 @@ export default class extends Controller {
     const dropZone = this.dropZoneTarget
 
     // Prevent default drag behaviors
-    ;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    ;["dragenter", "dragover", "dragleave", "drop"].forEach(eventName => {
       dropZone.addEventListener(eventName, this.preventDefaults.bind(this), false)
       document.body.addEventListener(eventName, this.preventDefaults.bind(this), false)
     })
 
     // Highlight drop zone when item is dragged over
-    ;['dragenter', 'dragover'].forEach(eventName => {
+    ;["dragenter", "dragover"].forEach(eventName => {
       dropZone.addEventListener(eventName, this.highlight.bind(this), false)
     })
 
-    ;['dragleave', 'drop'].forEach(eventName => {
+    ;["dragleave", "drop"].forEach(eventName => {
       dropZone.addEventListener(eventName, this.unhighlight.bind(this), false)
     })
 
     // Handle dropped files
-    dropZone.addEventListener('drop', this.handleDrop.bind(this), false)
+    dropZone.addEventListener("drop", this.handleDrop.bind(this), false)
   }
 
   // Initialize file input
@@ -76,7 +76,7 @@ export default class extends Controller {
     if (this.hasFileInputTarget) {
       this.fileInputTarget.multiple = this.multipleValue
       if (this.allowedTypesValue.length > 0) {
-        this.fileInputTarget.accept = this.allowedTypesValue.join(',')
+        this.fileInputTarget.accept = this.allowedTypesValue.join(",")
       }
     }
   }
@@ -115,7 +115,7 @@ export default class extends Controller {
     const validFiles = files.filter(file => this.validateFile(file))
     
     if (validFiles.length === 0) {
-      this.showError('No valid files selected')
+      this.showError("No valid files selected")
       return
     }
 
@@ -139,7 +139,7 @@ export default class extends Controller {
     // Check file type if restrictions exist
     if (this.allowedTypesValue.length > 0) {
       const isAllowed = this.allowedTypesValue.some(type => {
-        if (type.startsWith('.')) {
+        if (type.startsWith(".")) {
           return file.name.toLowerCase().endsWith(type.toLowerCase())
         } else {
           return file.type.includes(type)
@@ -161,7 +161,7 @@ export default class extends Controller {
     const uploadInfo = {
       id: fileId,
       file: file,
-      status: 'queued',
+      status: "queued",
       progress: 0,
       xhr: null
     }
@@ -174,8 +174,8 @@ export default class extends Controller {
   renderFileItem(uploadInfo) {
     if (!this.hasFileListTarget) return
 
-    const fileItem = document.createElement('div')
-    fileItem.className = 'upload-item'
+    const fileItem = document.createElement("div")
+    fileItem.className = "upload-item"
     fileItem.dataset.fileId = uploadInfo.id
     
     fileItem.innerHTML = `
@@ -199,10 +199,10 @@ export default class extends Controller {
 
   // Start all queued uploads
   startUploads() {
-    const queuedUploads = Array.from(this.uploads.values()).filter(upload => upload.status === 'queued')
+    const queuedUploads = Array.from(this.uploads.values()).filter(upload => upload.status === "queued")
     
     if (queuedUploads.length === 0) {
-      this.showError('No files queued for upload')
+      this.showError("No files queued for upload")
       return
     }
 
@@ -218,17 +218,17 @@ export default class extends Controller {
   // Upload individual file
   async uploadFile(uploadInfo) {
     const formData = new FormData()
-    formData.append('file', uploadInfo.file)
-    formData.append('integration_id', this.integrationIdValue)
+    formData.append("file", uploadInfo.file)
+    formData.append("integration_id", this.integrationIdValue)
 
     const xhr = new XMLHttpRequest()
     uploadInfo.xhr = xhr
 
     // Update upload status
-    this.updateUploadStatus(uploadInfo.id, 'uploading')
+    this.updateUploadStatus(uploadInfo.id, "uploading")
 
     // Track progress
-    xhr.upload.addEventListener('progress', (e) => {
+    xhr.upload.addEventListener("progress", (e) => {
       if (e.lengthComputable) {
         const percentComplete = (e.loaded / e.total) * 100
         this.updateUploadProgress(uploadInfo.id, percentComplete)
@@ -236,13 +236,13 @@ export default class extends Controller {
     })
 
     // Handle completion
-    xhr.addEventListener('load', () => {
+    xhr.addEventListener("load", () => {
       if (xhr.status >= 200 && xhr.status < 300) {
         try {
           const response = JSON.parse(xhr.responseText)
           this.handleUploadSuccess(uploadInfo.id, response)
         } catch (error) {
-          this.handleUploadError(uploadInfo.id, 'Invalid response from server')
+          this.handleUploadError(uploadInfo.id, "Invalid response from server")
         }
       } else {
         this.handleUploadError(uploadInfo.id, `HTTP ${xhr.status}: ${xhr.statusText}`)
@@ -250,17 +250,17 @@ export default class extends Controller {
     })
 
     // Handle errors
-    xhr.addEventListener('error', () => {
-      this.handleUploadError(uploadInfo.id, 'Network error occurred')
+    xhr.addEventListener("error", () => {
+      this.handleUploadError(uploadInfo.id, "Network error occurred")
     })
 
-    xhr.addEventListener('abort', () => {
-      this.handleUploadError(uploadInfo.id, 'Upload cancelled')
+    xhr.addEventListener("abort", () => {
+      this.handleUploadError(uploadInfo.id, "Upload cancelled")
     })
 
     // Start upload
-    xhr.open('POST', this.uploadUrlValue || `/cloud_integrations/${this.integrationIdValue}/upload`)
-    xhr.setRequestHeader('X-CSRF-Token', document.querySelector('[name="csrf-token"]').content)
+    xhr.open("POST", this.uploadUrlValue || `/cloud_integrations/${this.integrationIdValue}/upload`)
+    xhr.setRequestHeader("X-CSRF-Token", document.querySelector("[name=\"csrf-token\"]").content)
     xhr.send(formData)
   }
 
@@ -273,8 +273,8 @@ export default class extends Controller {
 
     const fileItem = this.fileListTarget.querySelector(`[data-file-id="${fileId}"]`)
     if (fileItem) {
-      const progressBar = fileItem.querySelector('.progress-bar__fill')
-      const statusText = fileItem.querySelector('.upload-item__status')
+      const progressBar = fileItem.querySelector(".progress-bar__fill")
+      const statusText = fileItem.querySelector(".upload-item__status")
       
       if (progressBar) {
         progressBar.style.width = `${progress}%`
@@ -299,7 +299,7 @@ export default class extends Controller {
     const fileItem = this.fileListTarget.querySelector(`[data-file-id="${fileId}"]`)
     if (fileItem) {
       fileItem.className = `upload-item upload-item--${status}`
-      const statusText = fileItem.querySelector('.upload-item__status')
+      const statusText = fileItem.querySelector(".upload-item__status")
       if (statusText) {
         statusText.textContent = status
       }
@@ -308,11 +308,11 @@ export default class extends Controller {
 
   // Handle successful upload
   handleUploadSuccess(fileId, response) {
-    this.updateUploadStatus(fileId, 'completed')
+    this.updateUploadStatus(fileId, "completed")
     this.updateUploadProgress(fileId, 100)
 
     // Dispatch success event
-    this.dispatch('upload:success', {
+    this.dispatch("upload:success", {
       detail: {
         fileId: fileId,
         response: response
@@ -324,7 +324,7 @@ export default class extends Controller {
 
   // Handle upload error
   handleUploadError(fileId, error) {
-    this.updateUploadStatus(fileId, 'error')
+    this.updateUploadStatus(fileId, "error")
     
     const upload = this.uploads.get(fileId)
     if (upload) {
@@ -334,14 +334,14 @@ export default class extends Controller {
     // Show error in file item
     const fileItem = this.fileListTarget.querySelector(`[data-file-id="${fileId}"]`)
     if (fileItem) {
-      const statusText = fileItem.querySelector('.upload-item__status')
+      const statusText = fileItem.querySelector(".upload-item__status")
       if (statusText) {
         statusText.textContent = `Error: ${error}`
       }
     }
 
     // Dispatch error event
-    this.dispatch('upload:error', {
+    this.dispatch("upload:error", {
       detail: {
         fileId: fileId,
         error: error
@@ -355,7 +355,7 @@ export default class extends Controller {
   checkAllUploadsComplete() {
     const uploads = Array.from(this.uploads.values())
     const activeUploads = uploads.filter(upload => 
-      upload.status === 'uploading' || upload.status === 'queued'
+      upload.status === "uploading" || upload.status === "queued"
     )
 
     if (activeUploads.length === 0) {
@@ -364,13 +364,13 @@ export default class extends Controller {
       this.disableControls(false)
 
       // Show completion status
-      const completedCount = uploads.filter(upload => upload.status === 'completed').length
-      const errorCount = uploads.filter(upload => upload.status === 'error').length
+      const completedCount = uploads.filter(upload => upload.status === "completed").length
+      const errorCount = uploads.filter(upload => upload.status === "error").length
       
       this.showStatus(`Upload complete: ${completedCount} successful, ${errorCount} errors`)
 
       // Dispatch completion event
-      this.dispatch('upload:complete', {
+      this.dispatch("upload:complete", {
         detail: {
           completed: completedCount,
           errors: errorCount,
@@ -433,7 +433,7 @@ export default class extends Controller {
 
     // Clear DOM
     if (this.hasFileListTarget) {
-      this.fileListTarget.innerHTML = ''
+      this.fileListTarget.innerHTML = ""
     }
 
     // Reset UI state
@@ -444,14 +444,14 @@ export default class extends Controller {
 
   // Retry failed uploads
   retryFailed() {
-    const failedUploads = Array.from(this.uploads.values()).filter(upload => upload.status === 'error')
+    const failedUploads = Array.from(this.uploads.values()).filter(upload => upload.status === "error")
     
     failedUploads.forEach(upload => {
-      upload.status = 'queued'
+      upload.status = "queued"
       upload.progress = 0
       upload.xhr = null
       delete upload.error
-      this.updateUploadStatus(upload.id, 'queued')
+      this.updateUploadStatus(upload.id, "queued")
       this.updateUploadProgress(upload.id, 0)
     })
 
@@ -474,14 +474,14 @@ export default class extends Controller {
   showStatus(message) {
     if (this.hasStatusTarget) {
       this.statusTarget.textContent = message
-      this.statusTarget.style.display = 'block'
+      this.statusTarget.style.display = "block"
     }
   }
 
   clearStatus() {
     if (this.hasStatusTarget) {
-      this.statusTarget.textContent = ''
-      this.statusTarget.style.display = 'none'
+      this.statusTarget.textContent = ""
+      this.statusTarget.style.display = "none"
     }
   }
 
@@ -490,11 +490,11 @@ export default class extends Controller {
     
     if (this.hasErrorContainerTarget) {
       this.errorContainerTarget.textContent = message
-      this.errorContainerTarget.style.display = 'block'
+      this.errorContainerTarget.style.display = "block"
       
       // Auto-hide after 5 seconds
       setTimeout(() => {
-        this.errorContainerTarget.style.display = 'none'
+        this.errorContainerTarget.style.display = "none"
         this.element.classList.remove(this.errorClass)
       }, 5000)
     }
@@ -506,13 +506,13 @@ export default class extends Controller {
   }
 
   formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes'
+    if (bytes === 0) return "0 Bytes"
     
     const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const sizes = ["Bytes", "KB", "MB", "GB"]
     const i = Math.floor(Math.log(bytes) / Math.log(k))
     
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
   }
 
   // Public API methods for external control

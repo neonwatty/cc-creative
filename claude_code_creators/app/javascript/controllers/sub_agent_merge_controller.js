@@ -10,7 +10,7 @@ export default class extends Controller {
   }
   
   connect() {
-    console.log('SubAgentMergeController connected')
+    console.log("SubAgentMergeController connected")
     this.setupKeyboardShortcuts()
   }
   
@@ -30,28 +30,28 @@ export default class extends Controller {
     }
     
     // Show dialog with animation
-    this.dialogTarget.classList.remove('hidden')
-    this.dialogTarget.classList.add('flex')
+    this.dialogTarget.classList.remove("hidden")
+    this.dialogTarget.classList.add("flex")
     
     // Animate backdrop
-    const backdrop = this.dialogTarget.querySelector('.backdrop')
+    const backdrop = this.dialogTarget.querySelector(".backdrop")
     if (backdrop) {
-      backdrop.style.opacity = '0'
+      backdrop.style.opacity = "0"
       requestAnimationFrame(() => {
-        backdrop.style.transition = 'opacity 0.3s ease-out'
-        backdrop.style.opacity = '1'
+        backdrop.style.transition = "opacity 0.3s ease-out"
+        backdrop.style.opacity = "1"
       })
     }
     
     // Animate dialog content
-    const content = this.dialogTarget.querySelector('.dialog-content')
+    const content = this.dialogTarget.querySelector(".dialog-content")
     if (content) {
-      content.style.transform = 'scale(0.95)'
-      content.style.opacity = '0'
+      content.style.transform = "scale(0.95)"
+      content.style.opacity = "0"
       requestAnimationFrame(() => {
-        content.style.transition = 'all 0.3s ease-out'
-        content.style.transform = 'scale(1)'
-        content.style.opacity = '1'
+        content.style.transition = "all 0.3s ease-out"
+        content.style.transform = "scale(1)"
+        content.style.opacity = "1"
       })
     }
     
@@ -68,24 +68,24 @@ export default class extends Controller {
     if (!this.hasDialogTarget) return
     
     // Animate out
-    const backdrop = this.dialogTarget.querySelector('.backdrop')
-    const content = this.dialogTarget.querySelector('.dialog-content')
+    const backdrop = this.dialogTarget.querySelector(".backdrop")
+    const content = this.dialogTarget.querySelector(".dialog-content")
     
     if (backdrop) {
-      backdrop.style.transition = 'opacity 0.2s ease-in'
-      backdrop.style.opacity = '0'
+      backdrop.style.transition = "opacity 0.2s ease-in"
+      backdrop.style.opacity = "0"
     }
     
     if (content) {
-      content.style.transition = 'all 0.2s ease-in'
-      content.style.transform = 'scale(0.95)'
-      content.style.opacity = '0'
+      content.style.transition = "all 0.2s ease-in"
+      content.style.transform = "scale(0.95)"
+      content.style.opacity = "0"
     }
     
     // Hide after animation
     setTimeout(() => {
-      this.dialogTarget.classList.add('hidden')
-      this.dialogTarget.classList.remove('flex')
+      this.dialogTarget.classList.add("hidden")
+      this.dialogTarget.classList.remove("flex")
     }, 200)
   }
   
@@ -98,11 +98,11 @@ export default class extends Controller {
     
     try {
       const response = await fetch(this.mergeUrlValue, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': document.querySelector('[name="csrf-token"]')?.content,
-          'Accept': 'application/json'
+          "Content-Type": "application/json",
+          "X-CSRF-Token": document.querySelector("[name=\"csrf-token\"]")?.content,
+          "Accept": "application/json"
         },
         body: JSON.stringify({
           merge: true
@@ -119,7 +119,7 @@ export default class extends Controller {
       this.hideDialog()
       
       // Show success notification
-      this.showNotification('Content merged successfully!', 'success')
+      this.showNotification("Content merged successfully!", "success")
       
       // Reload page or update UI based on response
       if (data.redirect_to) {
@@ -131,8 +131,8 @@ export default class extends Controller {
       }
       
     } catch (error) {
-      console.error('Failed to merge content:', error)
-      this.showNotification('Failed to merge content. Please try again.', 'error')
+      console.error("Failed to merge content:", error)
+      this.showNotification("Failed to merge content. Please try again.", "error")
       this.setLoadingState(false)
     }
   }
@@ -151,7 +151,7 @@ export default class extends Controller {
           Merging...
         `
       } else {
-        this.confirmButtonTarget.innerHTML = 'Merge Content'
+        this.confirmButtonTarget.innerHTML = "Merge Content"
       }
     }
     
@@ -160,48 +160,48 @@ export default class extends Controller {
     }
     
     if (this.hasLoadingOverlayTarget) {
-      this.loadingOverlayTarget.style.display = loading ? 'flex' : 'none'
+      this.loadingOverlayTarget.style.display = loading ? "flex" : "none"
     }
   }
   
   // Format content preview
   formatContentPreview(content) {
-    if (!content) return '<p class="text-gray-500">No content to preview</p>'
+    if (!content) return "<p class=\"text-gray-500\">No content to preview</p>"
     
     // Truncate long content
     const maxLength = 500
     const truncated = content.length > maxLength 
-      ? content.substring(0, maxLength) + '...' 
+      ? content.substring(0, maxLength) + "..." 
       : content
     
     // Convert to HTML with line breaks
     return truncated
-      .split('\n')
+      .split("\n")
       .map(line => `<p class="mb-2">${this.escapeHtml(line)}</p>`)
-      .join('')
+      .join("")
   }
   
   // Show notification
-  showNotification(message, type = 'info') {
-    const notification = document.createElement('div')
+  showNotification(message, type = "info") {
+    const notification = document.createElement("div")
     notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg text-white font-medium shadow-lg transition-all duration-300 ${
-      type === 'success' ? 'bg-green-500' : 
-      type === 'error' ? 'bg-red-500' : 
-      'bg-blue-500'
+      type === "success" ? "bg-green-500" : 
+        type === "error" ? "bg-red-500" : 
+          "bg-blue-500"
     }`
-    notification.style.transform = 'translateX(400px)'
+    notification.style.transform = "translateX(400px)"
     notification.textContent = message
     
     document.body.appendChild(notification)
     
     // Animate in
     requestAnimationFrame(() => {
-      notification.style.transform = 'translateX(0)'
+      notification.style.transform = "translateX(0)"
     })
     
     // Auto dismiss
     setTimeout(() => {
-      notification.style.transform = 'translateX(400px)'
+      notification.style.transform = "translateX(400px)"
       setTimeout(() => notification.remove(), 300)
     }, 3000)
   }
@@ -210,13 +210,13 @@ export default class extends Controller {
   setupKeyboardShortcuts() {
     this.keyboardHandler = (event) => {
       // Escape to close dialog
-      if (event.key === 'Escape' && !this.dialogTarget?.classList.contains('hidden')) {
+      if (event.key === "Escape" && !this.dialogTarget?.classList.contains("hidden")) {
         event.preventDefault()
         this.hideDialog()
       }
       
       // Enter to confirm when dialog is open
-      if (event.key === 'Enter' && !this.dialogTarget?.classList.contains('hidden')) {
+      if (event.key === "Enter" && !this.dialogTarget?.classList.contains("hidden")) {
         if (document.activeElement === this.confirmButtonTarget) {
           event.preventDefault()
           this.confirmMerge()
@@ -224,12 +224,12 @@ export default class extends Controller {
       }
     }
     
-    document.addEventListener('keydown', this.keyboardHandler)
+    document.addEventListener("keydown", this.keyboardHandler)
   }
   
   removeKeyboardShortcuts() {
     if (this.keyboardHandler) {
-      document.removeEventListener('keydown', this.keyboardHandler)
+      document.removeEventListener("keydown", this.keyboardHandler)
     }
   }
   
@@ -242,7 +242,7 @@ export default class extends Controller {
   
   // Utility methods
   escapeHtml(text) {
-    const div = document.createElement('div')
+    const div = document.createElement("div")
     div.textContent = text
     return div.innerHTML
   }

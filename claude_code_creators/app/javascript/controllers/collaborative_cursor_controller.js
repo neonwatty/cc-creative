@@ -31,7 +31,7 @@ export default class extends Controller {
     this.setupPresenceChannel()
     this.setupEventListeners()
     
-    console.log('CollaborativeCursorController connected')
+    console.log("CollaborativeCursorController connected")
   }
 
   disconnect() {
@@ -54,18 +54,18 @@ export default class extends Controller {
     if (!this.documentIdValue || !this.currentUserIdValue) return
     
     try {
-      const { default: PresenceChannel } = await import('../channels/presence_channel')
+      const { default: PresenceChannel } = await import("../channels/presence_channel")
       
       this.presenceChannel = PresenceChannel.create(
         this.documentIdValue,
         this.currentUserIdValue,
         {
           onConnected: () => {
-            console.log('Collaborative cursor connected to presence channel')
+            console.log("Collaborative cursor connected to presence channel")
           },
           
           onDisconnected: () => {
-            console.log('Collaborative cursor disconnected from presence channel')
+            console.log("Collaborative cursor disconnected from presence channel")
             this.clearAllCursors()
             this.clearAllSelections()
           },
@@ -93,7 +93,7 @@ export default class extends Controller {
         }
       )
     } catch (error) {
-      console.error('Failed to setup presence channel for cursors:', error)
+      console.error("Failed to setup presence channel for cursors:", error)
     }
   }
 
@@ -101,34 +101,34 @@ export default class extends Controller {
   setupEventListeners() {
     // Track mouse movement
     if (this.enableCursorsValue) {
-      document.addEventListener('mousemove', this.handleMouseMove.bind(this))
-      document.addEventListener('mouseenter', this.handleMouseEnter.bind(this))
-      document.addEventListener('mouseleave', this.handleMouseLeave.bind(this))
+      document.addEventListener("mousemove", this.handleMouseMove.bind(this))
+      document.addEventListener("mouseenter", this.handleMouseEnter.bind(this))
+      document.addEventListener("mouseleave", this.handleMouseLeave.bind(this))
     }
     
     // Track text selection
     if (this.enableSelectionsValue) {
-      document.addEventListener('selectionchange', this.handleSelectionChange.bind(this))
+      document.addEventListener("selectionchange", this.handleSelectionChange.bind(this))
     }
     
     // Track focus changes
-    document.addEventListener('focusin', this.handleFocusIn.bind(this))
-    document.addEventListener('focusout', this.handleFocusOut.bind(this))
+    document.addEventListener("focusin", this.handleFocusIn.bind(this))
+    document.addEventListener("focusout", this.handleFocusOut.bind(this))
   }
 
   removeEventListeners() {
     if (this.enableCursorsValue) {
-      document.removeEventListener('mousemove', this.handleMouseMove.bind(this))
-      document.removeEventListener('mouseenter', this.handleMouseEnter.bind(this))
-      document.removeEventListener('mouseleave', this.handleMouseLeave.bind(this))
+      document.removeEventListener("mousemove", this.handleMouseMove.bind(this))
+      document.removeEventListener("mouseenter", this.handleMouseEnter.bind(this))
+      document.removeEventListener("mouseleave", this.handleMouseLeave.bind(this))
     }
     
     if (this.enableSelectionsValue) {
-      document.removeEventListener('selectionchange', this.handleSelectionChange.bind(this))
+      document.removeEventListener("selectionchange", this.handleSelectionChange.bind(this))
     }
     
-    document.removeEventListener('focusin', this.handleFocusIn.bind(this))
-    document.removeEventListener('focusout', this.handleFocusOut.bind(this))
+    document.removeEventListener("focusin", this.handleFocusIn.bind(this))
+    document.removeEventListener("focusout", this.handleFocusOut.bind(this))
   }
 
   // Handle mouse movement
@@ -150,13 +150,13 @@ export default class extends Controller {
 
   handleMouseEnter(event) {
     if (this.presenceChannel) {
-      this.broadcastPresenceState('active')
+      this.broadcastPresenceState("active")
     }
   }
 
   handleMouseLeave(event) {
     if (this.presenceChannel) {
-      this.broadcastPresenceState('away')
+      this.broadcastPresenceState("away")
     }
   }
 
@@ -184,14 +184,14 @@ export default class extends Controller {
   handleFocusIn(event) {
     // User is active, show their cursor more prominently
     if (this.presenceChannel) {
-      this.broadcastPresenceState('focused')
+      this.broadcastPresenceState("focused")
     }
   }
 
   handleFocusOut(event) {
     // User focus left, fade cursor slightly
     if (this.presenceChannel) {
-      this.broadcastPresenceState('active')
+      this.broadcastPresenceState("active")
     }
   }
 
@@ -213,9 +213,9 @@ export default class extends Controller {
       
       if (current.className) {
         const classes = Array.from(current.classList)
-          .filter(cls => !cls.startsWith('cursor-') && !cls.startsWith('selection-'))
+          .filter(cls => !cls.startsWith("cursor-") && !cls.startsWith("selection-"))
           .slice(0, 2) // Limit classes to avoid overly long selectors
-          .join('.')
+          .join(".")
         if (classes) {
           selector += `.${classes}`
         }
@@ -234,7 +234,7 @@ export default class extends Controller {
       current = current.parentNode
     }
     
-    return path.join(' > ')
+    return path.join(" > ")
   }
 
   // Check if position changed significantly
@@ -249,7 +249,7 @@ export default class extends Controller {
   // Broadcast cursor position
   broadcastCursorPosition(position) {
     if (this.presenceChannel) {
-      this.presenceChannel.perform('cursor_moved', {
+      this.presenceChannel.perform("cursor_moved", {
         position: position
       })
     }
@@ -258,7 +258,7 @@ export default class extends Controller {
   // Broadcast selection
   broadcastSelection(selectionData) {
     if (this.presenceChannel) {
-      this.presenceChannel.perform('selection_changed', {
+      this.presenceChannel.perform("selection_changed", {
         selection: selectionData
       })
     }
@@ -267,7 +267,7 @@ export default class extends Controller {
   // Broadcast presence state
   broadcastPresenceState(state) {
     if (this.presenceChannel) {
-      this.presenceChannel.perform('presence_state_changed', {
+      this.presenceChannel.perform("presence_state_changed", {
         state: state
       })
     }
@@ -313,21 +313,21 @@ export default class extends Controller {
     cursor.classList.add(this.cursorClass)
     
     // Add user name
-    const nameElement = cursor.querySelector('.cursor-user-name')
+    const nameElement = cursor.querySelector(".cursor-user-name")
     if (nameElement) {
       nameElement.textContent = userName
     }
     
     // Add user-specific color
-    cursor.style.setProperty('--user-color', this.getUserColor(userId))
+    cursor.style.setProperty("--user-color", this.getUserColor(userId))
     
     return cursor
   }
 
   // Create default cursor if no template provided
   createDefaultCursor() {
-    const cursor = document.createElement('div')
-    cursor.className = 'collaborative-cursor'
+    const cursor = document.createElement("div")
+    cursor.className = "collaborative-cursor"
     cursor.innerHTML = `
       <div class="cursor-pointer"></div>
       <div class="cursor-label">
@@ -389,8 +389,8 @@ export default class extends Controller {
   removeCursor(userId) {
     const cursor = this.cursors.get(userId)
     if (cursor) {
-      cursor.style.transition = 'opacity 0.3s ease'
-      cursor.style.opacity = '0'
+      cursor.style.transition = "opacity 0.3s ease"
+      cursor.style.opacity = "0"
       
       setTimeout(() => {
         cursor.remove()
@@ -436,10 +436,10 @@ export default class extends Controller {
       if (!startElement || !endElement) return null
       
       // Create selection overlay
-      const selection = document.createElement('div')
+      const selection = document.createElement("div")
       selection.classList.add(this.selectionClass)
       selection.dataset.userId = userId
-      selection.style.setProperty('--user-color', this.getUserColor(userId))
+      selection.style.setProperty("--user-color", this.getUserColor(userId))
       
       // Calculate selection bounds
       const range = document.createRange()
@@ -451,8 +451,8 @@ export default class extends Controller {
       // Create highlight for each rect
       for (let i = 0; i < rects.length; i++) {
         const rect = rects[i]
-        const highlight = document.createElement('div')
-        highlight.className = 'selection-highlight'
+        const highlight = document.createElement("div")
+        highlight.className = "selection-highlight"
         highlight.style.cssText = `
           position: fixed;
           left: ${rect.left}px;
@@ -470,8 +470,8 @@ export default class extends Controller {
       // Add user label
       if (rects.length > 0) {
         const firstRect = rects[0]
-        const label = document.createElement('div')
-        label.className = 'selection-label'
+        const label = document.createElement("div")
+        label.className = "selection-label"
         label.textContent = userName
         label.style.cssText = `
           position: fixed;
@@ -491,7 +491,7 @@ export default class extends Controller {
       return selection
       
     } catch (error) {
-      console.error('Failed to create selection:', error)
+      console.error("Failed to create selection:", error)
       return null
     }
   }
@@ -500,8 +500,8 @@ export default class extends Controller {
   removeSelection(userId) {
     const selection = this.selections.get(userId)
     if (selection) {
-      selection.style.transition = 'opacity 0.3s ease'
-      selection.style.opacity = '0'
+      selection.style.transition = "opacity 0.3s ease"
+      selection.style.opacity = "0"
       
       setTimeout(() => {
         selection.remove()
@@ -530,8 +530,8 @@ export default class extends Controller {
   // Get consistent color for user
   getUserColor(userId) {
     const colors = [
-      '#ef4444', '#f97316', '#eab308', '#22c55e',
-      '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899'
+      "#ef4444", "#f97316", "#eab308", "#22c55e",
+      "#06b6d4", "#3b82f6", "#8b5cf6", "#ec4899"
     ]
     
     return colors[userId % colors.length]

@@ -14,7 +14,7 @@ export default class extends Controller {
   connect() {
     // Listen for messages from OAuth popup
     this.boundHandleMessage = this.handleMessage.bind(this)
-    window.addEventListener('message', this.boundHandleMessage)
+    window.addEventListener("message", this.boundHandleMessage)
     
     // Track popup reference
     this.popup = null
@@ -22,7 +22,7 @@ export default class extends Controller {
   }
 
   disconnect() {
-    window.removeEventListener('message', this.boundHandleMessage)
+    window.removeEventListener("message", this.boundHandleMessage)
     this.closePopup()
   }
 
@@ -35,7 +35,7 @@ export default class extends Controller {
       return
     }
 
-    this.updateStatus('connecting', `Connecting to ${this.providerValue}...`)
+    this.updateStatus("connecting", `Connecting to ${this.providerValue}...`)
     this.disableTrigger(true)
 
     // Calculate popup position (center of screen)
@@ -50,7 +50,7 @@ export default class extends Controller {
     )
 
     if (!this.popup) {
-      this.handleError('Popup blocked. Please allow popups for this site.')
+      this.handleError("Popup blocked. Please allow popups for this site.")
       return
     }
 
@@ -60,7 +60,7 @@ export default class extends Controller {
     // Set timeout for authentication
     this.authTimeout = setTimeout(() => {
       if (this.popup && !this.popup.closed) {
-        this.handleError('Authentication timed out. Please try again.')
+        this.handleError("Authentication timed out. Please try again.")
         this.closePopup()
       }
     }, 300000) // 5 minute timeout
@@ -75,24 +75,24 @@ export default class extends Controller {
 
     const { type, provider, status, error, data } = event.data
 
-    if (type !== 'oauth_result' || provider !== this.providerValue) {
+    if (type !== "oauth_result" || provider !== this.providerValue) {
       return
     }
 
-    if (status === 'success') {
+    if (status === "success") {
       this.handleSuccess(data)
-    } else if (status === 'error') {
-      this.handleError(error || 'Authentication failed')
+    } else if (status === "error") {
+      this.handleError(error || "Authentication failed")
     }
   }
 
   // Handle successful OAuth
   handleSuccess(data) {
-    this.updateStatus('success', `Successfully connected to ${this.providerValue}`)
+    this.updateStatus("success", `Successfully connected to ${this.providerValue}`)
     this.closePopup()
     
     // Dispatch custom event for parent components
-    this.dispatch('success', {
+    this.dispatch("success", {
       detail: {
         provider: this.providerValue,
         data: data
@@ -111,12 +111,12 @@ export default class extends Controller {
 
   // Handle OAuth errors
   handleError(error) {
-    this.updateStatus('error', error)
+    this.updateStatus("error", error)
     this.disableTrigger(false)
     this.closePopup()
     
     // Dispatch error event
-    this.dispatch('error', {
+    this.dispatch("error", {
       detail: {
         provider: this.providerValue,
         error: error
@@ -130,13 +130,13 @@ export default class extends Controller {
 
     this.statusTarget.className = `oauth-status oauth-status--${type}`
     this.statusTarget.textContent = message
-    this.statusTarget.style.display = 'block'
+    this.statusTarget.style.display = "block"
 
     // Auto-hide success/error messages
-    if (type === 'success' || type === 'error') {
+    if (type === "success" || type === "error") {
       setTimeout(() => {
         if (this.hasStatusTarget) {
-          this.statusTarget.style.display = 'none'
+          this.statusTarget.style.display = "none"
         }
       }, 5000)
     }
@@ -146,7 +146,7 @@ export default class extends Controller {
   disableTrigger(disabled) {
     if (this.hasTriggerTarget) {
       this.triggerTarget.disabled = disabled
-      this.triggerTarget.classList.toggle('loading', disabled)
+      this.triggerTarget.classList.toggle("loading", disabled)
     }
   }
 
@@ -173,7 +173,7 @@ export default class extends Controller {
     this.pollInterval = setInterval(() => {
       if (this.popup && this.popup.closed) {
         // Popup was closed without successful auth
-        this.handleError('Authentication cancelled')
+        this.handleError("Authentication cancelled")
       }
     }, 1000)
   }
@@ -182,9 +182,9 @@ export default class extends Controller {
   isValidOrigin(origin) {
     const allowedOrigins = [
       window.location.origin,
-      'https://accounts.google.com',
-      'https://www.dropbox.com',
-      'https://api.notion.com'
+      "https://accounts.google.com",
+      "https://www.dropbox.com",
+      "https://api.notion.com"
     ]
     
     return allowedOrigins.includes(origin)
@@ -200,7 +200,7 @@ export default class extends Controller {
   cancel(event) {
     event.preventDefault()
     this.closePopup()
-    this.updateStatus('cancelled', 'Authentication cancelled')
+    this.updateStatus("cancelled", "Authentication cancelled")
     this.disableTrigger(false)
   }
 }

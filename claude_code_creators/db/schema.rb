@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_02_201548) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_02_205920) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.string "name", null: false
     t.text "body"
@@ -252,6 +252,20 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_02_201548) do
     t.index ["user_id"], name: "index_documents_on_user_id"
   end
 
+  create_table "extension_logs", force: :cascade do |t|
+    t.integer "plugin_id", null: false
+    t.integer "user_id", null: false
+    t.string "action"
+    t.string "status"
+    t.text "error_message"
+    t.integer "execution_time"
+    t.json "resource_usage"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["plugin_id"], name: "index_extension_logs_on_plugin_id"
+    t.index ["user_id"], name: "index_extension_logs_on_user_id"
+  end
+
   create_table "identities", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "provider", null: false
@@ -285,6 +299,47 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_02_201548) do
     t.index ["operation_id"], name: "index_operational_transforms_on_operation_id", unique: true
     t.index ["user_id", "timestamp"], name: "index_operational_transforms_on_user_id_and_timestamp"
     t.index ["user_id"], name: "index_operational_transforms_on_user_id"
+  end
+
+  create_table "plugin_installations", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "plugin_id", null: false
+    t.json "configuration"
+    t.string "status"
+    t.datetime "installed_at"
+    t.datetime "last_used_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["plugin_id"], name: "index_plugin_installations_on_plugin_id"
+    t.index ["user_id"], name: "index_plugin_installations_on_user_id"
+  end
+
+  create_table "plugin_permissions", force: :cascade do |t|
+    t.integer "plugin_id", null: false
+    t.integer "user_id", null: false
+    t.string "permission_type"
+    t.string "resource"
+    t.datetime "granted_at"
+    t.datetime "revoked_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["plugin_id"], name: "index_plugin_permissions_on_plugin_id"
+    t.index ["user_id"], name: "index_plugin_permissions_on_user_id"
+  end
+
+  create_table "plugins", force: :cascade do |t|
+    t.string "name"
+    t.string "version"
+    t.text "description"
+    t.string "author"
+    t.string "category"
+    t.string "status"
+    t.json "metadata"
+    t.json "permissions"
+    t.json "sandbox_config"
+    t.datetime "installed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -383,9 +438,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_02_201548) do
   add_foreign_key "context_permissions", "users"
   add_foreign_key "context_permissions", "users", column: "granted_by_id"
   add_foreign_key "documents", "users"
+  add_foreign_key "extension_logs", "plugins"
+  add_foreign_key "extension_logs", "users"
   add_foreign_key "identities", "users"
   add_foreign_key "operational_transforms", "documents"
   add_foreign_key "operational_transforms", "users"
+  add_foreign_key "plugin_installations", "plugins"
+  add_foreign_key "plugin_installations", "users"
+  add_foreign_key "plugin_permissions", "plugins"
+  add_foreign_key "plugin_permissions", "users"
   add_foreign_key "sessions", "users"
   add_foreign_key "sub_agent_messages", "sub_agents"
   add_foreign_key "sub_agent_messages", "users"

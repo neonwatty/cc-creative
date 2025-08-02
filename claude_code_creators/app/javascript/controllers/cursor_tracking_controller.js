@@ -217,20 +217,20 @@ export default class extends Controller {
     
     // Apply user color
     const colorClass = this.getUserColorClass(userColor)
-    cursor.querySelector('svg').classList.add(colorClass)
+    cursor.querySelector("svg").classList.add(colorClass)
     
     if (this.showLabelsValue) {
-      const label = cursor.querySelector('.cursor-label')
+      const label = cursor.querySelector(".cursor-label")
       if (label) {
         label.classList.add(`cursor-bg-${this.getColorName(userColor)}`)
-        cursor.querySelector('.cursor-user-name-placeholder').textContent = userName
+        cursor.querySelector(".cursor-user-name-placeholder").textContent = userName
       }
     }
     
     // Add entrance animation
-    cursor.classList.add('entering')
+    cursor.classList.add("entering")
     setTimeout(() => {
-      cursor.classList.remove('entering')
+      cursor.classList.remove("entering")
     }, 200)
     
     return cursor
@@ -238,9 +238,9 @@ export default class extends Controller {
 
   animateCursorToPosition(cursor, position) {
     if (this.smoothMovementValue) {
-      cursor.style.transition = 'transform 150ms cubic-bezier(0.4, 0, 0.2, 1)'
+      cursor.style.transition = "transform 150ms cubic-bezier(0.4, 0, 0.2, 1)"
     } else {
-      cursor.style.transition = 'none'
+      cursor.style.transition = "none"
     }
     
     cursor.style.transform = `translate(${position.x}px, ${position.y}px)`
@@ -249,7 +249,7 @@ export default class extends Controller {
   hideCursor(userId) {
     const cursor = this.cursors.get(userId)
     if (cursor) {
-      cursor.classList.add('leaving')
+      cursor.classList.add("leaving")
       setTimeout(() => {
         this.removeCursor(userId)
       }, 200)
@@ -303,7 +303,7 @@ export default class extends Controller {
   fadeCursor(userId) {
     const cursor = this.cursors.get(userId)
     if (cursor) {
-      cursor.classList.add('cursor-idle')
+      cursor.classList.add("cursor-idle")
       
       // Remove after fade animation
       setTimeout(() => {
@@ -507,9 +507,9 @@ export default class extends Controller {
   setShowLabels(enabled) {
     this.showLabelsValue = enabled
     this.cursors.forEach(cursor => {
-      const label = cursor.querySelector('.cursor-label')
+      const label = cursor.querySelector(".cursor-label")
       if (label) {
-        label.style.display = enabled ? 'block' : 'none'
+        label.style.display = enabled ? "block" : "none"
       }
     })
   }

@@ -1,0 +1,433 @@
+<%= content_tag :div, class: marketplace_class, data: marketplace_data_attributes.merge("plugin-marketplace-target": "marketplace") do %>
+  
+  <!-- Marketplace Content -->
+  <div class="<%= content_class %>" data-plugin-marketplace-target="content">
+    
+    <!-- Header -->
+    <div class="<%= header_class %>">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            Plugin Marketplace
+          </h2>
+          <p class="text-sm text-gray-600 dark:text-gray-400">
+            Discover and install plugins to extend your workspace
+          </p>
+        </div>
+      </div>
+      
+      <button type="button" 
+              class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200"
+              data-action="click->plugin-marketplace#close"
+              data-plugin-marketplace-target="closeButton">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    
+    <!-- Navigation -->
+    <nav class="<%= nav_class %>">
+      <button type="button" 
+              class="<%= nav_button_class("marketplace", default_view) %>"
+              data-action="click->plugin-marketplace#switchView"
+              data-view="marketplace"
+              data-plugin-marketplace-target="navButton">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+        </svg>
+        <span>Browse Plugins</span>
+      </button>
+      
+      <button type="button" 
+              class="<%= nav_button_class("installed", default_view) %>"
+              data-action="click->plugin-marketplace#switchView"
+              data-view="installed"
+              data-plugin-marketplace-target="navButton">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <span>Installed</span>
+        <span class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-0.5 rounded-full text-xs font-medium ml-2" 
+              data-plugin-marketplace-target="installedCount">0</span>
+      </button>
+      
+      <button type="button" 
+              class="<%= nav_button_class("widgets", default_view) %>"
+              data-action="click->plugin-marketplace#switchView"
+              data-view="widgets"
+              data-plugin-marketplace-target="navButton">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+        </svg>
+        <span>My Widgets</span>
+        <span class="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-0.5 rounded-full text-xs font-medium ml-2" 
+              data-plugin-marketplace-target="widgetCount">0</span>
+      </button>
+    </nav>
+    
+    <!-- Toolbar -->
+    <% if enable_search || enable_filters %>
+      <div class="<%= toolbar_class %>">
+        
+        <% if enable_search %>
+          <!-- Search Section -->
+          <div class="<%= search_section_class %>">
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+              </div>
+              <input type="text" 
+                     class="<%= search_input_class %>"
+                     placeholder="Search plugins..."
+                     data-plugin-marketplace-target="searchInput"
+                     data-action="input->plugin-marketplace#handleSearch">
+            </div>
+          </div>
+        <% end %>
+        
+        <% if enable_filters %>
+          <!-- Filter Section -->
+          <div class="<%= filter_section_class %>">
+            <% if show_categories %>
+              <select class="<%= select_class %>" 
+                      data-plugin-marketplace-target="categoryFilter"
+                      data-action="change->plugin-marketplace#handleCategoryFilter">
+                <option value="">All Categories</option>
+                <% sample_categories.each do |category| %>
+                  <option value="<%= category %>"><%= category %></option>
+                <% end %>
+              </select>
+            <% end %>
+            
+            <select class="<%= select_class %>" 
+                    data-plugin-marketplace-target="sortFilter"
+                    data-action="change->plugin-marketplace#handleSortFilter">
+              <option value="name">Sort by Name</option>
+              <option value="author">Sort by Author</option>
+              <option value="category">Sort by Category</option>
+              <option value="rating">Sort by Rating</option>
+              <option value="downloads">Sort by Downloads</option>
+              <option value="updated">Sort by Updated</option>
+            </select>
+          </div>
+        <% end %>
+        
+        <!-- Refresh Button -->
+        <button type="button" 
+                class="<%= action_button_class('secondary') %>"
+                data-action="click->plugin-marketplace#refresh"
+                data-plugin-marketplace-target="refreshButton"
+                title="Refresh plugins">
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+          Refresh
+        </button>
+      </div>
+    <% end %>
+    
+    <!-- Body -->
+    <div class="<%= body_class %>">
+      
+      <!-- Marketplace View -->
+      <div class="<%= view_class %>" 
+           data-plugin-marketplace-target="view"
+           data-view="marketplace"
+           style="<%= 'display: none;' unless default_view == 'marketplace' %>">
+        
+        <% if show_featured %>
+          <!-- Featured Section -->
+          <div class="<%= featured_section_class %>">
+            <h3 class="<%= section_title_class %>">
+              <svg class="w-6 h-6 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+              </svg>
+              <span>Featured Plugins</span>
+            </h3>
+            
+            <div class="<%= featured_grid_class %>" data-plugin-marketplace-target="featuredGrid">
+              <% sample_featured_plugins.each do |plugin| %>
+                <div class="<%= plugin_card_class(plugin[:featured]) %>" 
+                     data-plugin-id="<%= plugin[:id] %>"
+                     data-action="click->plugin-marketplace#selectPlugin">
+                  
+                  <div class="<%= card_header_class %>">
+                    <div class="flex items-center">
+                      <div class="<%= plugin_icon_class %>">
+                        <%= plugin[:icon] %>
+                      </div>
+                      <div class="<%= plugin_info_class %>">
+                        <h4 class="<%= plugin_name_class %>">
+                          <%= plugin[:name] %>
+                        </h4>
+                        <div class="<%= plugin_meta_class %>">
+                          <span>by <%= plugin[:author] %></span>
+                          <span>•</span>
+                          <span>v<%= plugin[:version] %></span>
+                          <% if plugin[:featured] %>
+                            <span class="<%= tag_class('featured') %>">Featured</span>
+                          <% end %>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="<%= card_body_class %>">
+                    <p class="<%= plugin_description_class %>">
+                      <%= plugin[:description] %>
+                    </p>
+                    
+                    <div class="<%= plugin_tags_class %>">
+                      <span class="<%= tag_class('category') %>">
+                        <%= plugin[:category] %>
+                      </span>
+                      <% plugin[:keywords]&.each do |keyword| %>
+                        <span class="<%= tag_class %>">
+                          <%= keyword %>
+                        </span>
+                      <% end %>
+                    </div>
+                    
+                    <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                      <div class="flex items-center space-x-1">
+                        <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                        <span><%= plugin[:rating] %></span>
+                      </div>
+                      <span><%= plugin[:downloads] %> downloads</span>
+                    </div>
+                  </div>
+                  
+                  <div class="<%= card_footer_class %>">
+                    <div class="<%= status_badge_class(plugin[:status]) %>">
+                      <%= get_status_text(plugin[:status]) %>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                      <% get_action_buttons(plugin).each do |button| %>
+                        <button type="button" 
+                                class="<%= action_button_class(button[:variant]) %>"
+                                data-action="click->plugin-marketplace#<%= button[:action].gsub('-', '_') %>"
+                                data-plugin-id="<%= plugin[:id] %>">
+                          <%= button[:text] %>
+                        </button>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+        
+        <!-- All Plugins Section -->
+        <div class="p-6">
+          <h3 class="<%= section_title_class %>">
+            <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+            </svg>
+            <span>All Plugins</span>
+          </h3>
+          
+          <div class="<%= plugin_grid_class %>" data-plugin-marketplace-target="mainGrid">
+            <!-- Plugins will be dynamically loaded here -->
+          </div>
+        </div>
+      </div>
+      
+      <!-- Installed View -->
+      <div class="<%= view_class %>" 
+           data-plugin-marketplace-target="view"
+           data-view="installed"
+           style="<%= 'display: none;' unless default_view == 'installed' %>">
+        
+        <div class="p-6">
+          <h3 class="<%= section_title_class %>">
+            <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span>Installed Plugins</span>
+          </h3>
+          
+          <div class="space-y-4" data-plugin-marketplace-target="installedList">
+            <!-- Installed plugins will be loaded here -->
+          </div>
+          
+          <!-- Empty state for installed plugins -->
+          <div class="<%= empty_state_class %>" 
+               data-plugin-marketplace-target="installedEmptyState"
+               style="display: none;">
+            <div class="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-full h-full">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+              </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+              No plugins installed
+            </h3>
+            <p class="text-gray-500 dark:text-gray-400 mb-6">
+              Browse the marketplace to find and install plugins for your workspace.
+            </p>
+            <button type="button" 
+                    class="<%= action_button_class('primary') %>"
+                    data-action="click->plugin-marketplace#switchView"
+                    data-view="marketplace">
+              Browse Marketplace
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Widgets View -->
+      <div class="<%= view_class %>" 
+           data-plugin-marketplace-target="view"
+           data-view="widgets"
+           style="<%= 'display: none;' unless default_view == 'widgets' %>">
+        
+        <div class="p-6">
+          <h3 class="<%= section_title_class %>">
+            <svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+            </svg>
+            <span>Active Widgets</span>
+          </h3>
+          
+          <div class="space-y-4" data-plugin-marketplace-target="widgetsList">
+            <!-- Active widgets will be loaded here -->
+          </div>
+          
+          <!-- Empty state for widgets -->
+          <div class="<%= empty_state_class %>" 
+               data-plugin-marketplace-target="widgetsEmptyState"
+               style="display: none;">
+            <div class="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-full h-full">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+              </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+              No active widgets
+            </h3>
+            <p class="text-gray-500 dark:text-gray-400 mb-6">
+              Create widgets from installed plugins or start with built-in widget types.
+            </p>
+            <div class="flex space-x-3">
+              <button type="button" 
+                      class="<%= action_button_class('primary') %>"
+                      data-action="click->plugin-marketplace#createWidget">
+                Create Widget
+              </button>
+              <button type="button" 
+                      class="<%= action_button_class('secondary') %>"
+                      data-action="click->plugin-marketplace#switchView"
+                      data-view="marketplace">
+                Browse Plugins
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Loading State -->
+      <div class="<%= loading_state_class %>" 
+           data-plugin-marketplace-target="loadingState"
+           style="display: none;">
+        <div class="<%= spinner_class %>"></div>
+        <span class="ml-3 text-gray-600 dark:text-gray-400">Loading plugins...</span>
+      </div>
+      
+      <!-- Error State -->
+      <div class="<%= empty_state_class %>" 
+           data-plugin-marketplace-target="errorState"
+           style="display: none;">
+        <div class="w-16 h-16 mx-auto text-red-300 dark:text-red-600 mb-4">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-full h-full">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.314 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+          </svg>
+        </div>
+        <h3 class="text-lg font-medium text-red-900 dark:text-red-100 mb-2">
+          Failed to load plugins
+        </h3>
+        <p class="text-red-600 dark:text-red-400 mb-6" data-plugin-marketplace-target="errorMessage">
+          Unable to connect to the plugin marketplace.
+        </p>
+        <button type="button" 
+                class="<%= action_button_class('primary') %>"
+                data-action="click->plugin-marketplace#retry">
+          Try Again
+        </button>
+      </div>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="<%= pagination_class %>" 
+         data-plugin-marketplace-target="pagination"
+         style="display: none;">
+      <div class="flex items-center text-sm text-gray-700 dark:text-gray-300">
+        <span>Showing</span>
+        <span class="mx-1 font-medium" data-plugin-marketplace-target="paginationStart">1</span>
+        <span>to</span>
+        <span class="mx-1 font-medium" data-plugin-marketplace-target="paginationEnd">10</span>
+        <span>of</span>
+        <span class="mx-1 font-medium" data-plugin-marketplace-target="paginationTotal">100</span>
+        <span>plugins</span>
+      </div>
+      
+      <div class="flex items-center space-x-2">
+        <button type="button" 
+                class="<%= action_button_class('secondary') %>"
+                data-action="click->plugin-marketplace#previousPage"
+                data-plugin-marketplace-target="prevButton"
+                disabled>
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+          Previous
+        </button>
+        
+        <button type="button" 
+                class="<%= action_button_class('secondary') %>"
+                data-action="click->plugin-marketplace#nextPage"
+                data-plugin-marketplace-target="nextButton">
+          Next
+          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Status Bar -->
+    <div class="px-6 py-3 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between text-sm">
+      <div class="flex items-center space-x-4">
+        <span class="text-gray-600 dark:text-gray-400" data-plugin-marketplace-target="statusText">
+          Ready
+        </span>
+        <div class="w-1 h-1 bg-gray-400 rounded-full"></div>
+        <span class="text-gray-600 dark:text-gray-400">
+          Last updated: <span data-plugin-marketplace-target="lastUpdated">Never</span>
+        </span>
+      </div>
+      
+      <div class="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
+        <span>Marketplace v2.0</span>
+        <div class="w-1 h-1 bg-gray-400 rounded-full"></div>
+        <button type="button" 
+                class="hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200"
+                data-action="click->plugin-marketplace#showHelp">
+          Help
+        </button>
+      </div>
+    </div>
+  </div>
+  
+<% end %>

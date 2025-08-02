@@ -160,7 +160,7 @@ export default class extends Controller {
     )
     
     if (avatar) {
-      const indicator = avatar.querySelector('[data-presence-indicator-target=\"typingIndicator\"]')
+      const indicator = avatar.querySelector("[data-presence-indicator-target=\"typingIndicator\"]")
       if (indicator) {
         indicator.style.display = "block"
       }
@@ -186,7 +186,7 @@ export default class extends Controller {
     )
     
     if (avatar) {
-      const indicator = avatar.querySelector('[data-presence-indicator-target=\"typingIndicator\"]')
+      const indicator = avatar.querySelector("[data-presence-indicator-target=\"typingIndicator\"]")
       if (indicator) {
         indicator.style.display = "none"
       }
@@ -222,7 +222,7 @@ export default class extends Controller {
     const cursor = template.content.cloneNode(true).firstElementChild
     
     cursor.dataset.cursorUserId = userId
-    cursor.querySelector('.cursor-user-name').textContent = userName
+    cursor.querySelector(".cursor-user-name").textContent = userName
     
     return cursor
   }

@@ -36,6 +36,28 @@ Rails.application.routes.draw do
   end
   get "welcome/index"
 
+  # Plugin extension routes
+  resources :extensions, only: [ :index, :show ] do
+    member do
+      post :install
+      delete :uninstall
+      patch :enable
+      patch :disable
+      patch :configure
+      get :status
+      get :health
+      post :execute
+      get :documentation
+      patch :update
+    end
+
+    collection do
+      get :installed
+      get :marketplace
+      post :bulk_install
+    end
+  end
+
   # Document management routes
   resources :documents do
     member do

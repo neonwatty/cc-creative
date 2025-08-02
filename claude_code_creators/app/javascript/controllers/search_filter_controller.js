@@ -64,14 +64,14 @@ export default class extends Controller {
   
   // Submit the form via Turbo
   submitForm() {
-    if (!this.element.closest('form')) return
+    if (!this.element.closest("form")) return
     
-    const form = this.element.closest('form')
+    const form = this.element.closest("form")
     
     // Preserve scroll position
     if (this.preserveScroll) {
-      const scrollTop = document.querySelector('[data-context-sidebar]')?.scrollTop || 0
-      sessionStorage.setItem('contextSidebarScrollPosition', scrollTop)
+      const scrollTop = document.querySelector("[data-context-sidebar]")?.scrollTop || 0
+      sessionStorage.setItem("contextSidebarScrollPosition", scrollTop)
     }
     
     // Submit form using Turbo
@@ -121,15 +121,15 @@ export default class extends Controller {
     const filterType = event.currentTarget.dataset.filterType
     
     switch(filterType) {
-      case 'query':
-        if (this.hasSearchInputTarget) this.searchInputTarget.value = ""
-        break
-      case 'type':
-        if (this.hasTypeFilterTarget) this.typeFilterTarget.value = ""
-        break
-      case 'date':
-        if (this.hasDateFilterTarget) this.dateFilterTarget.value = ""
-        break
+    case "query":
+      if (this.hasSearchInputTarget) this.searchInputTarget.value = ""
+      break
+    case "type":
+      if (this.hasTypeFilterTarget) this.typeFilterTarget.value = ""
+      break
+    case "date":
+      if (this.hasDateFilterTarget) this.dateFilterTarget.value = ""
+      break
     }
     
     this.setLoadingState(true)
@@ -149,26 +149,26 @@ export default class extends Controller {
     })
     
     // Update browser URL without navigation
-    window.history.replaceState({}, '', url)
+    window.history.replaceState({}, "", url)
   }
   
   // Set loading state on form elements
   setLoadingState(loading) {
-    const form = this.element.closest('form')
+    const form = this.element.closest("form")
     if (!form) return
     
     // Add/remove loading classes
     if (loading) {
-      form.classList.add('opacity-60', 'pointer-events-none')
+      form.classList.add("opacity-60", "pointer-events-none")
       
       // Add loading spinner to search input
       if (this.hasSearchInputTarget) {
-        this.searchInputTarget.classList.add('pr-8')
+        this.searchInputTarget.classList.add("pr-8")
         
         // Create spinner if it doesn't exist
         if (!this.spinner) {
-          this.spinner = document.createElement('div')
-          this.spinner.className = 'absolute right-2 top-2.5'
+          this.spinner = document.createElement("div")
+          this.spinner.className = "absolute right-2 top-2.5"
           this.spinner.innerHTML = `
             <svg class="animate-spin h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -178,23 +178,23 @@ export default class extends Controller {
           this.searchInputTarget.parentElement.appendChild(this.spinner)
         }
         
-        this.spinner.style.display = 'block'
+        this.spinner.style.display = "block"
       }
     } else {
-      form.classList.remove('opacity-60', 'pointer-events-none')
+      form.classList.remove("opacity-60", "pointer-events-none")
       
       if (this.spinner) {
-        this.spinner.style.display = 'none'
+        this.spinner.style.display = "none"
       }
       
       // Restore scroll position
-      const scrollPosition = sessionStorage.getItem('contextSidebarScrollPosition')
+      const scrollPosition = sessionStorage.getItem("contextSidebarScrollPosition")
       if (scrollPosition && this.preserveScroll) {
-        const sidebar = document.querySelector('[data-context-sidebar]')
+        const sidebar = document.querySelector("[data-context-sidebar]")
         if (sidebar) {
           sidebar.scrollTop = parseInt(scrollPosition)
         }
-        sessionStorage.removeItem('contextSidebarScrollPosition')
+        sessionStorage.removeItem("contextSidebarScrollPosition")
       }
     }
   }
@@ -207,9 +207,9 @@ export default class extends Controller {
       (this.hasDateFilterTarget && this.dateFilterTarget.value)
     
     // Show/hide clear all button
-    const clearAllButton = this.element.querySelector('[data-action*="clearAllFilters"]')
+    const clearAllButton = this.element.querySelector("[data-action*=\"clearAllFilters\"]")
     if (clearAllButton) {
-      clearAllButton.style.display = hasActiveFilters ? 'inline-flex' : 'none'
+      clearAllButton.style.display = hasActiveFilters ? "inline-flex" : "none"
     }
   }
   
@@ -217,7 +217,7 @@ export default class extends Controller {
   setupKeyboardShortcuts() {
     this.keyboardHandler = (event) => {
       // Cmd/Ctrl + K to focus search
-      if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+      if ((event.metaKey || event.ctrlKey) && event.key === "k") {
         event.preventDefault()
         if (this.hasSearchInputTarget) {
           this.searchInputTarget.focus()
@@ -226,19 +226,19 @@ export default class extends Controller {
       }
       
       // Escape to clear search when focused
-      if (event.key === 'Escape' && document.activeElement === this.searchInputTarget) {
+      if (event.key === "Escape" && document.activeElement === this.searchInputTarget) {
         event.preventDefault()
         this.clearSearch()
         this.searchInputTarget.blur()
       }
     }
     
-    document.addEventListener('keydown', this.keyboardHandler)
+    document.addEventListener("keydown", this.keyboardHandler)
   }
   
   removeKeyboardShortcuts() {
     if (this.keyboardHandler) {
-      document.removeEventListener('keydown', this.keyboardHandler)
+      document.removeEventListener("keydown", this.keyboardHandler)
     }
   }
   
@@ -256,12 +256,12 @@ export default class extends Controller {
   
   // Announce search results for accessibility
   announceResults() {
-    const resultsCount = this.element.querySelector('[data-results-count]')
+    const resultsCount = this.element.querySelector("[data-results-count]")
     if (resultsCount) {
-      const announcement = document.createElement('div')
-      announcement.setAttribute('role', 'status')
-      announcement.setAttribute('aria-live', 'polite')
-      announcement.className = 'sr-only'
+      const announcement = document.createElement("div")
+      announcement.setAttribute("role", "status")
+      announcement.setAttribute("aria-live", "polite")
+      announcement.className = "sr-only"
       announcement.textContent = resultsCount.textContent
       
       document.body.appendChild(announcement)

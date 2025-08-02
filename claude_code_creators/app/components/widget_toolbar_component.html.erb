@@ -1,0 +1,298 @@
+<%= content_tag :div, class: toolbar_class, data: toolbar_data_attributes.merge("widget-toolbar-target": "toolbar") do %>
+  
+  <!-- Toolbar Content -->
+  <div class="toolbar-content flex items-center transition-all duration-300" 
+       data-widget-toolbar-target="content">
+    
+    <% action_groups.each_with_index do |group, group_index| %>
+      <% next if group[:actions].empty? %>
+      
+      <!-- Action Group -->
+      <div class="<%= toolbar_section_class %>" data-group="<%= group[:name].downcase %>">
+        
+        <% group[:actions].each_with_index do |action, index| %>
+          <% if action[:dropdown] %>
+            <!-- Dropdown Button -->
+            <div class="relative" data-widget-toolbar-target="dropdown">
+              <button type="button" 
+                      class="<%= button_class(action[:variant], false) %>"
+                      data-action="<%= action[:action] %>"
+                      data-widget-toolbar-target="dropdownButton"
+                      data-dropdown-id="<%= action[:id] %>"
+                      <%= "data-shortcut=\"#{action[:shortcut]}\"" if action[:shortcut] && show_shortcuts %>
+                      aria-haspopup="true"
+                      aria-expanded="false">
+                
+                <!-- Icon -->
+                <svg class="<%= show_labels ? 'w-4 h-4' : 'w-5 h-5' %>" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <%= get_icon_svg(action[:icon]).html_safe %>
+                </svg>
+                
+                <!-- Label -->
+                <% if show_labels %>
+                  <span class="hidden sm:inline"><%= action[:label] %></span>
+                <% end %>
+                
+                <!-- Dropdown Arrow -->
+                <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <%= get_icon_svg("chevron-down").html_safe %>
+                </svg>
+                
+                <!-- Tooltip -->
+                <% unless show_labels %>
+                  <div class="<%= tooltip_class %> <%= tooltip_position_class %>">
+                    <%= action[:tooltip] %>
+                    <% if action[:shortcut] && show_shortcuts %>
+                      <span class="ml-2 text-gray-400"><%= action[:shortcut] %></span>
+                    <% end %>
+                  </div>
+                <% end %>
+              </button>
+              
+              <!-- Dropdown Menu -->
+              <div class="<%= dropdown_class %>" 
+                   data-widget-toolbar-target="dropdownMenu"
+                   data-dropdown-id="<%= action[:id] %>">
+                <% action[:dropdown].each do |item| %>
+                  <div class="<%= dropdown_item_class %>"
+                       data-action="<%= item[:action] %>"
+                       <%= item[:data]&.map { |k, v| "data-#{k.to_s.gsub('_', '-')}=\"#{v}\"" }&.join(' ')&.html_safe %>>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <%= get_icon_svg(item[:icon]).html_safe %>
+                    </svg>
+                    <span><%= item[:label] %></span>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+            
+          <% else %>
+            <!-- Regular Button -->
+            <button type="button" 
+                    class="<%= button_class(action[:variant], false) %>"
+                    data-action="<%= action[:action] %>"
+                    data-widget-toolbar-target="actionButton"
+                    data-action-id="<%= action[:id] %>"
+                    <%= "data-shortcut=\"#{action[:shortcut]}\"" if action[:shortcut] && show_shortcuts %>
+                    <%= "disabled" if action[:disabled_when_empty] %>
+                    title="<%= action[:tooltip] %>">
+              
+              <!-- Icon -->
+              <svg class="<%= show_labels ? 'w-4 h-4' : 'w-5 h-5' %>" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <%= get_icon_svg(action[:icon]).html_safe %>
+              </svg>
+              
+              <!-- Label -->
+              <% if show_labels %>
+                <span class="hidden sm:inline"><%= action[:label] %></span>
+              <% end %>
+              
+              <!-- Badge (for notifications) -->
+              <% if action[:id] == "marketplace" %>
+                <span class="<%= badge_class %>" 
+                      data-widget-toolbar-target="marketplaceBadge"
+                      style="display: none;">
+                  <span data-widget-toolbar-target="updateCount">0</span>
+                </span>
+              <% end %>
+              
+              <!-- Tooltip -->
+              <% unless show_labels %>
+                <div class="<%= tooltip_class %> <%= tooltip_position_class %>">
+                  <%= action[:tooltip] %>
+                  <% if action[:shortcut] && show_shortcuts %>
+                    <span class="ml-2 text-gray-400"><%= action[:shortcut] %></span>
+                  <% end %>
+                </div>
+              <% end %>
+            </button>
+          <% end %>
+        <% end %>
+        
+        <!-- Group Separator -->
+        <% unless group_index == action_groups.length - 1 %>
+          <% if enable_grouping %>
+            <div class="<%= separator_class %>"></div>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+    
+    <!-- Status Indicator -->
+    <div class="flex items-center space-x-2 ml-4">
+      <div class="flex items-center space-x-1">
+        <div class="w-2 h-2 rounded-full transition-colors duration-200" 
+             data-widget-toolbar-target="statusIndicator"></div>
+        <span class="text-xs text-gray-500 dark:text-gray-400 hidden lg:inline" 
+              data-widget-toolbar-target="statusText">Ready</span>
+      </div>
+      
+      <!-- Widget Count -->
+      <div class="text-xs text-gray-500 dark:text-gray-400 hidden xl:flex items-center space-x-1">
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <%= get_icon_svg("grid").html_safe %>
+        </svg>
+        <span data-widget-toolbar-target="widgetCount">0</span>
+      </div>
+      
+      <!-- Layout Mode -->
+      <div class="text-xs text-gray-500 dark:text-gray-400 hidden xl:flex items-center space-x-1">
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" 
+             data-widget-toolbar-target="layoutIcon">
+          <%= get_icon_svg("grid").html_safe %>
+        </svg>
+        <span data-widget-toolbar-target="layoutMode">Grid</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Collapse Toggle -->
+  <% if collapsible %>
+    <button type="button" 
+            class="<%= collapse_button_class %>"
+            data-action="click->widget-toolbar#toggleCollapse"
+            data-widget-toolbar-target="collapseButton"
+            title="<%= position == 'left' || position == 'right' ? 'Collapse toolbar' : 'Collapse toolbar' %>">
+      <svg class="w-4 h-4 transition-transform duration-200" 
+           fill="none" stroke="currentColor" viewBox="0 0 24 24"
+           data-widget-toolbar-target="collapseIcon">
+        <% if position == "left" || position == "right" %>
+          <%= get_icon_svg("chevron-up").html_safe %>
+        <% else %>
+          <%= get_icon_svg("chevron-up").html_safe %>
+        <% end %>
+      </svg>
+    </button>
+  <% end %>
+  
+  <!-- Floating Position Handle -->
+  <% if position == "floating" %>
+    <div class="drag-handle absolute -top-1 -right-1 w-3 h-3 cursor-move" 
+         data-widget-toolbar-target="dragHandle"
+         data-action="mousedown->widget-toolbar#startDrag">
+      <div class="w-full h-full bg-gray-400 dark:bg-gray-500 rounded-full opacity-50 hover:opacity-75 transition-opacity duration-200"></div>
+    </div>
+  <% end %>
+  
+  <!-- Quick Actions Overlay (shown on hover for auto-hide mode) -->
+  <% if auto_hide %>
+    <div class="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full opacity-0 transition-opacity duration-300 pointer-events-none" 
+         data-widget-toolbar-target="hoverOverlay"></div>
+  <% end %>
+  
+  <!-- Keyboard Shortcut Overlay -->
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center opacity-0 invisible transition-all duration-300 z-50" 
+       data-widget-toolbar-target="shortcutOverlay">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-md mx-4">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          Keyboard Shortcuts
+        </h3>
+        <button type="button" 
+                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                data-action="click->widget-toolbar#hideShortcuts">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      
+      <div class="space-y-3 text-sm">
+        <% action_groups.each do |group| %>
+          <% group[:actions].each do |action| %>
+            <% if action[:shortcut] %>
+              <div class="flex justify-between items-center">
+                <span class="text-gray-600 dark:text-gray-400"><%= action[:label] %></span>
+                <kbd class="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded text-xs font-mono">
+                  <%= action[:shortcut] %>
+                </kbd>
+              </div>
+            <% end %>
+          <% end %>
+        <% end %>
+        
+        <div class="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
+          <div class="flex justify-between items-center">
+            <span class="text-gray-600 dark:text-gray-400">Show Shortcuts</span>
+            <kbd class="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded text-xs font-mono">
+              ?
+            </kbd>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Loading Overlay -->
+  <div class="absolute inset-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 invisible transition-all duration-300" 
+       data-widget-toolbar-target="loadingOverlay">
+    <div class="flex items-center space-x-2">
+      <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+      <span class="text-sm text-gray-600 dark:text-gray-400" data-widget-toolbar-target="loadingText">
+        Loading...
+      </span>
+    </div>
+  </div>
+  
+  <!-- Context Menu (right-click menu) -->
+  <div class="fixed bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl py-2 z-50 opacity-0 invisible transition-all duration-200" 
+       data-widget-toolbar-target="contextMenu"
+       style="min-width: 200px;">
+    
+    <div class="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide border-b border-gray-200 dark:border-gray-700">
+      Toolbar Options
+    </div>
+    
+    <div class="py-1">
+      <button type="button" 
+              class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-3"
+              data-action="click->widget-toolbar#toggleLabels">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+        </svg>
+        <span data-widget-toolbar-target="labelsToggleText">
+          <%= show_labels ? "Hide Labels" : "Show Labels" %>
+        </span>
+      </button>
+      
+      <button type="button" 
+              class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-3"
+              data-action="click->widget-toolbar#toggleShortcuts">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+        <span data-widget-toolbar-target="shortcutsToggleText">
+          <%= show_shortcuts ? "Hide Shortcuts" : "Show Shortcuts" %>
+        </span>
+      </button>
+      
+      <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+      
+      <div class="px-4 py-2">
+        <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Position</label>
+        <div class="mt-2 space-y-1">
+          <% %w[top bottom left right floating].each do |pos| %>
+            <button type="button" 
+                    class="w-full text-left px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded <%= 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400' if pos == position %>"
+                    data-action="click->widget-toolbar#changePosition"
+                    data-position="<%= pos %>">
+              <%= pos.capitalize %>
+            </button>
+          <% end %>
+        </div>
+      </div>
+      
+      <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+      
+      <button type="button" 
+              class="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center space-x-3"
+              data-action="click->widget-toolbar#resetToDefaults">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <%= get_icon_svg("refresh").html_safe %>
+        </svg>
+        <span>Reset to Defaults</span>
+      </button>
+    </div>
+  </div>
+  
+<% end %>

@@ -8,7 +8,7 @@ export default class extends Controller {
   }
   
   connect() {
-    console.log('SubAgentSidebarController connected')
+    console.log("SubAgentSidebarController connected")
     this.setupKeyboardShortcuts()
     this.loadSubAgents()
   }
@@ -23,7 +23,7 @@ export default class extends Controller {
     event?.stopPropagation()
     
     if (this.hasDropdownTarget) {
-      const isHidden = this.dropdownTarget.classList.contains('hidden')
+      const isHidden = this.dropdownTarget.classList.contains("hidden")
       
       if (isHidden) {
         this.showDropdown()
@@ -34,19 +34,19 @@ export default class extends Controller {
   }
   
   showDropdown() {
-    this.dropdownTarget.classList.remove('hidden')
-    this.dropdownTarget.classList.add('animate-fade-in')
+    this.dropdownTarget.classList.remove("hidden")
+    this.dropdownTarget.classList.add("animate-fade-in")
     
     // Close dropdown when clicking outside
     setTimeout(() => {
-      document.addEventListener('click', this.outsideClickHandler)
+      document.addEventListener("click", this.outsideClickHandler)
     }, 0)
   }
   
   hideDropdown() {
-    this.dropdownTarget.classList.add('hidden')
-    this.dropdownTarget.classList.remove('animate-fade-in')
-    document.removeEventListener('click', this.outsideClickHandler)
+    this.dropdownTarget.classList.add("hidden")
+    this.dropdownTarget.classList.remove("animate-fade-in")
+    document.removeEventListener("click", this.outsideClickHandler)
   }
   
   outsideClickHandler = (event) => {
@@ -86,7 +86,7 @@ export default class extends Controller {
   // Create new sub-agent
   async createSubAgent() {
     if (!this.hasAgentTypeTarget || !this.agentTypeTarget.value) {
-      console.error('No agent type selected')
+      console.error("No agent type selected")
       return
     }
     
@@ -95,11 +95,11 @@ export default class extends Controller {
     
     try {
       const response = await fetch(this.createUrlValue, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': document.querySelector('[name="csrf-token"]')?.content,
-          'Accept': 'application/json'
+          "Content-Type": "application/json",
+          "X-CSRF-Token": document.querySelector("[name=\"csrf-token\"]")?.content,
+          "Accept": "application/json"
         },
         body: JSON.stringify({
           sub_agent: {
@@ -121,11 +121,11 @@ export default class extends Controller {
       this.resetForm()
       
       // Show success notification
-      this.showNotification('Sub-agent created successfully!', 'success')
+      this.showNotification("Sub-agent created successfully!", "success")
       
     } catch (error) {
-      console.error('Failed to create sub-agent:', error)
-      this.showNotification('Failed to create sub-agent. Please try again.', 'error')
+      console.error("Failed to create sub-agent:", error)
+      this.showNotification("Failed to create sub-agent. Please try again.", "error")
     } finally {
       this.setLoadingState(false)
     }
@@ -159,24 +159,24 @@ export default class extends Controller {
     `
     
     // Add to top of list with animation
-    const newElement = document.createElement('div')
+    const newElement = document.createElement("div")
     newElement.innerHTML = agentHtml
     const agentElement = newElement.firstElementChild
     
-    agentElement.style.opacity = '0'
-    agentElement.style.transform = 'translateY(-10px)'
+    agentElement.style.opacity = "0"
+    agentElement.style.transform = "translateY(-10px)"
     
     this.agentsListTarget.prepend(agentElement)
     
     // Animate in
     requestAnimationFrame(() => {
-      agentElement.style.transition = 'all 0.3s ease-out'
-      agentElement.style.opacity = '1'
-      agentElement.style.transform = 'translateY(0)'
+      agentElement.style.transition = "all 0.3s ease-out"
+      agentElement.style.opacity = "1"
+      agentElement.style.transform = "translateY(0)"
     })
     
     // Remove empty state if exists
-    const emptyState = this.agentsListTarget.querySelector('.empty-state')
+    const emptyState = this.agentsListTarget.querySelector(".empty-state")
     if (emptyState) {
       emptyState.remove()
     }
@@ -189,16 +189,16 @@ export default class extends Controller {
     const subAgentId = event.currentTarget.dataset.subAgentId
     const agentElement = this.element.querySelector(`[data-sub-agent-id="${subAgentId}"]`)
     
-    if (!confirm('Are you sure you want to delete this sub-agent?')) {
+    if (!confirm("Are you sure you want to delete this sub-agent?")) {
       return
     }
     
     try {
       const response = await fetch(`/documents/${this.documentIdValue}/sub_agents/${subAgentId}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'X-CSRF-Token': document.querySelector('[name="csrf-token"]')?.content,
-          'Accept': 'application/json'
+          "X-CSRF-Token": document.querySelector("[name=\"csrf-token\"]")?.content,
+          "Accept": "application/json"
         }
       })
       
@@ -208,9 +208,9 @@ export default class extends Controller {
       
       // Animate out and remove
       if (agentElement) {
-        agentElement.style.transition = 'all 0.3s ease-out'
-        agentElement.style.opacity = '0'
-        agentElement.style.transform = 'translateX(-20px)'
+        agentElement.style.transition = "all 0.3s ease-out"
+        agentElement.style.opacity = "0"
+        agentElement.style.transform = "translateX(-20px)"
         
         setTimeout(() => {
           agentElement.remove()
@@ -222,11 +222,11 @@ export default class extends Controller {
         }, 300)
       }
       
-      this.showNotification('Sub-agent deleted successfully', 'success')
+      this.showNotification("Sub-agent deleted successfully", "success")
       
     } catch (error) {
-      console.error('Failed to delete sub-agent:', error)
-      this.showNotification('Failed to delete sub-agent', 'error')
+      console.error("Failed to delete sub-agent:", error)
+      this.showNotification("Failed to delete sub-agent", "error")
     }
   }
   
@@ -237,7 +237,7 @@ export default class extends Controller {
     try {
       const response = await fetch(`/documents/${this.documentIdValue}/sub_agents`, {
         headers: {
-          'Accept': 'application/json'
+          "Accept": "application/json"
         }
       })
       
@@ -254,7 +254,7 @@ export default class extends Controller {
       }
       
     } catch (error) {
-      console.error('Failed to load sub-agents:', error)
+      console.error("Failed to load sub-agents:", error)
       this.showEmptyState()
     }
   }
@@ -283,7 +283,7 @@ export default class extends Controller {
           </button>
         </div>
       </div>
-    `).join('')
+    `).join("")
   }
   
   showEmptyState() {
@@ -305,18 +305,18 @@ export default class extends Controller {
   // Helper methods
   formatAgentType(type) {
     const typeMap = {
-      'research': 'Research',
-      'writing': 'Writing', 
-      'analysis': 'Analysis',
-      'coding': 'Coding',
-      'review': 'Review'
+      "research": "Research",
+      "writing": "Writing", 
+      "analysis": "Analysis",
+      "coding": "Coding",
+      "review": "Review"
     }
     return typeMap[type] || type
   }
   
   resetForm() {
     if (this.hasAgentTypeTarget) {
-      this.agentTypeTarget.value = ''
+      this.agentTypeTarget.value = ""
     }
     
     if (this.hasNewAgentButtonTarget) {
@@ -334,37 +334,37 @@ export default class extends Controller {
       this.newAgentButtonTarget.disabled = loading
       
       if (loading) {
-        this.newAgentButtonTarget.classList.add('opacity-60', 'cursor-not-allowed')
+        this.newAgentButtonTarget.classList.add("opacity-60", "cursor-not-allowed")
       } else {
-        this.newAgentButtonTarget.classList.remove('opacity-60', 'cursor-not-allowed')
+        this.newAgentButtonTarget.classList.remove("opacity-60", "cursor-not-allowed")
       }
     }
     
     if (this.hasLoadingSpinnerTarget) {
-      this.loadingSpinnerTarget.style.display = loading ? 'block' : 'none'
+      this.loadingSpinnerTarget.style.display = loading ? "block" : "none"
     }
   }
   
-  showNotification(message, type = 'info') {
-    const notification = document.createElement('div')
+  showNotification(message, type = "info") {
+    const notification = document.createElement("div")
     notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg text-white font-medium shadow-lg transition-all duration-300 ${
-      type === 'success' ? 'bg-green-500' : 
-      type === 'error' ? 'bg-red-500' : 
-      'bg-blue-500'
+      type === "success" ? "bg-green-500" : 
+        type === "error" ? "bg-red-500" : 
+          "bg-blue-500"
     }`
-    notification.style.transform = 'translateX(400px)'
+    notification.style.transform = "translateX(400px)"
     notification.textContent = message
     
     document.body.appendChild(notification)
     
     // Animate in
     requestAnimationFrame(() => {
-      notification.style.transform = 'translateX(0)'
+      notification.style.transform = "translateX(0)"
     })
     
     // Auto dismiss
     setTimeout(() => {
-      notification.style.transform = 'translateX(400px)'
+      notification.style.transform = "translateX(400px)"
       setTimeout(() => notification.remove(), 300)
     }, 3000)
   }
@@ -373,18 +373,18 @@ export default class extends Controller {
   setupKeyboardShortcuts() {
     this.keyboardHandler = (event) => {
       // Cmd/Ctrl + K for quick sub-agent access
-      if ((event.metaKey || event.ctrlKey) && event.key === 'k' && event.shiftKey) {
+      if ((event.metaKey || event.ctrlKey) && event.key === "k" && event.shiftKey) {
         event.preventDefault()
         this.toggleDropdown()
       }
     }
     
-    document.addEventListener('keydown', this.keyboardHandler)
+    document.addEventListener("keydown", this.keyboardHandler)
   }
   
   removeKeyboardShortcuts() {
     if (this.keyboardHandler) {
-      document.removeEventListener('keydown', this.keyboardHandler)
+      document.removeEventListener("keydown", this.keyboardHandler)
     }
   }
 }

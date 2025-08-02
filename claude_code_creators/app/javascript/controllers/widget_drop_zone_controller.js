@@ -20,13 +20,13 @@ export default class extends Controller {
     this.originalClasses = this.dropZoneTarget.className
     
     // Add global drag listeners to track drag state
-    document.addEventListener('dragstart', this.handleGlobalDragStart.bind(this))
-    document.addEventListener('dragend', this.handleGlobalDragEnd.bind(this))
+    document.addEventListener("dragstart", this.handleGlobalDragStart.bind(this))
+    document.addEventListener("dragend", this.handleGlobalDragEnd.bind(this))
   }
 
   disconnect() {
-    document.removeEventListener('dragstart', this.handleGlobalDragStart.bind(this))
-    document.removeEventListener('dragend', this.handleGlobalDragEnd.bind(this))
+    document.removeEventListener("dragstart", this.handleGlobalDragStart.bind(this))
+    document.removeEventListener("dragend", this.handleGlobalDragEnd.bind(this))
   }
 
   // Global drag start - prepare all drop zones
@@ -99,7 +99,7 @@ export default class extends Controller {
     let dragData = {}
     
     try {
-      const jsonData = dataTransfer.getData('application/json')
+      const jsonData = dataTransfer.getData("application/json")
       if (jsonData) {
         dragData = JSON.parse(jsonData)
       }
@@ -110,9 +110,9 @@ export default class extends Controller {
     // Fallback to text data
     if (!dragData.type) {
       dragData = {
-        type: dataTransfer.getData('text/type') || 'unknown',
-        id: dataTransfer.getData('text/id'),
-        content: dataTransfer.getData('text/plain'),
+        type: dataTransfer.getData("text/type") || "unknown",
+        id: dataTransfer.getData("text/id"),
+        content: dataTransfer.getData("text/plain"),
         ...dragData
       }
     }
@@ -123,57 +123,57 @@ export default class extends Controller {
   // Check if the dragged type is acceptable
   isAcceptableType(type) {
     if (!type) return false
-    return this.acceptedTypesValue.includes(type) || this.acceptedTypesValue.includes('*')
+    return this.acceptedTypesValue.includes(type) || this.acceptedTypesValue.includes("*")
   }
 
   // Show drop zone as available for dropping
   showAsAvailable() {
-    this.dropZoneTarget.classList.add('drop-zone-available')
+    this.dropZoneTarget.classList.add("drop-zone-available")
     
     if (this.hasPulseAnimationTarget) {
-      this.pulseAnimationTarget.style.display = 'block'
+      this.pulseAnimationTarget.style.display = "block"
     }
   }
 
   // Show drop zone as unavailable
   showAsUnavailable() {
-    this.dropZoneTarget.classList.add('drop-zone-unavailable')
-    this.dropZoneTarget.style.opacity = '0.5'
+    this.dropZoneTarget.classList.add("drop-zone-unavailable")
+    this.dropZoneTarget.style.opacity = "0.5"
   }
 
   // Show drop zone as active (being hovered)
   showAsActive() {
-    this.dropZoneTarget.className = this.originalClasses + ' ' + this.getActiveClasses()
+    this.dropZoneTarget.className = this.originalClasses + " " + this.getActiveClasses()
     
     if (this.hasOverlayTarget) {
-      this.overlayTarget.classList.remove('opacity-0', 'invisible')
-      this.overlayTarget.classList.add('opacity-100', 'visible')
+      this.overlayTarget.classList.remove("opacity-0", "invisible")
+      this.overlayTarget.classList.add("opacity-100", "visible")
     }
 
     if (this.hasInstructionsTarget) {
-      this.instructionsTarget.style.opacity = '0.3'
+      this.instructionsTarget.style.opacity = "0.3"
     }
   }
 
   // Hide overlay and return to default state
   hideOverlay() {
     if (this.hasOverlayTarget) {
-      this.overlayTarget.classList.add('opacity-0', 'invisible')
-      this.overlayTarget.classList.remove('opacity-100', 'visible')
+      this.overlayTarget.classList.add("opacity-0", "invisible")
+      this.overlayTarget.classList.remove("opacity-100", "visible")
     }
 
     if (this.hasInstructionsTarget) {
-      this.instructionsTarget.style.opacity = '1'
+      this.instructionsTarget.style.opacity = "1"
     }
   }
 
   // Reset to default state
   resetToDefault() {
     this.dropZoneTarget.className = this.originalClasses
-    this.dropZoneTarget.style.opacity = '1'
+    this.dropZoneTarget.style.opacity = "1"
     
     if (this.hasPulseAnimationTarget) {
-      this.pulseAnimationTarget.style.display = 'none'
+      this.pulseAnimationTarget.style.display = "none"
     }
     
     this.hideOverlay()
@@ -182,22 +182,22 @@ export default class extends Controller {
   // Get active state classes
   getActiveClasses() {
     return [
-      'border-creative-primary-500',
-      'dark:border-creative-primary-400',
-      'bg-creative-primary-100',
-      'dark:bg-creative-primary-800/30',
-      'shadow-creative-xl',
-      'dark:shadow-creative-dark-xl',
-      'scale-105'
-    ].join(' ')
+      "border-creative-primary-500",
+      "dark:border-creative-primary-400",
+      "bg-creative-primary-100",
+      "dark:bg-creative-primary-800/30",
+      "shadow-creative-xl",
+      "dark:shadow-creative-dark-xl",
+      "scale-105"
+    ].join(" ")
   }
 
   // Update drop message based on drag data
   updateDropMessage(dragData) {
     if (this.hasDropMessageTarget) {
-      const itemType = dragData.type ? dragData.type.replace('_', ' ') : 'item'
+      const itemType = dragData.type ? dragData.type.replace("_", " ") : "item"
       const message = this.allowMultipleValue 
-        ? `Drop your ${itemType}${dragData.count > 1 ? 's' : ''} here`
+        ? `Drop your ${itemType}${dragData.count > 1 ? "s" : ""} here`
         : `Drop your ${itemType} here`
       
       this.dropMessageTarget.textContent = message
@@ -211,7 +211,7 @@ export default class extends Controller {
       this.showProcessing()
       
       // Dispatch custom event for handling by parent controllers
-      const dropEvent = new CustomEvent('widget-drop-zone:dropped', {
+      const dropEvent = new CustomEvent("widget-drop-zone:dropped", {
         detail: {
           data: dragData,
           target: this.targetValue,
@@ -232,8 +232,8 @@ export default class extends Controller {
       this.showSuccess()
       
     } catch (error) {
-      console.error('Drop processing failed:', error)
-      this.showError(error.message || 'Failed to process dropped item')
+      console.error("Drop processing failed:", error)
+      this.showError(error.message || "Failed to process dropped item")
     }
   }
 
@@ -242,11 +242,11 @@ export default class extends Controller {
     // This would need to be customized based on your application logic
     // For now, we'll just make a simple POST request
     
-    const response = await fetch('/drop_zone_handler', {
-      method: 'POST',
+    const response = await fetch("/drop_zone_handler", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-Token': document.querySelector('[name=\"csrf-token\"]')?.content
+        "Content-Type": "application/json",
+        "X-CSRF-Token": document.querySelector("[name=\"csrf-token\"]")?.content
       },
       body: JSON.stringify({
         target: this.targetValue,
@@ -264,19 +264,19 @@ export default class extends Controller {
   // Show processing state
   showProcessing() {
     if (this.hasTitleTarget) {
-      this.titleTarget.textContent = 'Processing...'
+      this.titleTarget.textContent = "Processing..."
     }
     
     if (this.hasIconTarget) {
-      this.iconTarget.classList.add('animate-spin')
+      this.iconTarget.classList.add("animate-spin")
     }
   }
 
   // Show success feedback
-  showSuccess(message = 'Successfully dropped!') {
+  showSuccess(message = "Successfully dropped!") {
     if (this.hasSuccessFeedbackTarget) {
-      this.successFeedbackTarget.classList.remove('opacity-0', 'invisible')
-      this.successFeedbackTarget.classList.add('opacity-100', 'visible')
+      this.successFeedbackTarget.classList.remove("opacity-0", "invisible")
+      this.successFeedbackTarget.classList.add("opacity-100", "visible")
       
       setTimeout(() => {
         this.hideSuccess()
@@ -289,8 +289,8 @@ export default class extends Controller {
   // Hide success feedback
   hideSuccess() {
     if (this.hasSuccessFeedbackTarget) {
-      this.successFeedbackTarget.classList.add('opacity-0', 'invisible')
-      this.successFeedbackTarget.classList.remove('opacity-100', 'visible')
+      this.successFeedbackTarget.classList.add("opacity-0", "invisible")
+      this.successFeedbackTarget.classList.remove("opacity-100", "visible")
     }
   }
 
@@ -301,8 +301,8 @@ export default class extends Controller {
         this.errorMessageTarget.textContent = message
       }
       
-      this.errorFeedbackTarget.classList.remove('opacity-0', 'invisible')
-      this.errorFeedbackTarget.classList.add('opacity-100', 'visible')
+      this.errorFeedbackTarget.classList.remove("opacity-0", "invisible")
+      this.errorFeedbackTarget.classList.add("opacity-100", "visible")
       
       setTimeout(() => {
         this.hideError()
@@ -315,8 +315,8 @@ export default class extends Controller {
   // Hide error feedback
   hideError() {
     if (this.hasErrorFeedbackTarget) {
-      this.errorFeedbackTarget.classList.add('opacity-0', 'invisible')
-      this.errorFeedbackTarget.classList.remove('opacity-100', 'visible')
+      this.errorFeedbackTarget.classList.add("opacity-0", "invisible")
+      this.errorFeedbackTarget.classList.remove("opacity-100", "visible")
     }
   }
 }

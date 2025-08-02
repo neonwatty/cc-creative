@@ -13,7 +13,7 @@ export default class extends Controller {
   }
   
   connect() {
-    console.log('DragDropController connected')
+    console.log("DragDropController connected")
     this.touchStartPosition = null
     this.touchThreshold = 10 // pixels
     this.isDragging = false
@@ -34,9 +34,9 @@ export default class extends Controller {
     // Remove touch handlers
     if (this.enableTouchValue) {
       this.itemTargets.forEach(item => {
-        item.removeEventListener('touchstart', this.handleTouchStart.bind(this))
-        item.removeEventListener('touchmove', this.handleTouchMove.bind(this))
-        item.removeEventListener('touchend', this.handleTouchEnd.bind(this))
+        item.removeEventListener("touchstart", this.handleTouchStart.bind(this))
+        item.removeEventListener("touchmove", this.handleTouchMove.bind(this))
+        item.removeEventListener("touchend", this.handleTouchEnd.bind(this))
       })
     }
   }
@@ -46,16 +46,16 @@ export default class extends Controller {
     
     this.sortable = new Sortable(this.listTarget, {
       group: {
-        name: 'context-items',
-        pull: 'clone',
+        name: "context-items",
+        pull: "clone",
         put: false
       },
       sort: true,
       animation: this.animationDurationValue,
-      handle: '.drag-handle',
-      ghostClass: 'sortable-ghost',
-      chosenClass: 'sortable-chosen',
-      dragClass: 'sortable-drag',
+      handle: ".drag-handle",
+      ghostClass: "sortable-ghost",
+      chosenClass: "sortable-chosen",
+      dragClass: "sortable-drag",
       forceFallback: false,
       fallbackOnBody: true,
       swapThreshold: 0.65,
@@ -64,12 +64,12 @@ export default class extends Controller {
       touchStartThreshold: this.touchThreshold,
       onStart: (evt) => {
         this.isDragging = true
-        document.body.classList.add('dragging-active')
+        document.body.classList.add("dragging-active")
         this.addDragFeedback(evt.item)
       },
       onEnd: (evt) => {
         this.isDragging = false
-        document.body.classList.remove('dragging-active')
+        document.body.classList.remove("dragging-active")
         this.removeDragFeedback(evt.item)
         
         if (evt.from === evt.to) {
@@ -86,22 +86,22 @@ export default class extends Controller {
   initializeDraggableItems() {
     // Add drag handles to items if they don't exist
     this.itemTargets.forEach(item => {
-      if (!item.querySelector('.drag-handle')) {
-        const handle = document.createElement('div')
-        handle.className = 'drag-handle absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center cursor-move opacity-0 group-hover:opacity-100 transition-opacity'
+      if (!item.querySelector(".drag-handle")) {
+        const handle = document.createElement("div")
+        handle.className = "drag-handle absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center cursor-move opacity-0 group-hover:opacity-100 transition-opacity"
         handle.innerHTML = `
           <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
           </svg>
         `
-        item.style.position = 'relative'
+        item.style.position = "relative"
         item.appendChild(handle)
       }
       
       // Make items draggable for drop into editor
-      item.setAttribute('draggable', 'true')
-      item.addEventListener('dragstart', this.handleDragStart.bind(this))
-      item.addEventListener('dragend', this.handleDragEnd.bind(this))
+      item.setAttribute("draggable", "true")
+      item.addEventListener("dragstart", this.handleDragStart.bind(this))
+      item.addEventListener("dragend", this.handleDragEnd.bind(this))
     })
   }
   
@@ -109,19 +109,19 @@ export default class extends Controller {
     const item = event.currentTarget
     const contextItem = {
       id: item.dataset.contextItemId,
-      title: item.querySelector('[data-item-title]')?.textContent.trim(),
-      content: item.querySelector('[data-item-content]')?.textContent.trim(),
+      title: item.querySelector("[data-item-title]")?.textContent.trim(),
+      content: item.querySelector("[data-item-content]")?.textContent.trim(),
       fullContent: item.dataset.contextItemContent
     }
     
     // Store the dragged item data
-    event.dataTransfer.effectAllowed = 'copy'
-    event.dataTransfer.setData('text/plain', contextItem.fullContent || contextItem.content)
-    event.dataTransfer.setData('application/json', JSON.stringify(contextItem))
+    event.dataTransfer.effectAllowed = "copy"
+    event.dataTransfer.setData("text/plain", contextItem.fullContent || contextItem.content)
+    event.dataTransfer.setData("application/json", JSON.stringify(contextItem))
     
     // Add visual feedback
-    item.classList.add('opacity-50')
-    document.body.classList.add('dragging-context-item')
+    item.classList.add("opacity-50")
+    document.body.classList.add("dragging-context-item")
     
     // Highlight drop zones
     this.highlightDropZones()
@@ -129,22 +129,22 @@ export default class extends Controller {
   
   handleDragEnd(event) {
     const item = event.currentTarget
-    item.classList.remove('opacity-50')
-    document.body.classList.remove('dragging-context-item')
+    item.classList.remove("opacity-50")
+    document.body.classList.remove("dragging-context-item")
     
     // Remove drop zone highlights
     this.removeDropZoneHighlights()
   }
   
   handleReorder(evt) {
-    const itemIds = Array.from(this.listTarget.querySelectorAll('[data-context-item-id]'))
+    const itemIds = Array.from(this.listTarget.querySelectorAll("[data-context-item-id]"))
       .map(item => item.dataset.contextItemId)
     
     // Store original order for rollback
     const originalOrder = [...itemIds]
     
     // Optimistically update UI
-    this.updateReorderUI('saving')
+    this.updateReorderUI("saving")
     
     // Send reorder request with retry logic
     this.sendReorderRequest(itemIds, originalOrder)
@@ -152,47 +152,47 @@ export default class extends Controller {
   
   highlightDropZones() {
     // Find the Trix editor
-    const editor = document.querySelector(this.editorSelectorValue || 'trix-editor')
+    const editor = document.querySelector(this.editorSelectorValue || "trix-editor")
     if (editor) {
-      editor.classList.add('drop-zone-active')
+      editor.classList.add("drop-zone-active")
       
       // Set up drop event listeners
-      editor.addEventListener('dragover', this.handleDragOver)
-      editor.addEventListener('drop', this.handleDrop.bind(this))
-      editor.addEventListener('dragleave', this.handleDragLeave)
+      editor.addEventListener("dragover", this.handleDragOver)
+      editor.addEventListener("drop", this.handleDrop.bind(this))
+      editor.addEventListener("dragleave", this.handleDragLeave)
     }
   }
   
   removeDropZoneHighlights() {
-    const editor = document.querySelector(this.editorSelectorValue || 'trix-editor')
+    const editor = document.querySelector(this.editorSelectorValue || "trix-editor")
     if (editor) {
-      editor.classList.remove('drop-zone-active', 'drop-zone-hover')
+      editor.classList.remove("drop-zone-active", "drop-zone-hover")
       
       // Remove drop event listeners
-      editor.removeEventListener('dragover', this.handleDragOver)
-      editor.removeEventListener('drop', this.handleDrop)
-      editor.removeEventListener('dragleave', this.handleDragLeave)
+      editor.removeEventListener("dragover", this.handleDragOver)
+      editor.removeEventListener("drop", this.handleDrop)
+      editor.removeEventListener("dragleave", this.handleDragLeave)
     }
   }
   
   handleDragOver(event) {
     event.preventDefault()
-    event.dataTransfer.dropEffect = 'copy'
-    event.currentTarget.classList.add('drop-zone-hover')
+    event.dataTransfer.dropEffect = "copy"
+    event.currentTarget.classList.add("drop-zone-hover")
   }
   
   handleDragLeave(event) {
-    event.currentTarget.classList.remove('drop-zone-hover')
+    event.currentTarget.classList.remove("drop-zone-hover")
   }
   
   handleDrop(event) {
     event.preventDefault()
     const editor = event.currentTarget
-    editor.classList.remove('drop-zone-hover')
+    editor.classList.remove("drop-zone-hover")
     
     try {
       // Get the dropped data
-      const contextItemData = event.dataTransfer.getData('application/json')
+      const contextItemData = event.dataTransfer.getData("application/json")
       const contextItem = JSON.parse(contextItemData)
       
       // Insert content into Trix editor
@@ -206,18 +206,18 @@ export default class extends Controller {
         editor.editor.insertHTML(insertion)
         
         // Show success feedback
-        this.showDropFeedback(event.clientX, event.clientY, 'Inserted successfully!')
+        this.showDropFeedback(event.clientX, event.clientY, "Inserted successfully!")
       }
     } catch (error) {
-      console.error('Failed to insert content:', error)
-      this.showDropFeedback(event.clientX, event.clientY, 'Failed to insert', true)
+      console.error("Failed to insert content:", error)
+      this.showDropFeedback(event.clientX, event.clientY, "Failed to insert", true)
     }
   }
   
   showDropFeedback(x, y, message, isError = false) {
-    const feedback = document.createElement('div')
+    const feedback = document.createElement("div")
     feedback.className = `fixed z-50 px-4 py-2 rounded-lg text-white text-sm font-medium transition-all duration-300 ${
-      isError ? 'bg-red-500' : 'bg-green-500'
+      isError ? "bg-red-500" : "bg-green-500"
     }`
     feedback.style.left = `${x}px`
     feedback.style.top = `${y}px`
@@ -227,8 +227,8 @@ export default class extends Controller {
     
     // Animate and remove
     setTimeout(() => {
-      feedback.style.transform = 'translateY(-20px)'
-      feedback.style.opacity = '0'
+      feedback.style.transform = "translateY(-20px)"
+      feedback.style.opacity = "0"
     }, 100)
     
     setTimeout(() => {
@@ -239,9 +239,9 @@ export default class extends Controller {
   // Setup touch handlers for mobile support
   setupTouchHandlers() {
     this.itemTargets.forEach(item => {
-      item.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false })
-      item.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false })
-      item.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: false })
+      item.addEventListener("touchstart", this.handleTouchStart.bind(this), { passive: false })
+      item.addEventListener("touchmove", this.handleTouchMove.bind(this), { passive: false })
+      item.addEventListener("touchend", this.handleTouchEnd.bind(this), { passive: false })
     })
   }
 
@@ -274,13 +274,13 @@ export default class extends Controller {
   // Add visual feedback during drag
   addDragFeedback(item) {
     // Add pulse effect to drag handle
-    const handle = item.querySelector('.drag-handle')
+    const handle = item.querySelector(".drag-handle")
     if (handle) {
-      handle.classList.add('animate-pulse')
+      handle.classList.add("animate-pulse")
     }
     
     // Add visual cue to item
-    item.classList.add('dragging-item')
+    item.classList.add("dragging-item")
     
     // Add haptic feedback on supported devices
     if (navigator.vibrate) {
@@ -290,13 +290,13 @@ export default class extends Controller {
 
   removeDragFeedback(item) {
     // Remove pulse effect
-    const handle = item.querySelector('.drag-handle')
+    const handle = item.querySelector(".drag-handle")
     if (handle) {
-      handle.classList.remove('animate-pulse')
+      handle.classList.remove("animate-pulse")
     }
     
     // Remove visual cue
-    item.classList.remove('dragging-item')
+    item.classList.remove("dragging-item")
   }
 
   // Determine if move should be allowed
@@ -305,7 +305,7 @@ export default class extends Controller {
     const related = evt.related
     
     // Don't allow dropping on non-sortable containers
-    if (!related.classList.contains('sortable-list')) {
+    if (!related.classList.contains("sortable-list")) {
       return false
     }
     
@@ -318,10 +318,10 @@ export default class extends Controller {
     
     try {
       const response = await fetch(this.reorderUrlValue, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': document.querySelector('[name="csrf-token"]')?.content
+          "Content-Type": "application/json",
+          "X-CSRF-Token": document.querySelector("[name=\"csrf-token\"]")?.content
         },
         body: JSON.stringify({ item_ids: itemIds })
       })
@@ -330,10 +330,10 @@ export default class extends Controller {
         throw new Error(`HTTP ${response.status}`)
       }
       
-      this.updateReorderUI('success')
+      this.updateReorderUI("success")
       
     } catch (error) {
-      console.error('Reorder failed:', error)
+      console.error("Reorder failed:", error)
       
       if (retryCount < maxRetries) {
         // Retry after delay
@@ -343,7 +343,7 @@ export default class extends Controller {
       } else {
         // Rollback to original order
         this.rollbackReorder(originalOrder)
-        this.updateReorderUI('error')
+        this.updateReorderUI("error")
       }
     }
   }
@@ -361,19 +361,19 @@ export default class extends Controller {
   }
 
   updateReorderUI(status) {
-    const statusIndicator = this.listTarget.querySelector('.reorder-status')
+    const statusIndicator = this.listTarget.querySelector(".reorder-status")
     if (statusIndicator) {
       statusIndicator.className = `reorder-status ${status}`
       statusIndicator.textContent = {
-        saving: 'Saving order...',
-        success: 'Order saved!',
-        error: 'Failed to save order'
-      }[status] || ''
+        saving: "Saving order...",
+        success: "Order saved!",
+        error: "Failed to save order"
+      }[status] || ""
       
-      if (status === 'success' || status === 'error') {
+      if (status === "success" || status === "error") {
         setTimeout(() => {
-          statusIndicator.textContent = ''
-          statusIndicator.className = 'reorder-status'
+          statusIndicator.textContent = ""
+          statusIndicator.className = "reorder-status"
         }, 2000)
       }
     }

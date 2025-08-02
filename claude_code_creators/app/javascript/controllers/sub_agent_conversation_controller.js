@@ -11,7 +11,7 @@ export default class extends Controller {
   }
   
   connect() {
-    console.log('SubAgentConversationController connected')
+    console.log("SubAgentConversationController connected")
     this.setupAutoSave()
     this.setupKeyboardShortcuts()
     this.setupDragAndDrop()
@@ -39,21 +39,21 @@ export default class extends Controller {
     // Add user message to UI immediately
     this.addMessageToUI({
       content: message,
-      role: 'user',
+      role: "user",
       created_at: new Date().toISOString()
     })
     
     // Clear input and draft
-    this.messageInputTarget.value = ''
+    this.messageInputTarget.value = ""
     this.clearDraft()
     
     try {
       const response = await fetch(this.sendUrlValue, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': document.querySelector('[name="csrf-token"]')?.content,
-          'Accept': 'application/json'
+          "Content-Type": "application/json",
+          "X-CSRF-Token": document.querySelector("[name=\"csrf-token\"]")?.content,
+          "Accept": "application/json"
         },
         body: JSON.stringify({
           message: {
@@ -77,12 +77,12 @@ export default class extends Controller {
       this.clearError()
       
     } catch (error) {
-      console.error('Failed to send message:', error)
-      this.showError('Failed to send message. Please try again.')
+      console.error("Failed to send message:", error)
+      this.showError("Failed to send message. Please try again.")
       
       // Remove the user message that failed
       const lastMessage = this.messagesListTarget.lastElementChild
-      if (lastMessage && lastMessage.dataset.role === 'user') {
+      if (lastMessage && lastMessage.dataset.role === "user") {
         lastMessage.remove()
       }
       
@@ -97,18 +97,18 @@ export default class extends Controller {
   addMessageToUI(message) {
     if (!this.hasMessagesListTarget) return
     
-    const isUser = message.role === 'user'
+    const isUser = message.role === "user"
     const messageHtml = `
-      <div class="flex ${isUser ? 'justify-end' : 'justify-start'} mb-4 message-item"
+      <div class="flex ${isUser ? "justify-end" : "justify-start"} mb-4 message-item"
            data-role="${message.role}"
-           data-message-id="${message.id || 'temp-' + Date.now()}">
+           data-message-id="${message.id || "temp-" + Date.now()}">
         <div class="max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-          isUser 
-            ? 'bg-blue-500 text-white' 
-            : 'bg-gray-200 text-gray-800'
-        }">
+  isUser 
+    ? "bg-blue-500 text-white" 
+    : "bg-gray-200 text-gray-800"
+}">
           <p class="text-sm whitespace-pre-wrap">${this.escapeHtml(message.content)}</p>
-          <p class="text-xs ${isUser ? 'text-blue-100' : 'text-gray-500'} mt-1">
+          <p class="text-xs ${isUser ? "text-blue-100" : "text-gray-500"} mt-1">
             ${new Date(message.created_at).toLocaleTimeString()}
           </p>
         </div>
@@ -116,20 +116,20 @@ export default class extends Controller {
     `
     
     // Add with animation
-    const messageElement = document.createElement('div')
+    const messageElement = document.createElement("div")
     messageElement.innerHTML = messageHtml
     const messageItem = messageElement.firstElementChild
     
-    messageItem.style.opacity = '0'
-    messageItem.style.transform = 'translateY(10px)'
+    messageItem.style.opacity = "0"
+    messageItem.style.transform = "translateY(10px)"
     
     this.messagesListTarget.appendChild(messageItem)
     
     // Animate in
     requestAnimationFrame(() => {
-      messageItem.style.transition = 'all 0.3s ease-out'
-      messageItem.style.opacity = '1'
-      messageItem.style.transform = 'translateY(0)'
+      messageItem.style.transition = "all 0.3s ease-out"
+      messageItem.style.opacity = "1"
+      messageItem.style.transform = "translateY(0)"
     })
     
     // Scroll to bottom
@@ -152,7 +152,7 @@ export default class extends Controller {
       </div>
     `
     
-    const typingElement = document.createElement('div')
+    const typingElement = document.createElement("div")
     typingElement.innerHTML = typingHtml
     this.messagesListTarget.appendChild(typingElement.firstElementChild)
     
@@ -160,7 +160,7 @@ export default class extends Controller {
   }
   
   hideTypingIndicator() {
-    const typingIndicator = this.messagesListTarget.querySelector('.typing-indicator')
+    const typingIndicator = this.messagesListTarget.querySelector(".typing-indicator")
     if (typingIndicator) {
       typingIndicator.remove()
     }
@@ -179,14 +179,14 @@ export default class extends Controller {
   showError(message) {
     if (this.hasErrorMessageTarget) {
       this.errorMessageTarget.textContent = message
-      this.errorMessageTarget.classList.remove('hidden')
+      this.errorMessageTarget.classList.remove("hidden")
     }
   }
   
   clearError() {
     if (this.hasErrorMessageTarget) {
-      this.errorMessageTarget.classList.add('hidden')
-      this.errorMessageTarget.textContent = ''
+      this.errorMessageTarget.classList.add("hidden")
+      this.errorMessageTarget.textContent = ""
     }
   }
   
@@ -223,7 +223,7 @@ export default class extends Controller {
     }
     
     if (this.hasLoadingIndicatorTarget) {
-      this.loadingIndicatorTarget.style.display = loading ? 'flex' : 'none'
+      this.loadingIndicatorTarget.style.display = loading ? "flex" : "none"
     }
   }
   
@@ -238,7 +238,7 @@ export default class extends Controller {
     })
     
     if (this.hasMessageInputTarget) {
-      this.messageInputTarget.addEventListener('input', this.saveDraft)
+      this.messageInputTarget.addEventListener("input", this.saveDraft)
     }
   }
   
@@ -260,16 +260,16 @@ export default class extends Controller {
   }
   
   showDraftNotification() {
-    const notification = document.createElement('div')
-    notification.className = 'absolute top-0 left-0 right-0 bg-yellow-100 text-yellow-800 text-xs px-3 py-1 text-center'
-    notification.textContent = 'Draft restored'
+    const notification = document.createElement("div")
+    notification.className = "absolute top-0 left-0 right-0 bg-yellow-100 text-yellow-800 text-xs px-3 py-1 text-center"
+    notification.textContent = "Draft restored"
     
-    this.messageFormTarget.style.position = 'relative'
+    this.messageFormTarget.style.position = "relative"
     this.messageFormTarget.appendChild(notification)
     
     setTimeout(() => {
-      notification.style.transition = 'opacity 0.3s'
-      notification.style.opacity = '0'
+      notification.style.transition = "opacity 0.3s"
+      notification.style.opacity = "0"
       setTimeout(() => notification.remove(), 300)
     }, 2000)
   }
@@ -278,7 +278,7 @@ export default class extends Controller {
   setupKeyboardShortcuts() {
     this.keyboardHandler = (event) => {
       // Cmd/Ctrl + Enter to send message
-      if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+      if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
         event.preventDefault()
         if (this.messageInputTarget?.value.trim()) {
           this.sendMessage()
@@ -286,21 +286,21 @@ export default class extends Controller {
       }
       
       // Escape to clear input
-      if (event.key === 'Escape' && document.activeElement === this.messageInputTarget) {
+      if (event.key === "Escape" && document.activeElement === this.messageInputTarget) {
         event.preventDefault()
-        this.messageInputTarget.value = ''
+        this.messageInputTarget.value = ""
         this.clearDraft()
       }
     }
     
     if (this.hasMessageInputTarget) {
-      this.messageInputTarget.addEventListener('keydown', this.keyboardHandler)
+      this.messageInputTarget.addEventListener("keydown", this.keyboardHandler)
     }
   }
   
   removeKeyboardShortcuts() {
     if (this.keyboardHandler && this.hasMessageInputTarget) {
-      this.messageInputTarget.removeEventListener('keydown', this.keyboardHandler)
+      this.messageInputTarget.removeEventListener("keydown", this.keyboardHandler)
     }
   }
   
@@ -317,7 +317,7 @@ export default class extends Controller {
   
   // Utility methods
   escapeHtml(text) {
-    const div = document.createElement('div')
+    const div = document.createElement("div")
     div.textContent = text
     return div.innerHTML
   }
@@ -347,36 +347,36 @@ export default class extends Controller {
     if (!this.hasMessageInputTarget) return
     
     // Make input area a drop zone
-    this.messageInputTarget.addEventListener('dragover', this.handleDragOver.bind(this))
-    this.messageInputTarget.addEventListener('drop', this.handleDrop.bind(this))
-    this.messageInputTarget.addEventListener('dragleave', this.handleDragLeave.bind(this))
+    this.messageInputTarget.addEventListener("dragover", this.handleDragOver.bind(this))
+    this.messageInputTarget.addEventListener("drop", this.handleDrop.bind(this))
+    this.messageInputTarget.addEventListener("dragleave", this.handleDragLeave.bind(this))
   }
   
   removeDragAndDrop() {
     if (!this.hasMessageInputTarget) return
     
-    this.messageInputTarget.removeEventListener('dragover', this.handleDragOver)
-    this.messageInputTarget.removeEventListener('drop', this.handleDrop)
-    this.messageInputTarget.removeEventListener('dragleave', this.handleDragLeave)
+    this.messageInputTarget.removeEventListener("dragover", this.handleDragOver)
+    this.messageInputTarget.removeEventListener("drop", this.handleDrop)
+    this.messageInputTarget.removeEventListener("dragleave", this.handleDragLeave)
   }
   
   handleDragOver(event) {
     event.preventDefault()
-    event.dataTransfer.dropEffect = 'copy'
-    this.messageInputTarget.classList.add('border-blue-500', 'bg-blue-50')
+    event.dataTransfer.dropEffect = "copy"
+    this.messageInputTarget.classList.add("border-blue-500", "bg-blue-50")
   }
   
   handleDragLeave(event) {
-    this.messageInputTarget.classList.remove('border-blue-500', 'bg-blue-50')
+    this.messageInputTarget.classList.remove("border-blue-500", "bg-blue-50")
   }
   
   handleDrop(event) {
     event.preventDefault()
-    this.messageInputTarget.classList.remove('border-blue-500', 'bg-blue-50')
+    this.messageInputTarget.classList.remove("border-blue-500", "bg-blue-50")
     
     try {
       // Check if it's a context item being dropped
-      const contextItemData = event.dataTransfer.getData('application/json')
+      const contextItemData = event.dataTransfer.getData("application/json")
       if (contextItemData) {
         const contextItem = JSON.parse(contextItemData)
         
@@ -401,31 +401,31 @@ export default class extends Controller {
         this.saveDraft()
         
         // Show feedback
-        this.showDropFeedback('Content added to message')
+        this.showDropFeedback("Content added to message")
       } else {
         // Handle text drop
-        const text = event.dataTransfer.getData('text/plain')
+        const text = event.dataTransfer.getData("text/plain")
         if (text) {
           this.insertTextAtCursor(text)
           this.saveDraft()
         }
       }
     } catch (error) {
-      console.error('Failed to handle drop:', error)
+      console.error("Failed to handle drop:", error)
     }
   }
   
   showDropFeedback(message) {
-    const feedback = document.createElement('div')
-    feedback.className = 'absolute bottom-full left-0 mb-2 px-3 py-1 bg-green-500 text-white text-sm rounded-lg shadow-lg'
+    const feedback = document.createElement("div")
+    feedback.className = "absolute bottom-full left-0 mb-2 px-3 py-1 bg-green-500 text-white text-sm rounded-lg shadow-lg"
     feedback.textContent = message
     
-    this.messageInputTarget.parentElement.style.position = 'relative'
+    this.messageInputTarget.parentElement.style.position = "relative"
     this.messageInputTarget.parentElement.appendChild(feedback)
     
     setTimeout(() => {
-      feedback.style.transition = 'opacity 0.3s'
-      feedback.style.opacity = '0'
+      feedback.style.transition = "opacity 0.3s"
+      feedback.style.opacity = "0"
       setTimeout(() => feedback.remove(), 300)
     }, 2000)
   }
@@ -434,7 +434,7 @@ export default class extends Controller {
   connectToChannel() {
     if (window.subAgentChannel && this.subAgentIdValue) {
       // The global channel is already connected in sub_agent_channel.js
-      console.log('Connected to SubAgentChannel for conversation')
+      console.log("Connected to SubAgentChannel for conversation")
     }
   }
 }

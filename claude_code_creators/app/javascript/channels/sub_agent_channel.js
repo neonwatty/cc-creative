@@ -29,32 +29,32 @@ export default class SubAgentChannel {
         },
         
         received: (data) => {
-          console.log('Received data from SubAgentChannel:', data)
+          console.log("Received data from SubAgentChannel:", data)
           
           // Handle different message types
           switch(data.type) {
-            case 'new_message':
-              this.handleNewMessage(data)
-              break
+          case "new_message":
+            this.handleNewMessage(data)
+            break
               
-            case 'sub_agent_created':
-              this.handleSubAgentCreated(data)
-              break
+          case "sub_agent_created":
+            this.handleSubAgentCreated(data)
+            break
               
-            case 'sub_agent_deleted':
-              this.handleSubAgentDeleted(data)
-              break
+          case "sub_agent_deleted":
+            this.handleSubAgentDeleted(data)
+            break
               
-            case 'typing_indicator':
-              this.handleTypingIndicator(data)
-              break
+          case "typing_indicator":
+            this.handleTypingIndicator(data)
+            break
               
-            case 'merge_completed':
-              this.handleMergeCompleted(data)
-              break
+          case "merge_completed":
+            this.handleMergeCompleted(data)
+            break
               
-            default:
-              console.warn('Unknown message type:', data.type)
+          default:
+            console.warn("Unknown message type:", data.type)
           }
         }
       }
@@ -74,7 +74,7 @@ export default class SubAgentChannel {
   sendMessage(subAgentId, content) {
     if (!this.subscription) return
     
-    this.subscription.perform('send_message', {
+    this.subscription.perform("send_message", {
       sub_agent_id: subAgentId,
       content: content
     })
@@ -84,7 +84,7 @@ export default class SubAgentChannel {
   startTyping(subAgentId) {
     if (!this.subscription) return
     
-    this.subscription.perform('typing', {
+    this.subscription.perform("typing", {
       sub_agent_id: subAgentId,
       typing: true
     })
@@ -94,7 +94,7 @@ export default class SubAgentChannel {
   stopTyping(subAgentId) {
     if (!this.subscription) return
     
-    this.subscription.perform('typing', {
+    this.subscription.perform("typing", {
       sub_agent_id: subAgentId,
       typing: false
     })
@@ -107,7 +107,7 @@ export default class SubAgentChannel {
     }
     
     // Find and update the conversation controller
-    const conversationController = document.querySelector('[data-controller~="sub-agent-conversation"]')
+    const conversationController = document.querySelector("[data-controller~=\"sub-agent-conversation\"]")
     if (conversationController && conversationController._stimulusController) {
       conversationController._stimulusController.receiveMessage(data)
     }
@@ -120,7 +120,7 @@ export default class SubAgentChannel {
     }
     
     // Update sidebar if exists
-    const sidebarController = document.querySelector('[data-controller~="sub-agent-sidebar"]')
+    const sidebarController = document.querySelector("[data-controller~=\"sub-agent-sidebar\"]")
     if (sidebarController && sidebarController._stimulusController) {
       sidebarController._stimulusController.addSubAgentToList(data.sub_agent)
     }
@@ -135,9 +135,9 @@ export default class SubAgentChannel {
     // Remove from sidebar if exists
     const agentElement = document.querySelector(`[data-sub-agent-id="${data.sub_agent_id}"]`)
     if (agentElement) {
-      agentElement.style.transition = 'all 0.3s ease-out'
-      agentElement.style.opacity = '0'
-      agentElement.style.transform = 'translateX(-20px)'
+      agentElement.style.transition = "all 0.3s ease-out"
+      agentElement.style.opacity = "0"
+      agentElement.style.transform = "translateX(-20px)"
       
       setTimeout(() => agentElement.remove(), 300)
     }
@@ -149,7 +149,7 @@ export default class SubAgentChannel {
       this.callbacks.onTypingIndicator(data)
     }
     
-    const conversationController = document.querySelector('[data-controller~="sub-agent-conversation"]')
+    const conversationController = document.querySelector("[data-controller~=\"sub-agent-conversation\"]")
     if (conversationController && conversationController._stimulusController) {
       if (data.typing) {
         conversationController._stimulusController.showTypingIndicator()
@@ -166,7 +166,7 @@ export default class SubAgentChannel {
     }
     
     // Show success notification
-    this.showNotification('Content merged successfully!', 'success')
+    this.showNotification("Content merged successfully!", "success")
     
     // Refresh page if needed
     if (data.refresh) {
@@ -175,34 +175,34 @@ export default class SubAgentChannel {
   }
   
   // Utility method for notifications
-  showNotification(message, type = 'info') {
-    const notification = document.createElement('div')
+  showNotification(message, type = "info") {
+    const notification = document.createElement("div")
     notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg text-white font-medium shadow-lg transition-all duration-300 ${
-      type === 'success' ? 'bg-green-500' : 
-      type === 'error' ? 'bg-red-500' : 
-      'bg-blue-500'
+      type === "success" ? "bg-green-500" : 
+        type === "error" ? "bg-red-500" : 
+          "bg-blue-500"
     }`
-    notification.style.transform = 'translateX(400px)'
+    notification.style.transform = "translateX(400px)"
     notification.textContent = message
     
     document.body.appendChild(notification)
     
     // Animate in
     requestAnimationFrame(() => {
-      notification.style.transform = 'translateX(0)'
+      notification.style.transform = "translateX(0)"
     })
     
     // Auto dismiss
     setTimeout(() => {
-      notification.style.transform = 'translateX(400px)'
+      notification.style.transform = "translateX(400px)"
       setTimeout(() => notification.remove(), 300)
     }, 3000)
   }
 }
 
 // Initialize sub-agent channel when document is ready
-document.addEventListener('turbo:load', () => {
-  const documentElement = document.querySelector('[data-document-id]')
+document.addEventListener("turbo:load", () => {
+  const documentElement = document.querySelector("[data-document-id]")
   if (documentElement) {
     const documentId = documentElement.dataset.documentId
     
@@ -214,16 +214,16 @@ document.addEventListener('turbo:load', () => {
     // Create new channel
     window.subAgentChannel = new SubAgentChannel(documentId, {
       connected: () => {
-        console.log('SubAgentChannel connected and ready')
+        console.log("SubAgentChannel connected and ready")
       },
       onNewMessage: (data) => {
-        console.log('New message received:', data)
+        console.log("New message received:", data)
       },
       onSubAgentCreated: (data) => {
-        console.log('New sub-agent created:', data)
+        console.log("New sub-agent created:", data)
       },
       onSubAgentDeleted: (data) => {
-        console.log('Sub-agent deleted:', data)
+        console.log("Sub-agent deleted:", data)
       }
     })
     
@@ -233,7 +233,7 @@ document.addEventListener('turbo:load', () => {
 })
 
 // Disconnect on page unload
-document.addEventListener('turbo:before-cache', () => {
+document.addEventListener("turbo:before-cache", () => {
   if (window.subAgentChannel) {
     window.subAgentChannel.disconnect()
     window.subAgentChannel = null

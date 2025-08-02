@@ -63,36 +63,36 @@ class PresenceChannel {
     }
 
     switch (data.type) {
-      case 'user_joined':
-        this.callbacks.onUserJoined?.(data.user)
-        break
+    case "user_joined":
+      this.callbacks.onUserJoined?.(data.user)
+      break
         
-      case 'user_left':
-        this.callbacks.onUserLeft?.(data.user_id)
-        break
+    case "user_left":
+      this.callbacks.onUserLeft?.(data.user_id)
+      break
         
-      case 'user_typing':
-        this.callbacks.onUserTyping?.(data.user_id, data.user_name)
-        break
+    case "user_typing":
+      this.callbacks.onUserTyping?.(data.user_id, data.user_name)
+      break
         
-      case 'user_stopped_typing':
-        this.callbacks.onUserStoppedTyping?.(data.user_id)
-        break
+    case "user_stopped_typing":
+      this.callbacks.onUserStoppedTyping?.(data.user_id)
+      break
         
-      case 'cursor_moved':
-        this.callbacks.onCursorMoved?.(data.user_id, data.user_name, data.position)
-        break
+    case "cursor_moved":
+      this.callbacks.onCursorMoved?.(data.user_id, data.user_name, data.position)
+      break
         
-      case 'selection_changed':
-        this.callbacks.onSelectionChanged?.(data.user_id, data.user_name, data.selection)
-        break
+    case "selection_changed":
+      this.callbacks.onSelectionChanged?.(data.user_id, data.user_name, data.selection)
+      break
         
-      case 'presence_data':
-        this.callbacks.onPresenceData?.(data.users, data.cursors, data.typing_users)
-        break
+    case "presence_data":
+      this.callbacks.onPresenceData?.(data.users, data.cursors, data.typing_users)
+      break
         
-      default:
-        console.log('Unknown presence update:', data)
+    default:
+      console.log("Unknown presence update:", data)
     }
   }
 
@@ -100,7 +100,7 @@ class PresenceChannel {
   startTyping() {
     if (!this.isTyping) {
       this.isTyping = true
-      this.perform('user_typing')
+      this.perform("user_typing")
     }
 
     // Clear existing timeout
@@ -118,7 +118,7 @@ class PresenceChannel {
   stopTyping() {
     if (this.isTyping) {
       this.isTyping = false
-      this.perform('user_stopped_typing')
+      this.perform("user_stopped_typing")
       
       if (this.typingTimeout) {
         clearTimeout(this.typingTimeout)
@@ -133,7 +133,7 @@ class PresenceChannel {
       return // Still throttling
     }
 
-    this.perform('cursor_moved', {
+    this.perform("cursor_moved", {
       position: { x, y }
     })
 
@@ -145,14 +145,14 @@ class PresenceChannel {
 
   // Update text selection
   updateSelection(selection) {
-    this.perform('selection_changed', {
+    this.perform("selection_changed", {
       selection: selection
     })
   }
 
   // Get current presence data
   getPresence() {
-    this.perform('get_presence')
+    this.perform("get_presence")
   }
 
   // Helper method to perform actions
@@ -202,6 +202,6 @@ export default PresenceChannel
 window.PresenceChannel = PresenceChannel
 
 // Cleanup on page unload
-window.addEventListener('beforeunload', () => {
+window.addEventListener("beforeunload", () => {
   PresenceChannel.disconnectAll()
 })

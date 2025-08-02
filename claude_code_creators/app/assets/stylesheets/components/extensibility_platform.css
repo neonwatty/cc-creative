@@ -1,0 +1,416 @@
+/* ==========================================================================
+   Phase 3 Extensibility Platform - Component Styles
+   ========================================================================== */
+
+/* Widget Container Enhanced Styles */
+.widget-container {
+  --widget-container-bg: theme('colors.white');
+  --widget-container-border: theme('colors.creative-neutral.200');
+  --docking-zone-bg: theme('colors.creative-primary.50');
+  --docking-zone-border: theme('colors.creative-primary.400');
+}
+
+.dark .widget-container {
+  --widget-container-bg: theme('colors.creative-neutral.900');
+  --widget-container-border: theme('colors.creative-neutral.700');
+  --docking-zone-bg: theme('colors.creative-primary.900');
+  --docking-zone-border: theme('colors.creative-primary.500');
+}
+
+/* Responsive Docking Zones */
+@media (max-width: 768px) {
+  .docking-zone {
+    @apply w-16 h-16;
+  }
+  
+  .docking-zone.left,
+  .docking-zone.right {
+    @apply top-1/3 bottom-1/3;
+  }
+  
+  .docking-zone.top,
+  .docking-zone.bottom {
+    @apply left-1/4 right-1/4;
+  }
+  
+  .docking-zone.center {
+    @apply w-24 h-24;
+  }
+}
+
+@media (max-width: 480px) {
+  .docking-zone {
+    @apply w-12 h-12;
+  }
+  
+  .docking-zone.center {
+    @apply w-20 h-20;
+  }
+  
+  .widget-toolbar {
+    @apply px-2 py-2;
+  }
+  
+  .ai-review-panel {
+    @apply w-full;
+  }
+  
+  .plugin-marketplace .marketplace-content {
+    @apply max-w-full mx-2;
+  }
+}
+
+/* Widget Toolbar Responsive Styles */
+.widget-toolbar {
+  --toolbar-bg: theme('colors.white');
+  --toolbar-border: theme('colors.creative-neutral.200');
+  --toolbar-shadow: theme('boxShadow.creative-lg');
+}
+
+.dark .widget-toolbar {
+  --toolbar-bg: theme('colors.creative-neutral.800');
+  --toolbar-border: theme('colors.creative-neutral.700');
+  --toolbar-shadow: theme('boxShadow.creative-dark-lg');
+}
+
+@media (max-width: 1024px) {
+  .widget-toolbar.floating {
+    @apply w-full max-w-sm;
+  }
+  
+  .widget-toolbar .toolbar-section {
+    @apply space-x-1;
+  }
+  
+  .widget-toolbar .toolbar-btn {
+    @apply w-8 h-8 text-xs;
+  }
+}
+
+/* AI Review Panel Responsive Design */
+.ai-review-panel {
+  --panel-bg: theme('colors.white');
+  --panel-border: theme('colors.creative-neutral.200');
+  --panel-shadow: theme('boxShadow.creative-xl');
+}
+
+.dark .ai-review-panel {
+  --panel-bg: theme('colors.creative-neutral.800');
+  --panel-border: theme('colors.creative-neutral.700');
+  --panel-shadow: theme('boxShadow.creative-dark-xl');
+}
+
+@media (max-width: 1024px) {
+  .ai-review-panel.fixed.left-4,
+  .ai-review-panel.fixed.right-4 {
+    @apply w-80;
+  }
+}
+
+@media (max-width: 768px) {
+  .ai-review-panel.fixed {
+    @apply left-2 right-2 w-auto;
+  }
+  
+  .ai-review-panel.fixed.left-4,
+  .ai-review-panel.fixed.right-4 {
+    @apply left-2 right-2 w-auto;
+  }
+  
+  .ai-review-filters {
+    @apply flex-col space-y-2 space-x-0;
+  }
+  
+  .ai-review-filters .filter-section {
+    @apply flex-wrap space-x-0 space-y-1;
+  }
+}
+
+/* Plugin Marketplace Responsive Styles */
+.plugin-marketplace {
+  --marketplace-bg: theme('colors.white');
+  --marketplace-border: theme('colors.creative-neutral.200');
+}
+
+.dark .plugin-marketplace {
+  --marketplace-bg: theme('colors.creative-neutral.900');
+  --marketplace-border: theme('colors.creative-neutral.700');
+}
+
+@media (max-width: 1024px) {
+  .marketplace-content {
+    @apply max-w-4xl;
+  }
+  
+  .plugin-grid {
+    @apply grid-cols-1 sm:grid-cols-2;
+  }
+  
+  .featured-grid {
+    @apply grid-cols-1 sm:grid-cols-2 lg:grid-cols-3;
+  }
+}
+
+@media (max-width: 768px) {
+  .marketplace-content {
+    @apply max-w-full mx-2;
+  }
+  
+  .marketplace-header {
+    @apply flex-col space-y-4;
+  }
+  
+  .marketplace-toolbar {
+    @apply flex-col space-y-3;
+  }
+  
+  .search-section {
+    @apply max-w-full;
+  }
+  
+  .filter-section {
+    @apply flex-wrap space-x-0 space-y-2;
+  }
+  
+  .plugin-grid,
+  .featured-grid {
+    @apply grid-cols-1;
+  }
+}
+
+/* Plugin Installation Modal Responsive */
+.plugin-installation-modal {
+  --modal-bg: theme('colors.white');
+  --modal-border: theme('colors.creative-neutral.200');
+}
+
+.dark .plugin-installation-modal {
+  --modal-bg: theme('colors.creative-neutral.900');
+  --modal-border: theme('colors.creative-neutral.700');
+}
+
+@media (max-width: 1024px) {
+  .plugin-installation-modal .modal-content {
+    @apply max-w-2xl;
+  }
+}
+
+@media (max-width: 768px) {
+  .plugin-installation-modal .modal-content {
+    @apply max-w-full mx-2;
+  }
+  
+  .plugin-info {
+    @apply flex-col space-y-4;
+  }
+  
+  .plugin-info .flex {
+    @apply flex-col space-x-0 space-y-4;
+  }
+  
+  .modal-footer {
+    @apply flex-col space-y-3;
+  }
+  
+  .modal-footer .flex:last-child {
+    @apply w-full justify-center;
+  }
+}
+
+/* Enhanced Animation Classes */
+.widget-dragging {
+  @apply cursor-grabbing select-none;
+}
+
+.widget-dragging .docking-zone {
+  @apply animate-pulse-gentle;
+}
+
+.widget-entrance {
+  animation: widgetEntrance 0.5s ease-creative-out forwards;
+}
+
+.widget-exit {
+  animation: widgetExit 0.3s ease-creative-in forwards;
+}
+
+@keyframes widgetEntrance {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes widgetExit {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.8) translateY(-20px);
+  }
+}
+
+/* Accessibility Enhancements */
+.widget-container:focus-within .docking-zone {
+  @apply ring-2 ring-creative-primary-500 ring-offset-2;
+}
+
+.ai-review-panel .suggestion-item:focus {
+  @apply ring-2 ring-creative-primary-500 ring-offset-2 outline-none;
+}
+
+.plugin-marketplace .plugin-card:focus {
+  @apply ring-2 ring-creative-primary-500 ring-offset-2 outline-none;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .docking-zone {
+    @apply border-4 border-solid;
+  }
+  
+  .widget-toolbar {
+    @apply border-2 border-solid;
+  }
+  
+  .ai-review-panel {
+    @apply border-2 border-solid;
+  }
+  
+  .plugin-card {
+    @apply border-2 border-solid;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .widget-container,
+  .widget-toolbar,
+  .ai-review-panel,
+  .plugin-marketplace,
+  .plugin-installation-modal {
+    @apply transition-none;
+  }
+  
+  .docking-zone,
+  .toolbar-btn,
+  .suggestion-item,
+  .plugin-card {
+    @apply transition-none animate-none;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .widget-container,
+  .widget-toolbar,
+  .ai-review-panel,
+  .plugin-marketplace,
+  .plugin-installation-modal {
+    @apply shadow-none border border-gray-300;
+  }
+  
+  .docking-zone {
+    @apply hidden;
+  }
+  
+  .widget-toolbar {
+    @apply hidden;
+  }
+}
+
+/* Custom Scrollbars for Webkit */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  @apply bg-creative-neutral-300 dark:bg-creative-neutral-600 rounded-full;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  @apply bg-creative-neutral-400 dark:bg-creative-neutral-500;
+}
+
+/* Focus Ring Utilities */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-creative-primary-500 focus:ring-offset-2;
+}
+
+.focus-ring-dark {
+  @apply dark:focus:ring-offset-creative-neutral-800;
+}
+
+/* Component State Classes */
+.state-loading {
+  @apply opacity-60 pointer-events-none;
+}
+
+.state-disabled {
+  @apply opacity-40 pointer-events-none grayscale;
+}
+
+.state-error {
+  @apply border-red-500 bg-red-50 dark:bg-red-900/20;
+}
+
+.state-success {
+  @apply border-creative-secondary-500 bg-creative-secondary-50 dark:bg-creative-secondary-900/20;
+}
+
+/* Utility Classes for Component Integration */
+.extensibility-platform {
+  @apply relative w-full h-full overflow-hidden;
+}
+
+.extensibility-platform .widget-layer {
+  @apply absolute inset-0 z-10;
+}
+
+.extensibility-platform .toolbar-layer {
+  @apply absolute inset-0 z-20 pointer-events-none;
+}
+
+.extensibility-platform .toolbar-layer > * {
+  @apply pointer-events-auto;
+}
+
+.extensibility-platform .modal-layer {
+  @apply absolute inset-0 z-30;
+}
+
+.extensibility-platform .panel-layer {
+  @apply absolute inset-0 z-40;
+}
+
+/* Dark Mode Specific Enhancements */
+.dark .extensibility-platform {
+  @apply bg-creative-neutral-900;
+}
+
+.dark .widget-container {
+  @apply bg-creative-neutral-800;
+}
+
+.dark .docking-zone-active {
+  @apply bg-creative-primary-900/60 border-creative-primary-400;
+}
+
+.dark .suggestion-item:hover {
+  @apply bg-creative-neutral-750;
+}
+
+.dark .plugin-card:hover {
+  @apply bg-creative-neutral-750;
+}

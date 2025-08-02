@@ -7,20 +7,20 @@ export default class extends Controller {
 
   connect() {
     // Load collapsed state from localStorage
-    const savedState = localStorage.getItem('sidebar-collapsed')
+    const savedState = localStorage.getItem("sidebar-collapsed")
     if (savedState !== null) {
-      this.collapsedValue = savedState === 'true'
+      this.collapsedValue = savedState === "true"
       this.updateSidebarState()
     }
 
     // Add resize listener to auto-collapse on small screens
     this.resizeListener = this.handleResize.bind(this)
-    window.addEventListener('resize', this.resizeListener)
+    window.addEventListener("resize", this.resizeListener)
     this.handleResize() // Check initial screen size
   }
 
   disconnect() {
-    window.removeEventListener('resize', this.resizeListener)
+    window.removeEventListener("resize", this.resizeListener)
   }
 
   // Toggle sidebar collapsed state
@@ -35,34 +35,34 @@ export default class extends Controller {
     const sidebar = this.element
     
     if (this.collapsedValue) {
-      sidebar.classList.remove('w-80')
-      sidebar.classList.add('w-16')
+      sidebar.classList.remove("w-80")
+      sidebar.classList.add("w-16")
     } else {
-      sidebar.classList.remove('w-16')
-      sidebar.classList.add('w-80')
+      sidebar.classList.remove("w-16")
+      sidebar.classList.add("w-80")
     }
 
     // Update toggle button icon
     if (this.hasToggleButtonTarget) {
-      const icon = this.toggleButtonTarget.querySelector('svg')
+      const icon = this.toggleButtonTarget.querySelector("svg")
       if (icon) {
         if (this.collapsedValue) {
-          icon.classList.add('rotate-180')
+          icon.classList.add("rotate-180")
         } else {
-          icon.classList.remove('rotate-180')
+          icon.classList.remove("rotate-180")
         }
       }
     }
 
     // Dispatch event for other components to react
-    this.dispatch('toggled', { 
+    this.dispatch("toggled", { 
       detail: { collapsed: this.collapsedValue } 
     })
   }
 
   // Save state to localStorage
   saveSidebarState() {
-    localStorage.setItem('sidebar-collapsed', this.collapsedValue.toString())
+    localStorage.setItem("sidebar-collapsed", this.collapsedValue.toString())
   }
 
   // Handle window resize
@@ -82,10 +82,10 @@ export default class extends Controller {
     
     // Add visual selection state
     this.clearContextItemSelection()
-    event.currentTarget.classList.add('bg-creative-primary-50', 'dark:bg-creative-primary-900/20')
+    event.currentTarget.classList.add("bg-creative-primary-50", "dark:bg-creative-primary-900/20")
     
     // Dispatch event for other components
-    this.dispatch('context-item-selected', {
+    this.dispatch("context-item-selected", {
       detail: { contextItemId }
     })
   }
@@ -98,11 +98,11 @@ export default class extends Controller {
     // Add loading state to button
     const button = event.currentTarget
     const originalContent = button.innerHTML
-    button.innerHTML = '<div class="w-3 h-3 border border-creative-primary-500 border-t-transparent rounded-full animate-spin"></div>'
+    button.innerHTML = "<div class=\"w-3 h-3 border border-creative-primary-500 border-t-transparent rounded-full animate-spin\"></div>"
     button.disabled = true
     
     // Dispatch event for editor to handle insertion
-    this.dispatch('context-item-insert', {
+    this.dispatch("context-item-insert", {
       detail: { 
         contextItemId,
         button,
@@ -113,9 +113,9 @@ export default class extends Controller {
 
   // Clear context item selections
   clearContextItemSelection() {
-    const selectedItems = this.element.querySelectorAll('[data-context-item-id]')
+    const selectedItems = this.element.querySelectorAll("[data-context-item-id]")
     selectedItems.forEach(item => {
-      item.classList.remove('bg-creative-primary-50', 'dark:bg-creative-primary-900/20')
+      item.classList.remove("bg-creative-primary-50", "dark:bg-creative-primary-900/20")
     })
   }
 
@@ -130,9 +130,9 @@ export default class extends Controller {
       
       if (success) {
         // Show brief success state
-        button.classList.add('text-creative-secondary-600', 'dark:text-creative-secondary-400')
+        button.classList.add("text-creative-secondary-600", "dark:text-creative-secondary-400")
         setTimeout(() => {
-          button.classList.remove('text-creative-secondary-600', 'dark:text-creative-secondary-400')
+          button.classList.remove("text-creative-secondary-600", "dark:text-creative-secondary-400")
         }, 1000)
       }
     }
@@ -159,13 +159,13 @@ export default class extends Controller {
   // Handle search functionality (if search input is added)
   search(event) {
     const query = event.target.value.toLowerCase().trim()
-    const searchableItems = this.element.querySelectorAll('[data-searchable]')
+    const searchableItems = this.element.querySelectorAll("[data-searchable]")
     
     searchableItems.forEach(item => {
       const text = item.textContent.toLowerCase()
-      const matches = text.includes(query) || query === ''
+      const matches = text.includes(query) || query === ""
       
-      item.style.display = matches ? '' : 'none'
+      item.style.display = matches ? "" : "none"
     })
   }
 
@@ -174,11 +174,11 @@ export default class extends Controller {
     if (!this.collapsedValue) return
     
     const item = event.currentTarget
-    const tooltip = item.querySelector('[data-tooltip]')
+    const tooltip = item.querySelector("[data-tooltip]")
     
     if (tooltip) {
-      tooltip.classList.remove('opacity-0', 'invisible')
-      tooltip.classList.add('opacity-100', 'visible')
+      tooltip.classList.remove("opacity-0", "invisible")
+      tooltip.classList.add("opacity-100", "visible")
     }
   }
 
@@ -186,24 +186,24 @@ export default class extends Controller {
     if (!this.collapsedValue) return
     
     const item = event.currentTarget
-    const tooltip = item.querySelector('[data-tooltip]')
+    const tooltip = item.querySelector("[data-tooltip]")
     
     if (tooltip) {
-      tooltip.classList.add('opacity-0', 'invisible')
-      tooltip.classList.remove('opacity-100', 'visible')
+      tooltip.classList.add("opacity-0", "invisible")
+      tooltip.classList.remove("opacity-100", "visible")
     }
   }
 
   // Handle keyboard shortcuts
   handleKeydown(event) {
     // Cmd/Ctrl + B to toggle sidebar
-    if ((event.metaKey || event.ctrlKey) && event.key === 'b') {
+    if ((event.metaKey || event.ctrlKey) && event.key === "b") {
       event.preventDefault()
       this.toggle()
     }
     
     // Escape to collapse sidebar
-    if (event.key === 'Escape' && !this.collapsedValue) {
+    if (event.key === "Escape" && !this.collapsedValue) {
       this.collapse()
     }
   }

@@ -1,0 +1,329 @@
+<%= content_tag :div, class: modal_class, data: modal_data_attributes,
+                role: "dialog", 
+                aria_modal: "true",
+                aria_labelledby: "plugin-modal-title" do %>
+  
+  <!-- Modal Content -->
+  <div class="<%= content_class %>" data-plugin-installation-modal-target="modalContent">
+    
+    <!-- Header -->
+    <div class="<%= header_class %>">
+      <div class="flex items-center space-x-4">
+        <div class="<%= plugin_icon_class %>">
+          <%= sample_plugin[:icon] %>
+        </div>
+        
+        <div>
+          <h2 id="plugin-modal-title" 
+              class="text-2xl font-bold text-creative-neutral-900 dark:text-creative-neutral-100">
+            Install Plugin
+          </h2>
+          <p class="text-creative-neutral-600 dark:text-creative-neutral-400 mt-1">
+            Add new functionality to your workspace
+          </p>
+        </div>
+      </div>
+      
+      <!-- Close Button -->
+      <button type="button" 
+              class="w-10 h-10 flex items-center justify-center text-creative-neutral-500 
+                     dark:text-creative-neutral-400 hover:text-creative-neutral-700 
+                     dark:hover:text-creative-neutral-300 hover:bg-creative-neutral-100 
+                     dark:hover:bg-creative-neutral-700 rounded-xl transition-all duration-200"
+              data-action="click->plugin-installation-modal#close"
+              aria-label="Close modal">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    
+    <!-- Body -->
+    <div class="<%= body_class %>">
+      
+      <!-- Plugin Information -->
+      <div class="<%= plugin_info_class %>">
+        <div class="flex items-start space-x-6">
+          <div class="<%= plugin_icon_class %>">
+            <%= sample_plugin[:icon] %>
+          </div>
+          
+          <div class="flex-1 space-y-4">
+            <!-- Plugin Details -->
+            <div>
+              <h3 class="text-2xl font-bold text-creative-neutral-900 dark:text-creative-neutral-100 mb-2">
+                <%= sample_plugin[:name] %>
+              </h3>
+              
+              <div class="flex items-center space-x-4 text-sm text-creative-neutral-600 dark:text-creative-neutral-400 mb-3">
+                <span>by <%= sample_plugin[:author] %></span>
+                <span>•</span>
+                <span>v<%= sample_plugin[:version] %></span>
+                <span>•</span>
+                <span><%= sample_plugin[:size] %></span>
+                <span>•</span>
+                <div class="flex items-center space-x-1">
+                  <svg class="w-4 h-4 text-creative-accent-amber" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                  </svg>
+                  <span><%= sample_plugin[:rating] %></span>
+                </div>
+                <span>•</span>
+                <span><%= sample_plugin[:downloads] %> downloads</span>
+              </div>
+              
+              <p class="text-creative-neutral-700 dark:text-creative-neutral-300 leading-relaxed">
+                <%= sample_plugin[:description] %>
+              </p>
+            </div>
+            
+            <!-- Version Selection -->
+            <div class="bg-creative-neutral-50 dark:bg-creative-neutral-800 rounded-xl p-4">
+              <h4 class="text-sm font-semibold text-creative-neutral-900 dark:text-creative-neutral-100 mb-3">
+                Select Version
+              </h4>
+              
+              <div class="space-y-2">
+                <label class="flex items-center p-3 bg-white dark:bg-creative-neutral-700 rounded-lg border-2 
+                               border-creative-primary-500 cursor-pointer transition-all duration-200">
+                  <input type="radio" name="version" value="2.1.0" checked class="sr-only">
+                  <div class="w-4 h-4 bg-creative-primary-500 rounded-full flex items-center justify-center mr-3">
+                    <div class="w-2 h-2 bg-white rounded-full"></div>
+                  </div>
+                  <div class="flex-1">
+                    <div class="flex items-center space-x-2">
+                      <span class="font-medium text-creative-neutral-900 dark:text-creative-neutral-100">
+                        v2.1.0 (Latest)
+                      </span>
+                      <span class="px-2 py-0.5 text-xs font-medium bg-creative-secondary-100 
+                                   text-creative-secondary-800 dark:bg-creative-secondary-900/30 
+                                   dark:text-creative-secondary-300 rounded-full">
+                        Recommended
+                      </span>
+                    </div>
+                    <p class="text-sm text-creative-neutral-600 dark:text-creative-neutral-400">
+                      Latest stable release with all features
+                    </p>
+                  </div>
+                </label>
+                
+                <label class="flex items-center p-3 bg-white dark:bg-creative-neutral-700 rounded-lg border-2 
+                               border-creative-neutral-200 dark:border-creative-neutral-600 cursor-pointer 
+                               hover:border-creative-neutral-300 dark:hover:border-creative-neutral-500 
+                               transition-all duration-200">
+                  <input type="radio" name="version" value="2.0.5" class="sr-only">
+                  <div class="w-4 h-4 border-2 border-creative-neutral-300 dark:border-creative-neutral-500 
+                              rounded-full mr-3"></div>
+                  <div>
+                    <span class="font-medium text-creative-neutral-900 dark:text-creative-neutral-100">
+                      v2.0.5 (Stable)
+                    </span>
+                    <p class="text-sm text-creative-neutral-600 dark:text-creative-neutral-400">
+                      Previous stable release
+                    </p>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Installation Options -->
+      <div class="p-6 border-b border-creative-neutral-200 dark:border-creative-neutral-700">
+        <h4 class="text-lg font-semibold text-creative-neutral-900 dark:text-creative-neutral-100 mb-4">
+          Installation Options
+        </h4>
+        
+        <div class="grid gap-4">
+          <!-- Full Installation -->
+          <label class="option-card p-5 border-2 border-creative-primary-500 bg-creative-primary-50 
+                         dark:bg-creative-primary-900/20 rounded-xl cursor-pointer transition-all duration-300">
+            <input type="radio" name="installation_mode" value="full" checked class="sr-only">
+            <div class="flex items-start space-x-4">
+              <div class="w-5 h-5 bg-creative-primary-500 rounded-full flex items-center justify-center mt-0.5">
+                <div class="w-2.5 h-2.5 bg-white rounded-full"></div>
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center justify-between mb-2">
+                  <h5 class="font-semibold text-creative-neutral-900 dark:text-creative-neutral-100">
+                    Full Installation
+                  </h5>
+                  <span class="text-sm font-medium text-creative-primary-600 dark:text-creative-primary-400">
+                    15.2 MB
+                  </span>
+                </div>
+                <p class="text-sm text-creative-neutral-600 dark:text-creative-neutral-400 mb-3">
+                  Install all features and dependencies for complete functionality
+                </p>
+                <div class="flex flex-wrap gap-2">
+                  <span class="px-2 py-1 text-xs bg-creative-secondary-100 text-creative-secondary-800 
+                               dark:bg-creative-secondary-900/30 dark:text-creative-secondary-300 
+                               rounded-full">Complete feature set</span>
+                  <span class="px-2 py-1 text-xs bg-creative-secondary-100 text-creative-secondary-800 
+                               dark:bg-creative-secondary-900/30 dark:text-creative-secondary-300 
+                               rounded-full">All AI models</span>
+                  <span class="px-2 py-1 text-xs bg-creative-secondary-100 text-creative-secondary-800 
+                               dark:bg-creative-secondary-900/30 dark:text-creative-secondary-300 
+                               rounded-full">Advanced settings</span>
+                </div>
+              </div>
+            </div>
+          </label>
+          
+          <!-- Minimal Installation -->
+          <label class="option-card p-5 border-2 border-creative-neutral-200 dark:border-creative-neutral-700 
+                         bg-white dark:bg-creative-neutral-800 rounded-xl cursor-pointer 
+                         hover:border-creative-primary-300 dark:hover:border-creative-primary-600 
+                         transition-all duration-300">
+            <input type="radio" name="installation_mode" value="minimal" class="sr-only">
+            <div class="flex items-start space-x-4">
+              <div class="w-5 h-5 border-2 border-creative-neutral-300 dark:border-creative-neutral-500 
+                          rounded-full mt-0.5"></div>
+              <div class="flex-1">
+                <div class="flex items-center justify-between mb-2">
+                  <h5 class="font-semibold text-creative-neutral-900 dark:text-creative-neutral-100">
+                    Minimal Installation
+                  </h5>
+                  <span class="text-sm font-medium text-creative-neutral-600 dark:text-creative-neutral-400">
+                    8.1 MB
+                  </span>
+                </div>
+                <p class="text-sm text-creative-neutral-600 dark:text-creative-neutral-400 mb-3">
+                  Install core features only for lighter footprint
+                </p>
+                <div class="flex flex-wrap gap-2">
+                  <span class="px-2 py-1 text-xs bg-creative-neutral-100 text-creative-neutral-700 
+                               dark:bg-creative-neutral-700 dark:text-creative-neutral-300 
+                               rounded-full">Core functionality</span>
+                  <span class="px-2 py-1 text-xs bg-creative-neutral-100 text-creative-neutral-700 
+                               dark:bg-creative-neutral-700 dark:text-creative-neutral-300 
+                               rounded-full">Basic AI features</span>
+                </div>
+              </div>
+            </div>
+          </label>
+        </div>
+      </div>
+      
+      <!-- Permissions -->
+      <div class="p-6">
+        <h4 class="text-lg font-semibold text-creative-neutral-900 dark:text-creative-neutral-100 mb-4">
+          Required Permissions
+        </h4>
+        
+        <div class="space-y-3">
+          <!-- File Access Permission -->
+          <div class="flex items-start space-x-4 p-4 bg-creative-secondary-50 dark:bg-creative-secondary-900/20 
+                      border-2 border-creative-secondary-200 dark:border-creative-secondary-700/50 
+                      rounded-xl">
+            <div class="w-8 h-8 bg-creative-secondary-500 text-white rounded-lg flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <div class="flex items-center justify-between mb-1">
+                <h5 class="font-semibold text-creative-neutral-900 dark:text-creative-neutral-100">
+                  File System Access
+                </h5>
+                <span class="px-2 py-0.5 text-xs font-medium bg-creative-secondary-100 
+                             text-creative-secondary-800 dark:bg-creative-secondary-900/30 
+                             dark:text-creative-secondary-300 rounded-full">
+                  Granted
+                </span>
+              </div>
+              <p class="text-sm text-creative-neutral-600 dark:text-creative-neutral-400">
+                Read and write files in your project directory
+              </p>
+            </div>
+          </div>
+          
+          <!-- Network Access Permission -->
+          <div class="flex items-start space-x-4 p-4 bg-creative-accent-amber/10 dark:bg-yellow-900/20 
+                      border-2 border-creative-accent-amber/30 dark:border-yellow-700/50 rounded-xl">
+            <div class="w-8 h-8 bg-creative-accent-amber text-white rounded-lg flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <div class="flex items-center justify-between mb-1">
+                <h5 class="font-semibold text-creative-neutral-900 dark:text-creative-neutral-100">
+                  Network Access
+                </h5>
+                <span class="px-2 py-0.5 text-xs font-medium bg-creative-accent-amber/20 
+                             text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 rounded-full">
+                  Requires Review
+                </span>
+              </div>
+              <p class="text-sm text-creative-neutral-600 dark:text-creative-neutral-400">
+                Make HTTP requests to external AI services for code analysis
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Permission Notice -->
+        <div class="mt-4 p-4 bg-creative-primary-50 dark:bg-creative-primary-900/20 rounded-xl">
+          <div class="flex items-start space-x-3">
+            <svg class="w-5 h-5 text-creative-primary-600 dark:text-creative-primary-400 mt-0.5 flex-shrink-0" 
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <div class="text-sm">
+              <p class="font-medium text-creative-primary-800 dark:text-creative-primary-200 mb-1">
+                Security Notice
+              </p>
+              <p class="text-creative-primary-700 dark:text-creative-primary-300">
+                This plugin will have access to your project files and can make network requests. 
+                Review the permissions carefully before installing.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="<%= footer_class %>">
+      <div class="flex items-center space-x-4">
+        <label class="flex items-center space-x-2 text-sm">
+          <input type="checkbox" 
+                 class="w-4 h-4 text-creative-primary-600 border-creative-neutral-300 
+                        dark:border-creative-neutral-600 rounded focus:ring-creative-primary-500 
+                        dark:bg-creative-neutral-800"
+                 data-plugin-installation-modal-target="agreementCheckbox">
+          <span class="text-creative-neutral-700 dark:text-creative-neutral-300">
+            I agree to the <a href="#" class="text-creative-primary-600 dark:text-creative-primary-400 hover:underline">terms of service</a>
+          </span>
+        </label>
+      </div>
+      
+      <div class="flex items-center space-x-3">
+        <button type="button" 
+                class="btn btn-ghost px-6 py-2"
+                data-action="click->plugin-installation-modal#close">
+          Cancel
+        </button>
+        
+        <button type="button" 
+                class="btn btn-primary px-6 py-2 flex items-center space-x-2"
+                data-action="click->plugin-installation-modal#startInstallation"
+                data-plugin-installation-modal-target="installButton"
+                disabled>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          <span data-plugin-installation-modal-target="installButtonText">Install Plugin</span>
+        </button>
+      </div>
+    </div>
+    
+  </div>
+  
+<% end %>

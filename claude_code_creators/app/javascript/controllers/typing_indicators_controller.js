@@ -243,7 +243,7 @@ export default class extends Controller {
     element.classList.add(this.getUserColorClass(user.color))
     
     // Set initials
-    const initialsElement = element.querySelector('.avatar-initials')
+    const initialsElement = element.querySelector(".avatar-initials")
     if (initialsElement) {
       initialsElement.textContent = this.getUserInitials(user.name)
     }
@@ -391,7 +391,7 @@ export default class extends Controller {
   }
 
   getUserInitials(name) {
-    return name.split(' ').map(word => word[0]).join('').toUpperCase().substring(0, 2)
+    return name.split(" ").map(word => word[0]).join("").toUpperCase().substring(0, 2)
   }
 
   getUserColorClass(color) {

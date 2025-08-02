@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  plugin: one
+  user: one
+  permission_type: MyString
+  resource: MyString
+  granted_at: 2025-08-02 13:59:20
+  revoked_at: 2025-08-02 13:59:20
+
+two:
+  plugin: two
+  user: two
+  permission_type: MyString
+  resource: MyString
+  granted_at: 2025-08-02 13:59:20
+  revoked_at: 2025-08-02 13:59:20

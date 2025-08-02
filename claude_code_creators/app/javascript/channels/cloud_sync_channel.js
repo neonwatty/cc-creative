@@ -27,12 +27,12 @@ class CloudSyncChannel {
       {
         connected: () => {
           console.log("Connected to CloudSyncChannel")
-          this.trigger('connected')
+          this.trigger("connected")
         },
 
         disconnected: () => {
           console.log("Disconnected from CloudSyncChannel")
-          this.trigger('disconnected')
+          this.trigger("disconnected")
         },
 
         received: (data) => {
@@ -56,36 +56,36 @@ class CloudSyncChannel {
     const { event, integration_id, error } = data
 
     if (error) {
-      this.trigger('error', { error, integration_id })
+      this.trigger("error", { error, integration_id })
       return
     }
 
     switch (event) {
-      case 'sync_started':
-        this.trigger('sync_started', data)
-        break
-      case 'sync_progress':
-        this.trigger('sync_progress', data)
-        break
-      case 'sync_completed':
-        this.trigger('sync_completed', data)
-        break
-      case 'sync_error':
-        this.trigger('sync_error', data)
-        break
-      case 'file_imported':
-        this.trigger('file_imported', data)
-        break
-      case 'file_exported':
-        this.trigger('file_exported', data)
-        break
-      default:
-        // Handle status updates and other messages
-        if (data.integrations) {
-          this.trigger('status_update', data)
-        } else if (integration_id) {
-          this.trigger('integration_status', data)
-        }
+    case "sync_started":
+      this.trigger("sync_started", data)
+      break
+    case "sync_progress":
+      this.trigger("sync_progress", data)
+      break
+    case "sync_completed":
+      this.trigger("sync_completed", data)
+      break
+    case "sync_error":
+      this.trigger("sync_error", data)
+      break
+    case "file_imported":
+      this.trigger("file_imported", data)
+      break
+    case "file_exported":
+      this.trigger("file_exported", data)
+      break
+    default:
+      // Handle status updates and other messages
+      if (data.integrations) {
+        this.trigger("status_update", data)
+      } else if (integration_id) {
+        this.trigger("integration_status", data)
+      }
     }
   }
 
@@ -93,7 +93,7 @@ class CloudSyncChannel {
   getSyncStatus(integrationId = null) {
     if (!this.channel) return
 
-    this.channel.perform('get_sync_status', {
+    this.channel.perform("get_sync_status", {
       integration_id: integrationId
     })
   }
@@ -102,7 +102,7 @@ class CloudSyncChannel {
   triggerSync(integrationId) {
     if (!this.channel) return
 
-    this.channel.perform('trigger_sync', {
+    this.channel.perform("trigger_sync", {
       integration_id: integrationId
     })
   }
@@ -149,9 +149,9 @@ class CloudSyncChannel {
 window.cloudSyncChannel = new CloudSyncChannel()
 
 // Auto-connect if user data is available
-document.addEventListener('DOMContentLoaded', () => {
-  const userIdElement = document.querySelector('[data-user-id]')
-  const integrationIdElement = document.querySelector('[data-integration-id]')
+document.addEventListener("DOMContentLoaded", () => {
+  const userIdElement = document.querySelector("[data-user-id]")
+  const integrationIdElement = document.querySelector("[data-integration-id]")
   
   if (userIdElement) {
     const userId = userIdElement.dataset.userId
@@ -162,21 +162,21 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 
 // Integrate with Stimulus controllers
-document.addEventListener('cloud-sync:connect', (event) => {
+document.addEventListener("cloud-sync:connect", (event) => {
   const { userId, integrationId } = event.detail
   window.cloudSyncChannel.connect(userId, integrationId)
 })
 
-document.addEventListener('cloud-sync:disconnect', () => {
+document.addEventListener("cloud-sync:disconnect", () => {
   window.cloudSyncChannel.disconnect()
 })
 
-document.addEventListener('cloud-sync:get-status', (event) => {
+document.addEventListener("cloud-sync:get-status", (event) => {
   const { integrationId } = event.detail
   window.cloudSyncChannel.getSyncStatus(integrationId)
 })
 
-document.addEventListener('cloud-sync:trigger-sync', (event) => {
+document.addEventListener("cloud-sync:trigger-sync", (event) => {
   const { integrationId } = event.detail
   window.cloudSyncChannel.triggerSync(integrationId)
 })

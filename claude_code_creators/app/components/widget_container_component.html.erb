@@ -1,0 +1,319 @@
+<%= content_tag :div, class: container_class, data: container_data_attributes do %>
+  
+  <!-- Widget Area -->
+  <div class="<%= widget_area_class %>" <%= widget_area_data_attributes.map { |k, v| "#{k}=\"#{v}\"" }.join(' ').html_safe %>>
+    
+    <!-- Empty State -->
+    <div class="<%= empty_state_class %>" data-widget-container-target="emptyState">
+      <div class="w-24 h-24 mx-auto text-gray-300 dark:text-gray-600 mb-6">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-full h-full">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" 
+                d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+        </svg>
+      </div>
+      
+      <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        Create Your Widget Layout
+      </h3>
+      
+      <p class="text-gray-500 dark:text-gray-400 mb-8 max-w-md">
+        Start building your personalized workspace by adding widgets. Drag and drop to arrange them exactly how you like.
+      </p>
+      
+      <!-- Quick Start Options -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
+        <% widget_templates.each do |template| %>
+          <button type="button" 
+                  class="quick-template-btn p-4 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-lg transition-all duration-200 group"
+                  data-action="click->widget-container#createQuickWidget"
+                  data-widget-type="<%= template[:type] %>"
+                  title="<%= template[:description] %>">
+            <div class="text-2xl mb-2 group-hover:scale-110 transition-transform duration-200">
+              <%= template[:icon] %>
+            </div>
+            <div class="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <%= template[:name] %>
+            </div>
+          </button>
+        <% end %>
+      </div>
+      
+      <div class="space-y-3">
+        <button type="button" 
+                class="btn btn-primary btn-lg"
+                data-action="click->widget-container#openWidgetCreator">
+          <span class="mr-2">+</span>
+          Create Custom Widget
+        </button>
+        
+        <div class="text-sm text-gray-400 dark:text-gray-500">
+          or
+          <button type="button" 
+                  class="text-blue-600 dark:text-blue-400 hover:underline"
+                  data-action="click->widget-container#openMarketplace">
+            browse the plugin marketplace
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Snap Grid (shown during drag operations) -->
+    <% if show_guidelines && enable_snap %>
+      <div class="<%= snap_grid_class %>" data-widget-container-target="snapGrid">
+        <svg class="w-full h-full">
+          <!-- Vertical lines -->
+          <% snap_grid_lines[:vertical].each do |x| %>
+            <line x1="<%= x %>" y1="0" x2="<%= x %>" y2="100%" 
+                  stroke="currentColor" stroke-width="1" 
+                  class="text-blue-200 dark:text-blue-800" />
+          <% end %>
+          
+          <!-- Horizontal lines -->
+          <% snap_grid_lines[:horizontal].each do |y| %>
+            <line x1="0" y1="<%= y %>" x2="100%" y2="<%= y %>" 
+                  stroke="currentColor" stroke-width="1" 
+                  class="text-blue-200 dark:text-blue-800" />
+          <% end %>
+        </svg>
+      </div>
+    <% end %>
+    
+    <!-- Alignment Guidelines (shown during widget positioning) -->
+    <% if show_guidelines %>
+      <div class="<%= guidelines_class %>" data-widget-container-target="guidelines">
+        <!-- Vertical alignment line -->
+        <div class="absolute left-1/2 top-0 bottom-0 w-0.5 bg-blue-400 dark:bg-blue-500 transform -translate-x-0.5" 
+             data-widget-container-target="verticalGuideline" style="display: none;"></div>
+        
+        <!-- Horizontal alignment line -->
+        <div class="absolute top-1/2 left-0 right-0 h-0.5 bg-blue-400 dark:bg-blue-500 transform -translate-y-0.5" 
+             data-widget-container-target="horizontalGuideline" style="display: none;"></div>
+        
+        <!-- Custom guidelines (dynamically added) -->
+        <div data-widget-container-target="customGuidelines"></div>
+      </div>
+    <% end %>
+    
+    <!-- Enhanced Docking Zones with Professional Visual Feedback -->
+    <% if enable_docking %>
+      <% docking_zones.each do |zone| %>
+        <div class="<%= docking_zone_class(zone) %>" 
+             data-widget-container-target="dockingZone"
+             data-zone="<%= zone %>"
+             role="region"
+             aria-label="<%= zone.capitalize %> docking zone"
+             tabindex="-1">
+          
+          <!-- Background Pattern -->
+          <div class="absolute inset-0 opacity-30">
+            <svg class="w-full h-full" viewBox="0 0 60 60" fill="none">
+              <defs>
+                <pattern id="docking-pattern-<%= zone %>" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                  <circle cx="10" cy="10" r="1" fill="currentColor" class="text-creative-primary-300 dark:text-creative-primary-600"/>
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#docking-pattern-<%= zone %>)"/>
+            </svg>
+          </div>
+          
+          <!-- Central Content -->
+          <div class="relative z-10 text-center space-y-3">
+            <!-- Zone Icon with Enhanced Styling -->
+            <div class="w-12 h-12 mx-auto text-creative-primary-500 dark:text-creative-primary-400 
+                        bg-white dark:bg-creative-neutral-800 rounded-full shadow-creative-md 
+                        flex items-center justify-center transform transition-transform duration-200">
+              <% case zone %>
+              <% when "left" %>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-6 h-6 stroke-2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+                </svg>
+              <% when "right" %>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-6 h-6 stroke-2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
+                </svg>
+              <% when "top" %>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-6 h-6 stroke-2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 11l7-7 7 7M5 19l7-7 7 7"/>
+                </svg>
+              <% when "bottom" %>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-6 h-6 stroke-2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 13l-7 7-7-7m14-8l-7 7-7-7"/>
+                </svg>
+              <% when "center" %>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-6 h-6 stroke-2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+              <% end %>
+            </div>
+            
+            <!-- Zone Label -->
+            <div class="text-sm font-semibold text-creative-primary-700 dark:text-creative-primary-300 
+                        bg-white/80 dark:bg-creative-neutral-800/80 px-3 py-1 rounded-full 
+                        backdrop-blur-sm shadow-creative-sm">
+              Drop <%= zone %>
+            </div>
+            
+            <!-- Zone Description -->
+            <div class="text-xs text-creative-neutral-600 dark:text-creative-neutral-400 hidden group-hover:block">
+              <% case zone %>
+              <% when "left" %>
+                Dock to left side
+              <% when "right" %>
+                Dock to right side
+              <% when "top" %>
+                Dock to top
+              <% when "bottom" %>
+                Dock to bottom
+              <% when "center" %>
+                Place in center
+              <% end %>
+            </div>
+          </div>
+          
+          <!-- Pulse Animation Ring -->
+          <div class="absolute inset-0 rounded-xl border-2 border-creative-primary-400/50 
+                      dark:border-creative-primary-500/50 animate-ping opacity-0 
+                      group-hover:opacity-75 transition-opacity duration-300"></div>
+        </div>
+      <% end %>
+    <% end %>
+    
+    <!-- Widget Content Area (where widgets are actually placed) -->
+    <div class="widget-content relative w-full h-full" 
+         data-widget-container-target="widgetContent">
+      <!-- Widgets will be dynamically added here -->
+    </div>
+  </div>
+  
+  <!-- Layout Mode Switcher -->
+  <div class="<%= layout_switcher_class %>" data-widget-container-target="layoutSwitcher">
+    <button type="button" 
+            class="<%= layout_button_class("grid", layout_mode) %>"
+            data-action="click->widget-container#switchLayoutMode"
+            data-layout-mode="grid"
+            title="Grid Layout">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+              d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+      </svg>
+    </button>
+    
+    <button type="button" 
+            class="<%= layout_button_class("column", layout_mode) %>"
+            data-action="click->widget-container#switchLayoutMode"
+            data-layout-mode="column"
+            title="Column Layout">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+              d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+      </svg>
+    </button>
+    
+    <button type="button" 
+            class="<%= layout_button_class("row", layout_mode) %>"
+            data-action="click->widget-container#switchLayoutMode"
+            data-layout-mode="row"
+            title="Row Layout">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+              d="M6 4v16M10 4v16M14 4v16M18 4v16"/>
+      </svg>
+    </button>
+  </div>
+  
+  <!-- Quick Add Button -->
+  <button type="button" 
+          class="<%= quick_add_button_class %>"
+          data-action="click->widget-container#showQuickAdd"
+          data-widget-container-target="quickAddButton"
+          title="Add Widget">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+    </svg>
+  </button>
+  
+  <!-- Performance Monitor (development mode) -->
+  <% if Rails.env.development? %>
+    <div class="<%= performance_monitor_class %>" data-widget-container-target="performanceMonitor">
+      <div class="font-semibold text-gray-700 dark:text-gray-300 mb-1">Performance</div>
+      <div class="text-gray-600 dark:text-gray-400">
+        <div>Widgets: <span data-widget-container-target="widgetCount">0</span>/<%= max_widgets %></div>
+        <div>FPS: <span data-widget-container-target="fpsCounter">60</span></div>
+        <div>Memory: <span data-widget-container-target="memoryUsage">0</span>MB</div>
+      </div>
+    </div>
+  <% end %>
+  
+  <!-- Status Bar -->
+  <div class="<%= status_bar_class %>" data-widget-container-target="statusBar">
+    <div class="flex items-center space-x-4">
+      <span class="text-green-600 dark:text-green-400" data-widget-container-target="statusIndicator">
+        <svg class="w-4 h-4 inline-block mr-1" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        Layout saved
+      </span>
+      
+      <span class="text-gray-500 dark:text-gray-400" data-widget-container-target="statusMessage">
+        Ready
+      </span>
+    </div>
+    
+    <div class="flex items-center space-x-4 text-xs">
+      <span>Layout: <span class="font-medium capitalize" data-widget-container-target="currentLayout"><%= layout_mode %></span></span>
+      <span>Auto-save: <span class="font-medium" data-widget-container-target="autoSaveStatus"><%= auto_save ? "On" : "Off" %></span></span>
+      <span>Snap: <span class="font-medium" data-widget-container-target="snapStatus"><%= enable_snap ? "On" : "Off" %></span></span>
+    </div>
+  </div>
+  
+  <!-- Keyboard Shortcuts Help (hidden by default) -->
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center opacity-0 invisible transition-all duration-300 z-50" 
+       data-widget-container-target="shortcutsHelp">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-md mx-4">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          Keyboard Shortcuts
+        </h3>
+        <button type="button" 
+                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                data-action="click->widget-container#hideShortcuts">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      
+      <div class="space-y-3 text-sm">
+        <div class="flex justify-between">
+          <span class="text-gray-600 dark:text-gray-400">Add Widget</span>
+          <kbd class="kbd">Cmd+N</kbd>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-600 dark:text-gray-400">Save Layout</span>
+          <kbd class="kbd">Cmd+S</kbd>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-600 dark:text-gray-400">Toggle Snap</span>
+          <kbd class="kbd">G</kbd>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-600 dark:text-gray-400">Toggle Guidelines</span>
+          <kbd class="kbd">H</kbd>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-600 dark:text-gray-400">Select All</span>
+          <kbd class="kbd">Cmd+A</kbd>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-600 dark:text-gray-400">Delete Selected</span>
+          <kbd class="kbd">Delete</kbd>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-600 dark:text-gray-400">Help</span>
+          <kbd class="kbd">?</kbd>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+<% end %>
