@@ -1,267 +1,198 @@
-# Claude Code Instructions
+# Claude Code Agent System
 
-## Quick Agent Reference
-- 🚂 Rails/Ruby → `ruby-rails-expert`
-- 📦 JS/npm → `javascript-package-expert`  
-- 🎨 CSS/UI → `tailwind-css-expert`
-- 🧪 Tests → `test-runner-fixer`
-- 🐛 Debug → `error-debugger`
-- 📋 Planning → `project-orchestrator`
-- 🔀 Git → `git-auto-commit`
+## Quick Start
 
-## Agent Assignment Guidelines
+1. **Simple Tasks** → Direct to specialist agent
+2. **Complex Tasks** → Use `project-orchestrator` (Planning Mode)
+3. **Errors** → Auto-escalate to `error-debugger`
 
-### Task Type to Agent Mapping
-When working on tasks, use the appropriate specialized agent based on the task domain:
+## Agent Reference
 
-#### Backend Development
-- **Ruby/Rails Tasks** → `ruby-rails-expert`
-  - Models, controllers, migrations, ActiveRecord
-  - Rails configuration, routing, Action Cable
-  - Rails testing (RSpec, Minitest)
-  - ViewComponents and Rails view logic
-  
-#### Frontend Development
-- **JavaScript/TypeScript** → `javascript-package-expert`
-  - npm/yarn package management
-  - Stimulus controllers, JavaScript modules
-  - Build tools and bundling
-  - Frontend framework integration
-  
-- **Styling/UI** → `tailwind-css-expert`
-  - Tailwind CSS utilities and components
-  - Responsive design, dark mode
-  - ViewComponent styling
-  - CSS architecture and optimization
+| Agent | Use For | Trigger Keywords |
+|-------|---------|------------------|
+| 🚂 `ruby-rails-expert` | Rails + Ruby linting (RuboCop) | rails, model, controller, activerecord, rubocop, lint |
+| 📦 `javascript-package-expert` | JS/TS + npm + JS linting (ESLint) | npm, javascript, package, stimulus, eslint, lint |
+| 🎨 `tailwind-css-expert` | Styling, UI, responsive design | css, tailwind, styling, ui |
+| 🧪 `test-runner-fixer` | Write/fix tests, coverage | test, spec, rspec, coverage |
+| 🐛 `error-debugger` | Debug errors, performance | error, bug, failing, debug |
+| 📋 `project-orchestrator` | Planning, coordination, todo lists | plan, coordinate, complex, todo, strategy |
+| 🔀 `git-auto-commit` | Create commits | commit, save changes |
 
-#### Quality Assurance
-- **Testing** → `test-runner-fixer`
-  - Writing new tests
-  - Fixing failing tests
-  - Test coverage improvements
-  - Test performance optimization
-  
-- **Debugging** → `error-debugger`
-  - Runtime errors, exceptions
-  - Performance issues
-  - Unexpected behavior
-  - Stack trace analysis
+## Workflow
 
-#### Project Management
-- **Planning/Coordination** → `project-orchestrator`
-  - Breaking down complex tasks
-  - Coordinating multi-agent work
-  - Architectural decisions
-  - Risk assessment and mitigation
+See visual workflow: [workflow-diagram.md](.claude/workflow-diagram.md)
 
-#### Version Control
-- **Git Operations** → `git-auto-commit`
-  - Creating meaningful commits
-  - Managing git workflow
-  - Analyzing changes for commit messages
+## Agent Communication
 
-### Before Starting a Task
-1. Read the task details carefully
-2. Identify the primary technology domain (Rails, JS, CSS, etc.)
-3. Check if the task involves multiple domains
-4. Assign the appropriate agent(s) based on the mapping above
-5. For multi-domain tasks, use `project-orchestrator` to coordinate
+Agents communicate through structured completion reports embedded in their responses. Each agent knows when to hand off work to the next appropriate agent.
 
-### Agent Usage Examples
+## Context7 Documentation Integration
 
-#### Example 1: Creating a Rails Controller (Single Domain)
-```bash
-# For task 4.2: "Create ContextItems controller with CRUD actions"
-# Use ruby-rails-expert
-Task(description="Create Rails controller", 
-     subagent_type="ruby-rails-expert", 
-     prompt="Create ContextItems controller with CRUD actions, Pundit authorization...")
-```
+All agents are enhanced with real-time documentation access via Context7 MCP server:
 
-#### Example 2: Implementing ViewComponent with Styling (Multi-Domain)
-```bash
-# For task 4.3: "Implement ContextSidebarComponent"
-# First use ruby-rails-expert for the component structure
-Task(description="Create ViewComponent", 
-     subagent_type="ruby-rails-expert", 
-     prompt="Generate and implement ContextSidebarComponent...")
+- **📚 Current Best Practices**: Agents query up-to-date framework documentation before making decisions
+- **🔍 Version-Specific Guidance**: Access to latest stable versions and migration guides  
+- **⚡ Performance Optimization**: Current techniques and patterns from official sources
+- **🛡️ Security Standards**: Latest security guidelines and vulnerability patterns
+- **🧪 Testing Strategies**: Modern testing framework patterns and best practices
 
-# Then use tailwind-css-expert for styling
-Task(description="Style sidebar component", 
-     subagent_type="tailwind-css-expert", 
-     prompt="Style the context sidebar with Tailwind CSS...")
-```
+**Integration Guide**: [context7-integration-guide.md](.claude/context7-integration-guide.md)
 
-#### Example 3: Complex Feature with JS Interactivity
-```bash
-# For task 4.4: "Add drag-and-drop functionality"
-# Use project-orchestrator to plan the approach
-Task(description="Plan drag-and-drop", 
-     subagent_type="project-orchestrator", 
-     prompt="Plan implementation of drag-and-drop with Sortable.js...")
+### Usage Pattern
+Agents automatically query Context7 for current documentation when:
+- Making architectural decisions
+- Implementing new features
+- Debugging complex issues
+- Running linting and quality checks
+- Creating comprehensive plans
 
-# Then execute with appropriate agents based on the plan
-```
+### Fallback Strategy
+If Context7 is unavailable, agents gracefully degrade to existing knowledge while noting documentation verification needs in completion reports.
 
-### Multi-Agent Workflows
+## Playwright Browser Automation Integration
 
-For tasks spanning multiple domains, follow this pattern:
+All agents are enhanced with comprehensive browser automation capabilities via Playwright MCP server:
 
-1. **Analyze** → Use your judgment or `project-orchestrator` for complex tasks
-2. **Execute** → Use domain-specific agents for implementation
-3. **Test** → Use `test-runner-fixer` to verify
-4. **Debug** → Use `error-debugger` if issues arise
-5. **Commit** → Use `git-auto-commit` when complete
+- **🌐 Real-Browser Testing**: Agents perform E2E testing, visual validation, and user interaction simulation
+- **📱 Cross-Platform Validation**: Testing across Chromium, Firefox, WebKit, and mobile viewports
+- **🎨 Visual Regression Testing**: Automated screenshot comparison and responsive design validation
+- **🔍 Interactive Debugging**: Browser-based error reproduction and real-time debugging capabilities
+- **⚡ Performance Testing**: Real-world performance monitoring and optimization in browser environments
+- **🧪 System Testing**: Full-stack user journey validation and integration testing
 
-#### Example Workflow: "Implement Context Sidebar with Drag-and-Drop"
-```bash
-1. project-orchestrator → Break down the feature into components
-2. ruby-rails-expert → Create ViewComponent and controller logic
-3. tailwind-css-expert → Design and style the UI
-4. javascript-package-expert → Add Stimulus controllers for interactivity
-5. test-runner-fixer → Write comprehensive tests
-6. error-debugger → Fix any issues that arise
-7. git-auto-commit → Commit the completed feature
-```
+**Integration Guide**: [playwright-integration-guide.md](.claude/playwright-integration-guide.md)
 
-### Agent Selection Quick Rules
-- See Ruby/Rails code? → `ruby-rails-expert`
-- See package.json or JS files? → `javascript-package-expert`
-- Need styling or Tailwind? → `tailwind-css-expert`
-- Tests failing? → `test-runner-fixer`
-- Getting errors? → `error-debugger`
-- Need to plan complex work? → `project-orchestrator`
-- Ready to commit? → `git-auto-commit`
+### Usage Patterns by Agent
+- **🧪 test-runner-fixer**: E2E test automation, visual regression testing, cross-browser validation
+- **🎨 tailwind-css-expert**: Responsive design testing, component visual validation, interactive state testing
+- **🐛 error-debugger**: Browser bug reproduction, JavaScript error analysis, UI debugging workflows
+- **📦 javascript-package-expert**: Real-browser JS testing, Stimulus controller validation, package integration
+- **🚂 ruby-rails-expert**: Rails system testing, user journey validation, Hotwire/Turbo testing
+- **📋 project-orchestrator**: Comprehensive testing strategy coordination, multi-agent workflow orchestration
 
-## Automatic Workflow Patterns
+### Browser Automation Capabilities
+Agents automatically use Playwright for:
+- User interaction simulation (clicks, form submission, navigation)
+- Visual state capture and screenshot comparison
+- Console error monitoring and network request analysis
+- Cross-browser compatibility validation
+- Performance profiling and optimization
+- Accessibility testing and validation
 
-### Orchestrator-Managed Workflows
+### Fallback Strategy
+If Playwright is unavailable, agents gracefully fall back to traditional testing methods while documenting browser testing limitations in completion reports.
 
-For complex tasks requiring multiple agents, use the `project-orchestrator` to create automatic handoff chains that eliminate manual intervention:
+## Router Configuration
 
-#### Pattern 1: Full-Stack Feature Implementation
-```bash
-# Start with orchestrator for planning and delegation
-Task(description="Implement feature with automatic handoffs", 
-     subagent_type="project-orchestrator", 
-     prompt="Create automatic delegation chain for [feature description]. 
-             Include agent handoff protocols.")
+Automatic agent selection rules: [router.yaml](.claude/router.yaml)
 
-# Orchestrator creates delegation plan and launches first agent
-# Each agent automatically:
-# 1. Completes their work
-# 2. Updates task status
-# 3. Signals completion with structured report
-# 4. Recommends next agent
-# 5. Project orchestrator launches next phase
-```
+## Task Master Integration
 
-#### Pattern 2: Bug Fix with Testing
-```bash
-# For error scenarios requiring coordination
-Task(description="Debug and fix with automatic testing", 
-     subagent_type="project-orchestrator", 
-     prompt="Coordinate error-debugger → test-runner-fixer → git-auto-commit")
-```
+**Import Task Master commands:**
+@./.taskmaster/CLAUDE.md
 
-#### Pattern 3: UI Feature with Backend Integration
-```bash
-# For features spanning multiple domains
-Task(description="Coordinate full-stack UI feature", 
-     subagent_type="project-orchestrator", 
-     prompt="Plan: ruby-rails-expert → tailwind-css-expert → javascript-package-expert → test-runner-fixer → git-auto-commit")
-```
+All agents automatically:
+- Update task status via `mcp__task-master-ai__set_task_status`
+- Log progress via `mcp__task-master-ai__update_subtask`
 
-### Agent Completion Protocols
-
-All specialist agents now follow automatic handoff protocols:
-
-#### Completion Report Format (All Agents)
-```
-## [AGENT TYPE] WORK COMPLETED ✅
-
-**Implementation Summary:**
-- [What was accomplished]
-
-**Files Modified:**
-- [List all files]
-
-**Next Phase Readiness:**
-- ✅ [Current work complete]
-- ✅ Ready for [next work type]
-- ⚠️ [Any blockers]
-
-**Handoff Instructions:**
-- [Guidance for next agent]
-
-**Task Status:** Updated to [status]
-```
-
-#### Automatic Status Updates
-Agents automatically update task status and log implementation notes.
-
-#### Next Agent Recommendations
-Each agent suggests the next logical step:
-- Backend complete → Frontend agent
-- Frontend complete → Testing agent  
-- Testing complete → Git commit agent
-- Errors encountered → Debug agent
-
-### Error Escalation Procedures
-
-#### Automatic Escalation Chain
-1. **Specialist Agent** encounters blocker
-2. **Specialist Agent** documents issue and attempts resolution
-3. If unresolved → **error-debugger** agent activated
-4. If still blocked → **project-orchestrator** coordinates resolution
-5. **project-orchestrator** may reassign or modify delegation plan
-
-#### Escalation Format
-```
-## ESCALATION TO PROJECT-ORCHESTRATOR ⚠️
-
-**Issue:** [Brief description]
-**Agent:** [Current agent type]
-**Attempted Solutions:** [What was tried]
-**Blocker Details:** [Specific problem]
-**Recommendation:** [Suggested next steps]
-```
-
-### Automatic Progress Tracking
+## Starting Complex Tasks
 
 ```bash
-# Agents automatically update progress throughout workflow:
-1. project-orchestrator → Creates delegation plan, updates task
-2. specialist-agent → Updates with progress, marks complete
-3. next-agent → Auto-triggered based on completion report
-4. git-auto-commit → Final status update and task closure
-```
-
-### Benefits of Automatic Workflows
-
-1. **Zero Manual Intervention** - Once started, workflow completes automatically
-2. **Consistent Task Tracking** - All progress logged automatically
-3. **Structured Handoffs** - Clear communication between agents
-4. **Error Recovery** - Automatic escalation and coordination
-5. **Audit Trail** - Complete history of work and decisions
-
-### Usage Instructions
-
-#### To Start Automatic Workflow:
-```bash
-# For new complex tasks
-Task(description="[brief description]", 
+Task(description="Brief description",
      subagent_type="project-orchestrator", 
      prompt="Create automatic workflow for: [detailed requirements]")
 ```
 
-#### To Continue Existing Workflow:
-Agents will automatically continue based on completion protocols - no user intervention needed.
+The orchestrator will:
+1. Analyze requirements
+2. Create delegation plan
+3. Launch specialist agents
+4. Monitor progress
+5. Handle errors/escalations
+6. Trigger git commit when complete
 
-#### To Handle Interruptions:
-If workflow is interrupted, restart with:
-```bash
-Task(description="Resume workflow", 
-     subagent_type="project-orchestrator", 
-     prompt="Analyze current task state and resume automatic workflow from where it left off")
+## Agent Communication Flow
+
 ```
+User Request → Analyze → Route to Agent → Execute → Report → Next Agent/Complete
+                  ↓
+              [Complex?] → project-orchestrator → Delegation Plan
+```
+
+## Error Handling
+
+Automatic escalation chain:
+1. Specialist agent attempts fix
+2. Escalate to `error-debugger`
+3. Escalate to `project-orchestrator`
+4. Replan and reassign
+
+## Planning Protocol
+
+**MANDATORY: All complex tasks must begin with proper planning**
+
+1. **Planning Requirement**: Any task involving multiple steps, agents, or phases MUST start with project-orchestrator in Planning Mode
+2. **Plan Storage**: All plans MUST be saved to `@plans/[feature-name]/README.md` before execution
+3. **Todo Tracking**: Use TodoWrite tool to create actionable, trackable task lists
+4. **Execution Flow**: 
+   - User request → project-orchestrator analyzes complexity
+   - Complex task → Planning Mode creates plan
+   - Plan saved to @plans/ directory
+   - TodoWrite creates task list
+   - Execution Mode runs plan
+   - Progress tracked via Task Master
+
+### Plan Structure Requirements
+
+Every plan must include:
+- Clear objectives and success criteria
+- Actionable todo list with agent assignments
+- Test-Driven Development (TDD) approach
+- Linting and code quality phases
+- Implementation phases with timelines
+- Risk assessment and mitigation
+- Automatic execution command
+
+### TDD and Code Quality Protocol
+
+1. **Test First**: All new features MUST start with failing tests
+2. **Implementation**: Code only to make tests pass
+3. **Linting**: Run appropriate linters after each implementation:
+   - Ruby: `ruby-rails-expert` (includes RuboCop)
+   - JavaScript: `javascript-package-expert` (includes ESLint)
+4. **Quality Gates**: No phase proceeds with failing tests or linting errors
+
+### Planning Workflow Example
+
+```bash
+# For any complex feature request:
+Task(description="Implement [feature]",
+     subagent_type="project-orchestrator",
+     prompt="[Detailed requirements] - Create plan and execute with automatic handoffs")
+
+# Or if plan already exists:
+Task(description="Execute [feature] plan",
+     subagent_type="project-orchestrator", 
+     prompt="Execute plan at plans/[feature-name]/README.md")
+```
+
+## Best Practices
+
+- Always start complex tasks with project-orchestrator (Planning Mode)
+- Let orchestrator handle multi-domain tasks
+- Linting is integrated with language experts (not separate agents)
+- Trust automatic handoffs
+- Check Task Master for progress
+- Agents complete work before handoff
+- Use structured completion reports
+- Document all plans in @plans/ directory
+
+## Important Instructions
+
+- Do what's asked; nothing more, nothing less
+- Never create files unless necessary
+- Always prefer editing existing files
+- No unsolicited documentation creation
+- ALWAYS plan before executing complex tasks
+
+For detailed agent capabilities, see individual agent files in `.claude/agents/`

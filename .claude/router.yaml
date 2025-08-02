@@ -1,0 +1,288 @@
+# Agent Router Configuration
+# This file defines routing rules for automatic agent selection
+
+# Agent Definitions
+agents:
+  ruby-rails-expert:
+    name: "Ruby on Rails Expert"
+    color: pink
+    capabilities:
+      - rails_models
+      - rails_controllers
+      - rails_migrations
+      - activerecord
+      - rails_testing
+      - viewcomponents
+    triggers:
+      file_patterns:
+        - "**/*.rb"
+        - "**/Gemfile*"
+        - "db/migrate/*.rb"
+        - "app/models/**/*.rb"
+        - "app/controllers/**/*.rb"
+        - "app/views/**/*.erb"
+      keywords:
+        - rails
+        - activerecord
+        - migration
+        - controller
+        - model
+        - rspec
+        - minitest
+        - rubocop
+        - lint
+
+  javascript-package-expert:
+    name: "JavaScript Package Expert"
+    color: yellow
+    capabilities:
+      - npm_management
+      - yarn_management
+      - javascript_modules
+      - stimulus_controllers
+      - build_tools
+      - dependencies
+    triggers:
+      file_patterns:
+        - "**/*.js"
+        - "**/*.ts"
+        - "**/*.jsx"
+        - "**/*.tsx"
+        - "**/package.json"
+        - "**/yarn.lock"
+        - "**/package-lock.json"
+      keywords:
+        - npm
+        - yarn
+        - pnpm
+        - javascript
+        - typescript
+        - stimulus
+        - webpack
+        - package
+        - eslint
+        - lint
+
+  tailwind-css-expert:
+    name: "Tailwind CSS Expert"
+    color: cyan
+    capabilities:
+      - tailwind_utilities
+      - responsive_design
+      - dark_mode
+      - component_styling
+      - css_optimization
+    triggers:
+      file_patterns:
+        - "**/*.css"
+        - "**/*.scss"
+        - "**/tailwind.config.js"
+        - "app/views/**/*.html.erb"
+        - "app/components/**/*.html.erb"
+      keywords:
+        - tailwind
+        - css
+        - styling
+        - responsive
+        - dark mode
+        - ui
+        - design
+
+  test-runner-fixer:
+    name: "Test Runner & Fixer"
+    color: green
+    capabilities:
+      - write_tests
+      - fix_failing_tests
+      - test_coverage
+      - test_optimization
+    triggers:
+      file_patterns:
+        - "**/*_test.rb"
+        - "**/*_spec.rb"
+        - "test/**/*.rb"
+        - "spec/**/*.rb"
+        - "**/*.test.js"
+        - "**/*.spec.js"
+      keywords:
+        - test
+        - spec
+        - rspec
+        - minitest
+        - jest
+        - testing
+        - coverage
+
+  error-debugger:
+    name: "Error Debugger"
+    color: red
+    capabilities:
+      - runtime_errors
+      - build_failures
+      - performance_issues
+      - stack_trace_analysis
+      - root_cause_analysis
+    triggers:
+      keywords:
+        - error
+        - exception
+        - failing
+        - crash
+        - bug
+        - debug
+        - trace
+        - undefined
+        - null
+      error_patterns:
+        - "NoMethodError"
+        - "NameError"
+        - "SyntaxError"
+        - "TypeError"
+        - "undefined method"
+        - "cannot read property"
+
+  project-orchestrator:
+    name: "Project Orchestrator"
+    color: green
+    capabilities:
+      - planning
+      - delegation
+      - coordination
+      - architecture
+      - risk_assessment
+      - create_plans
+      - todo_lists
+    triggers:
+      keywords:
+        - implement feature
+        - create system
+        - build application
+        - coordinate
+        - plan
+        - planning
+        - todo
+        - strategy
+        - breakdown
+        - architecture
+        - complex
+        - multi-step
+
+  git-auto-commit:
+    name: "Git Auto Commit"
+    color: purple
+    capabilities:
+      - create_commits
+      - analyze_changes
+      - write_commit_messages
+    triggers:
+      keywords:
+        - commit
+        - save changes
+        - git commit
+        - finalize
+
+# Routing Rules
+routing_rules:
+  # Priority 1: Error conditions (highest priority)
+  - condition: contains_error
+    agent: error-debugger
+    priority: 1
+
+  # Priority 2: Complex multi-domain tasks or planning requests
+  - condition: multi_domain_task_or_planning
+    agent: project-orchestrator
+    priority: 2
+    
+  # Priority 3: Specific domain tasks
+  - condition: matches_agent_triggers
+    agent: auto_select
+    priority: 3
+
+  # Priority 4: Default to orchestrator for unclear tasks
+  - condition: unclear_task
+    agent: project-orchestrator
+    priority: 4
+
+# Handoff Rules
+handoff_rules:
+  ruby-rails-expert:
+    success:
+      - condition: needs_frontend
+        next_agent: javascript-package-expert
+      - condition: needs_styling
+        next_agent: tailwind-css-expert
+      - condition: needs_testing
+        next_agent: test-runner-fixer
+      - condition: complete
+        next_agent: git-auto-commit
+    failure:
+      next_agent: error-debugger
+
+  javascript-package-expert:
+    success:
+      - condition: needs_styling
+        next_agent: tailwind-css-expert
+      - condition: needs_testing
+        next_agent: test-runner-fixer
+      - condition: complete
+        next_agent: git-auto-commit
+    failure:
+      next_agent: error-debugger
+
+  tailwind-css-expert:
+    success:
+      - condition: needs_testing
+        next_agent: test-runner-fixer
+      - condition: complete
+        next_agent: git-auto-commit
+    failure:
+      next_agent: error-debugger
+
+  test-runner-fixer:
+    success:
+      - condition: complete
+        next_agent: git-auto-commit
+    failure:
+      next_agent: error-debugger
+
+  error-debugger:
+    success:
+      - condition: return_to_original
+        next_agent: previous_agent
+      - condition: needs_orchestration
+        next_agent: project-orchestrator
+    failure:
+      next_agent: project-orchestrator
+
+# Escalation Thresholds
+escalation:
+  max_retry_attempts: 2
+  escalation_chain:
+    - original_agent
+    - error-debugger
+    - project-orchestrator
+  
+# Task Complexity Indicators
+complexity_indicators:
+  simple:
+    - single_file_change
+    - single_domain
+    - clear_requirements
+    - no_dependencies
+  
+  complex:
+    - multiple_domains
+    - multiple_files
+    - architectural_changes
+    - dependency_updates
+    - breaking_changes
+    - requires_migration
+    - three_or_more_steps
+    - multiple_agents_required
+
+# Communication Channels
+communication:
+  task_master_integration: true
+  auto_status_updates: true
+  completion_report_required: true
+  handoff_data_format: json

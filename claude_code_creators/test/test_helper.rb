@@ -3,43 +3,6 @@ ENV["RAILS_ENV"] ||= "test"
 # SimpleCov must be started before any application code is loaded
 require "simplecov"
 
-# Configure SimpleCov for parallel testing
-if ENV["TEST_ENV_NUMBER"]
-  SimpleCov.command_name "test:#{ENV['TEST_ENV_NUMBER']}"
-  SimpleCov.at_exit do
-    SimpleCov.result.format!
-  end
-end
-
-SimpleCov.start "rails" do
-  add_filter "/test/"
-  add_filter "/config/"
-  add_filter "/vendor/"
-  add_filter "/app/channels/application_cable/channel.rb"
-  add_filter "/app/channels/application_cable/connection.rb"
-  add_filter "/app/jobs/application_job.rb"
-  add_filter "/app/mailers/application_mailer.rb"
-  add_filter "/app/models/application_record.rb"
-
-  add_group "Controllers", "app/controllers"
-  add_group "Models", "app/models"
-  add_group "Services", "app/services"
-  add_group "Jobs", "app/jobs"
-  add_group "Helpers", "app/helpers"
-  add_group "Mailers", "app/mailers"
-  add_group "Components", "app/components"
-  add_group "Channels", "app/channels"
-
-  # Enable branch coverage
-  enable_coverage :branch
-
-  # Minimum coverage required (temporarily disabled while improving coverage)
-  # minimum_coverage 80
-
-  # Track files with 0% coverage
-  track_files "app/**/*.rb"
-end
-
 require_relative "../config/environment"
 require "rails/test_help"
 require "mocha/minitest"
