@@ -1,0 +1,743 @@
+/**
+ * Collaboration Components Styles
+ * Comprehensive styles for all collaboration UI components
+ */
+
+/* ============================================================================
+   Base Collaboration Styles
+   ============================================================================ */
+.collaboration-component {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --collaboration-primary: theme('colors.creative.primary.500');
+  --collaboration-secondary: theme('colors.creative.secondary.500');
+  --collaboration-accent-rose: theme('colors.creative.accent.rose');
+  --collaboration-accent-teal: theme('colors.creative.accent.teal');
+  --collaboration-accent-amber: theme('colors.creative.accent.amber');
+  --collaboration-accent-purple: theme('colors.creative.accent.purple');
+  --collaboration-neutral-50: theme('colors.creative.neutral.50');
+  --collaboration-neutral-100: theme('colors.creative.neutral.100');
+  --collaboration-neutral-200: theme('colors.creative.neutral.200');
+  --collaboration-neutral-600: theme('colors.creative.neutral.600');
+  --collaboration-neutral-800: theme('colors.creative.neutral.800');
+  --collaboration-neutral-900: theme('colors.creative.neutral.900');
+}
+
+/* ============================================================================
+   Presence Indicators Component
+   ============================================================================ */
+.presence-indicators {
+  /* Responsive behavior */
+}
+
+.presence-indicators .avatar-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.presence-indicators .user-avatar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-weight: 600;
+  transition: all 200ms ease-out;
+  cursor: pointer;
+}
+
+.presence-indicators .user-avatar:hover {
+  transform: scale(1.1);
+  z-index: 10;
+}
+
+.presence-indicators .typing-indicator {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  background: var(--collaboration-secondary);
+  border-radius: 50%;
+  border: 2px solid white;
+  animation: pulse-gentle 1.5s infinite;
+}
+
+.presence-indicators .overflow-counter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--collaboration-neutral-200);
+  color: var(--collaboration-neutral-600);
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+/* ============================================================================
+   Typing Indicators Component
+   ============================================================================ */
+.typing-indicators {
+  transition: opacity 200ms ease-in-out, transform 200ms ease-in-out;
+}
+
+.typing-indicators[style*="display: none"] {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+}
+
+.typing-indicators .indicator-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: white;
+  border: 1px solid var(--collaboration-neutral-200);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(8px) saturate(150%);
+}
+
+.typing-indicators .avatars-container {
+  display: flex;
+  gap: -0.5rem;
+}
+
+.typing-indicators .typing-avatar {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.625rem;
+  font-weight: 600;
+  border: 2px solid white;
+  margin-left: -0.25rem;
+}
+
+.typing-indicators .typing-avatar:first-child {
+  margin-left: 0;
+}
+
+.typing-indicators .typing-text {
+  font-size: 0.875rem;
+  color: var(--collaboration-neutral-600);
+  font-weight: 500;
+}
+
+.typing-indicators .typing-animation {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.typing-indicators .typing-dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 50%;
+  background: var(--collaboration-primary);
+}
+
+/* Typing animations */
+@keyframes pulse-gentle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes wave {
+  0%, 40%, 100% { transform: translateY(0); }
+  20% { transform: translateY(-4px); }
+}
+
+.typing-animation-pulse .typing-dot:nth-child(1) { animation: pulse-gentle 1.5s infinite 0s; }
+.typing-animation-pulse .typing-dot:nth-child(2) { animation: pulse-gentle 1.5s infinite 0.1s; }
+.typing-animation-pulse .typing-dot:nth-child(3) { animation: pulse-gentle 1.5s infinite 0.2s; }
+
+.typing-animation-wave .typing-dot:nth-child(1) { animation: wave 1.2s infinite 0s; }
+.typing-animation-wave .typing-dot:nth-child(2) { animation: wave 1.2s infinite 0.15s; }
+.typing-animation-wave .typing-dot:nth-child(3) { animation: wave 1.2s infinite 0.3s; }
+
+.typing-animation-dots .typing-dot:nth-child(1) { animation: bounce 1s infinite 0s; }
+.typing-animation-dots .typing-dot:nth-child(2) { animation: bounce 1s infinite 0.2s; }
+.typing-animation-dots .typing-dot:nth-child(3) { animation: bounce 1s infinite 0.4s; }
+
+/* ============================================================================
+   Cursor Tracking Component
+   ============================================================================ */
+.cursor-tracking-overlay {
+  pointer-events: none;
+  user-select: none;
+  overflow: hidden;
+}
+
+.cursor-element {
+  position: absolute;
+  pointer-events: none;
+  z-index: 40;
+  transform-origin: top left;
+  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cursor-element.entering {
+  animation: cursorEnter 200ms ease-out;
+}
+
+.cursor-element.leaving {
+  animation: cursorLeave 200ms ease-in;
+}
+
+.cursor-element .cursor-label {
+  position: absolute;
+  top: 1.25rem;
+  left: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: white;
+  border-radius: 0.25rem;
+  white-space: nowrap;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trail-dot {
+  position: absolute;
+  width: 0.25rem;
+  height: 0.25rem;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: trailFade 2s ease-out forwards;
+}
+
+.collision-zone {
+  position: absolute;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: 2px solid var(--collaboration-accent-amber);
+  background: var(--collaboration-accent-amber);
+  background-opacity: 0.2;
+  pointer-events: none;
+  transition: all 200ms ease-out;
+}
+
+.collision-zone.active {
+  animation: collisionPulse 500ms ease-in-out infinite alternate;
+}
+
+/* Cursor animations */
+@keyframes cursorEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translate(-2px, -2px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translate(0, 0);
+  }
+}
+
+@keyframes cursorLeave {
+  from {
+    opacity: 1;
+    transform: scale(1) translate(0, 0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.8) translate(-2px, -2px);
+  }
+}
+
+@keyframes trailFade {
+  0% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+  100% { opacity: 0; transform: scale(0.5); }
+}
+
+@keyframes collisionPulse {
+  0% { transform: scale(1); opacity: 0.3; }
+  100% { transform: scale(1.2); opacity: 0.6; }
+}
+
+/* ============================================================================
+   Conflict Resolution Modal Component
+   ============================================================================ */
+.conflict-resolution-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  transition: opacity 300ms ease-in-out, visibility 300ms ease-in-out;
+}
+
+.conflict-resolution-modal[style*="display: none"] {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.conflict-resolution-modal .modal-container {
+  position: relative;
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--collaboration-neutral-200);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: scale(1) translateY(0);
+  transition: transform 300ms ease-out, opacity 300ms ease-out;
+}
+
+.conflict-resolution-modal[style*="display: none"] .modal-container {
+  transform: scale(0.95) translateY(-20px);
+  opacity: 0;
+}
+
+.conflict-resolution-modal .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--collaboration-neutral-200);
+  background: var(--collaboration-neutral-50);
+}
+
+.conflict-resolution-modal .modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+.conflict-resolution-modal .modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  border-top: 1px solid var(--collaboration-neutral-200);
+  background: var(--collaboration-neutral-50);
+}
+
+.conflict-resolution-modal .diff-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  border: 1px solid var(--collaboration-neutral-200);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.conflict-resolution-modal .diff-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.conflict-resolution-modal .diff-header {
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-bottom: 1px solid currentColor;
+  border-opacity: 0.2;
+}
+
+.conflict-resolution-modal .diff-content {
+  padding: 1rem;
+  font-size: 0.875rem;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  line-height: 1.5;
+  max-height: 16rem;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+
+.conflict-resolution-modal .action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 200ms ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.conflict-resolution-modal .action-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* ============================================================================
+   Collaboration Status Component
+   ============================================================================ */
+.collaboration-status {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid var(--collaboration-neutral-200);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8px) saturate(150%);
+  transition: all 300ms ease-in-out;
+  user-select: none;
+  pointer-events: auto;
+}
+
+.collaboration-status:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.collaboration-status .status-indicator {
+  position: relative;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  transition: all 200ms ease-out;
+}
+
+.collaboration-status .status-indicator.connected {
+  background: var(--collaboration-accent-teal);
+}
+
+.collaboration-status .status-indicator.connected::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: inherit;
+  opacity: 0.3;
+  animation: statusPulse 2s infinite;
+}
+
+.collaboration-status .status-indicator.connecting {
+  background: var(--collaboration-accent-amber);
+  animation: bounce 1s infinite;
+}
+
+.collaboration-status .status-indicator.disconnected {
+  background: var(--collaboration-accent-rose);
+  animation: pulse 2s infinite;
+}
+
+.collaboration-status .status-indicator.syncing {
+  background: var(--collaboration-primary);
+  animation: spin 1s linear infinite;
+}
+
+.collaboration-status .signal-bars {
+  display: flex;
+  align-items: end;
+  gap: 1px;
+}
+
+.collaboration-status .signal-bar {
+  width: 0.25rem;
+  border-radius: 0.125rem;
+  transition: all 200ms ease-out;
+}
+
+.collaboration-status .notification-toast {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 50;
+  transform: translateX(100%);
+  opacity: 0;
+  transition: transform 300ms ease-out, opacity 300ms ease-out;
+}
+
+.collaboration-status .notification-toast.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* Status animations */
+@keyframes statusPulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.1; transform: scale(1.1); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================================================
+   Responsive Design
+   ============================================================================ */
+
+/* Mobile devices (640px and below) */
+@media (max-width: 640px) {
+  .collaboration-status {
+    position: fixed !important;
+    bottom: 1rem !important;
+    left: 1rem !important;
+    right: 1rem !important;
+    top: auto !important;
+    width: auto !important;
+    max-width: calc(100vw - 2rem);
+    padding: 0.75rem;
+    gap: 0.5rem;
+  }
+  
+  .collaboration-status .divider {
+    display: none;
+  }
+  
+  .typing-indicators .indicator-card {
+    margin: 0 1rem;
+    max-width: calc(100vw - 2rem);
+    padding: 0.75rem;
+  }
+  
+  .typing-indicators .typing-text {
+    font-size: 0.875rem;
+  }
+  
+  .typing-indicators .typing-avatar {
+    width: 1.25rem;
+    height: 1.25rem;
+    font-size: 0.625rem;
+  }
+  
+  .cursor-element {
+    transform: scale(0.8);
+  }
+  
+  .cursor-element .cursor-label {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+    max-width: 120px;
+  }
+  
+  .collision-zone {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  
+  .conflict-resolution-modal .modal-container {
+    margin: 1rem;
+    max-height: calc(100vh - 2rem);
+  }
+  
+  .conflict-resolution-modal .diff-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .conflict-resolution-modal .modal-footer {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .conflict-resolution-modal .modal-footer > div {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .conflict-resolution-modal .action-button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .notification-toast {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    right: 1rem;
+    width: auto;
+  }
+}
+
+/* Tablet devices (641px - 1024px) */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .conflict-resolution-modal .modal-container {
+    max-width: 90vw;
+    margin: 2rem;
+  }
+}
+
+/* ============================================================================
+   Accessibility & High Contrast
+   ============================================================================ */
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .collaboration-component {
+    border-width: 2px;
+  }
+  
+  .status-indicator,
+  .typing-dot,
+  .signal-bar {
+    border: 1px solid currentColor;
+  }
+  
+  .cursor-element svg {
+    stroke: currentColor;
+    stroke-width: 1px;
+  }
+  
+  .cursor-label {
+    border: 1px solid currentColor;
+  }
+  
+  .collision-zone {
+    border-width: 3px;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .collaboration-component,
+  .collaboration-component *,
+  .cursor-element,
+  .trail-dot,
+  .collision-zone,
+  .typing-indicators,
+  .notification-toast {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .status-indicator.connected::after {
+    display: none;
+  }
+  
+  .cursor-element.smooth-move {
+    transition: none;
+  }
+  
+  .typing-dot {
+    opacity: 0.7;
+  }
+}
+
+/* Focus management for accessibility */
+.collaboration-component:focus-within {
+  outline: 2px solid var(--collaboration-primary);
+  outline-offset: 2px;
+}
+
+.collaboration-component .action-button:focus-visible {
+  outline: 2px solid var(--collaboration-primary);
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   Dark Mode Support
+   ============================================================================ */
+@media (prefers-color-scheme: dark) {
+  .collaboration-component {
+    --collaboration-neutral-50: theme('colors.creative.neutral.800');
+    --collaboration-neutral-100: theme('colors.creative.neutral.700');
+    --collaboration-neutral-200: theme('colors.creative.neutral.600');
+    --collaboration-neutral-600: theme('colors.creative.neutral.400');
+    --collaboration-neutral-800: theme('colors.creative.neutral.200');
+    --collaboration-neutral-900: theme('colors.creative.neutral.100');
+  }
+  
+  .typing-indicators .indicator-card,
+  .collaboration-status,
+  .conflict-resolution-modal .modal-container {
+    background: var(--collaboration-neutral-900);
+    border-color: var(--collaboration-neutral-600);
+    color: var(--collaboration-neutral-100);
+  }
+  
+  .cursor-label {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  }
+  
+  .collaboration-status,
+  .typing-indicators .indicator-card {
+    backdrop-filter: blur(10px) saturate(180%);
+  }
+}
+
+/* ============================================================================
+   Print Styles
+   ============================================================================ */
+@media print {
+  .collaboration-component,
+  .typing-indicators,
+  .collaboration-status,
+  .cursor-tracking-overlay,
+  .conflict-resolution-modal,
+  .notification-toast {
+    display: none !important;
+  }
+}
+
+/* ============================================================================
+   Performance Optimizations
+   ============================================================================ */
+.collaboration-component,
+.status-indicator,
+.signal-bar,
+.notification-toast,
+.cursor-element,
+.trail-dot {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Prevent text selection on interactive elements */
+.collaboration-component .status-indicator,
+.collaboration-component .signal-bar,
+.cursor-tracking-overlay *,
+.typing-indicators .typing-avatar {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* ============================================================================
+   Color Classes for Dynamic Application
+   ============================================================================ */
+.cursor-primary { color: var(--collaboration-primary); }
+.cursor-secondary { color: var(--collaboration-secondary); }
+.cursor-purple { color: var(--collaboration-accent-purple); }
+.cursor-amber { color: var(--collaboration-accent-amber); }
+.cursor-rose { color: var(--collaboration-accent-rose); }
+.cursor-teal { color: var(--collaboration-accent-teal); }
+
+.cursor-bg-primary { background-color: var(--collaboration-primary); }
+.cursor-bg-secondary { background-color: var(--collaboration-secondary); }
+.cursor-bg-purple { background-color: var(--collaboration-accent-purple); }
+.cursor-bg-amber { background-color: var(--collaboration-accent-amber); }
+.cursor-bg-rose { background-color: var(--collaboration-accent-rose); }
+.cursor-bg-teal { background-color: var(--collaboration-accent-teal); }
+
+.bg-creative-primary-500 { background-color: var(--collaboration-primary); }
+.bg-creative-secondary-500 { background-color: var(--collaboration-secondary); }
+.bg-creative-accent-purple { background-color: var(--collaboration-accent-purple); }
+.bg-creative-accent-amber { background-color: var(--collaboration-accent-amber); }
+.bg-creative-accent-rose { background-color: var(--collaboration-accent-rose); }
+.bg-creative-accent-teal { background-color: var(--collaboration-accent-teal); }
+
+/* Component-specific responsive utilities */
+.collaboration-hide-mobile {
+  @media (max-width: 640px) {
+    display: none !important;
+  }
+}
+
+.collaboration-show-mobile {
+  display: none;
+  @media (max-width: 640px) {
+    display: block !important;
+  }
+}

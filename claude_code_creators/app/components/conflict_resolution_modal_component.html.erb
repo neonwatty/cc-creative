@@ -1,0 +1,413 @@
+<div class="<%= modal_backdrop_class %>"
+     data-controller="conflict-resolution"
+     <% configuration_data.each do |key, value| %>
+       data-<%= key.to_s.gsub('_', '-') %>-value="<%= value %>"
+     <% end %>
+     <%= accessibility_attributes.map { |k, v| "#{k}=\"#{v}\"" }.join(' ').html_safe %>
+     style="display: none;"
+     data-conflict-resolution-target="modal">
+
+  <!-- Modal Container -->
+  <div class="<%= modal_container_class %>"
+       data-conflict-resolution-target="container"
+       role="document">
+    
+    <!-- Modal Header -->
+    <div class="<%= modal_header_class %>">
+      <div class="flex items-center">
+        <!-- Conflict Icon -->
+        <div class="<%= conflict_icon_class %>">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-full h-full">
+            <%= conflict_icon_svg.html_safe %>
+          </svg>
+        </div>
+        
+        <!-- Title and Description -->
+        <div>
+          <h2 id="conflict-modal-title" 
+              class="text-lg font-semibold text-creative-neutral-900 dark:text-white">
+            <%= conflict_title %>
+          </h2>
+          <p id="conflict-modal-description" 
+             class="text-sm text-creative-neutral-600 dark:text-creative-neutral-400 mt-1">
+            <%= conflict_description %>
+          </p>
+        </div>
+      </div>
+
+      <!-- Close Button -->
+      <button type="button"
+              class="text-creative-neutral-400 hover:text-creative-neutral-600 dark:hover:text-creative-neutral-200 transition-colors"
+              data-conflict-resolution-target="closeButton"
+              data-action="click->conflict-resolution#close"
+              aria-label="Close conflict resolution modal">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="<%= modal_body_class %>">
+      
+      <!-- Conflict Information -->
+      <div class="mb-6 p-4 bg-creative-accent-amber bg-opacity-10 border border-creative-accent-amber border-opacity-20 rounded-lg">
+        <div class="flex items-start space-x-3">
+          <div class="flex-shrink-0 w-5 h-5 text-creative-accent-amber mt-0.5">
+            <svg fill="currentColor" viewBox="0 0 20 20" class="w-full h-full">
+              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-sm font-medium text-creative-accent-amber">
+              Immediate Action Required
+            </h3>
+            <div class="mt-1 text-sm text-creative-neutral-700 dark:text-creative-neutral-300">
+              <p data-conflict-resolution-target="conflictDetails">
+                <!-- Specific conflict details will be populated here -->
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resolution Timer (if enabled) -->
+      <% unless auto_resolution_enabled? %>
+        <div class="<%= timer_container_class %> mb-6"
+             data-conflict-resolution-target="timerContainer">
+          <span class="flex-shrink-0">
+            Auto-resolve in:
+          </span>
+          <div class="<%= timer_bar_class %>">
+            <div class="<%= timer_fill_class %>"
+                 data-conflict-resolution-target="timerFill"
+                 style="width: 100%;"></div>
+          </div>
+          <span class="flex-shrink-0 font-mono"
+                data-conflict-resolution-target="timerText">
+            30s
+          </span>
+        </div>
+      <% end %>
+
+      <!-- Diff Viewer (if enabled) -->
+      <% if show_diff %>
+        <div class="<%= diff_container_class %>"
+             data-conflict-resolution-target="diffContainer">
+          
+          <!-- Local Changes Panel -->
+          <div class="<%= diff_panel_class(:local) %>">
+            <div class="<%= diff_header_class(:local) %>">
+              <div class="flex items-center justify-between">
+                <span>Your Changes</span>
+                <span class="text-xs opacity-75"
+                      data-conflict-resolution-target="localTimestamp">
+                  <!-- Timestamp will be populated -->
+                </span>
+              </div>
+            </div>
+            <div class="<%= diff_content_class %>"
+                 data-conflict-resolution-target="localContent">
+              <!-- Local content will be populated here -->
+            </div>
+          </div>
+
+          <!-- Remote Changes Panel -->
+          <div class="<%= diff_panel_class(:remote) %>">
+            <div class="<%= diff_header_class(:remote) %>">
+              <div class="flex items-center justify-between">
+                <span data-conflict-resolution-target="remoteUserName">
+                  Other User's Changes
+                </span>
+                <span class="text-xs opacity-75"
+                      data-conflict-resolution-target="remoteTimestamp">
+                  <!-- Timestamp will be populated -->
+                </span>
+              </div>
+            </div>
+            <div class="<%= diff_content_class %>"
+                 data-conflict-resolution-target="remoteContent">
+              <!-- Remote content will be populated here -->
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Merge Tools (if enabled and applicable) -->
+      <% if merge_tools_enabled? %>
+        <div class="mt-6 p-4 border border-creative-neutral-200 dark:border-creative-neutral-700 rounded-lg">
+          <h4 class="text-sm font-medium text-creative-neutral-900 dark:text-white mb-3">
+            Merge Options
+          </h4>
+          
+          <!-- Manual Merge Editor -->
+          <div class="space-y-3">
+            <label for="merged-content" 
+                   class="block text-sm font-medium text-creative-neutral-700 dark:text-creative-neutral-300">
+              Edit merged content:
+            </label>
+            <textarea id="merged-content"
+                      class="w-full h-32 px-3 py-2 border border-creative-neutral-300 dark:border-creative-neutral-600 rounded-md shadow-sm focus:ring-creative-primary-500 focus:border-creative-primary-500 dark:bg-creative-neutral-800 dark:text-white font-mono text-sm"
+                      data-conflict-resolution-target="mergedContent"
+                      placeholder="Manually edit the merged content here..."></textarea>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Conflict Metadata -->
+      <div class="mt-6 text-xs text-creative-neutral-500 dark:text-creative-neutral-400 space-y-1">
+        <div class="flex justify-between">
+          <span>Conflict ID:</span>
+          <span class="font-mono" data-conflict-resolution-target="conflictId">
+            <!-- Will be populated -->
+          </span>
+        </div>
+        <div class="flex justify-between">
+          <span>Document Section:</span>
+          <span data-conflict-resolution-target="conflictSection">
+            <!-- Will be populated -->
+          </span>
+        </div>
+        <div class="flex justify-between">
+          <span>Detection Time:</span>
+          <span data-conflict-resolution-target="detectionTime">
+            <!-- Will be populated -->
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="<%= modal_footer_class %>">
+      
+      <!-- Action Buttons -->
+      <div class="flex items-center space-x-3">
+        
+        <!-- Accept Local Changes -->
+        <button type="button"
+                class="<%= action_button_class(:accept_local) %>"
+                data-conflict-resolution-target="acceptLocalButton"
+                data-action="click->conflict-resolution#acceptLocal">
+          <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"/>
+          </svg>
+          Keep Mine
+        </button>
+
+        <!-- Accept Remote Changes -->
+        <button type="button"
+                class="<%= action_button_class(:accept_remote) %>"
+                data-conflict-resolution-target="acceptRemoteButton"
+                data-action="click->conflict-resolution#acceptRemote">
+          <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"/>
+          </svg>
+          Keep Theirs
+        </button>
+
+        <!-- Merge Changes (if enabled) -->
+        <% if merge_tools_enabled? %>
+          <button type="button"
+                  class="<%= action_button_class(:merge) %>"
+                  data-conflict-resolution-target="mergeButton"
+                  data-action="click->conflict-resolution#merge">
+            <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+            </svg>
+            Merge
+          </button>
+        <% end %>
+      </div>
+
+      <!-- Secondary Actions -->
+      <div class="flex items-center space-x-3">
+        
+        <!-- Cancel -->
+        <button type="button"
+                class="<%= action_button_class(:cancel) %>"
+                data-conflict-resolution-target="cancelButton"
+                data-action="click->conflict-resolution#cancel">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Styles for conflict resolution modal -->
+<style>
+  /* Modal animations */
+  .conflict-resolution-modal {
+    transition: opacity 300ms ease-in-out, visibility 300ms ease-in-out;
+  }
+
+  .conflict-resolution-modal[style*="display: none"] {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .conflict-resolution-modal[style*="display: block"] {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Modal container animations */
+  .conflict-resolution-modal .modal-container {
+    transition: transform 300ms ease-out, opacity 300ms ease-out;
+  }
+
+  .conflict-resolution-modal[style*="display: none"] .modal-container {
+    transform: scale(0.95) translateY(-20px);
+    opacity: 0;
+  }
+
+  .conflict-resolution-modal[style*="display: block"] .modal-container {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+
+  /* Diff viewer styles */
+  .diff-content {
+    /* Custom scrollbar for diff content */
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.creative.neutral.400') theme('colors.creative.neutral.100');
+  }
+
+  .diff-content::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .diff-content::-webkit-scrollbar-track {
+    background: theme('colors.creative.neutral.100');
+    border-radius: 3px;
+  }
+
+  .diff-content::-webkit-scrollbar-thumb {
+    background: theme('colors.creative.neutral.400');
+    border-radius: 3px;
+  }
+
+  .diff-content::-webkit-scrollbar-thumb:hover {
+    background: theme('colors.creative.neutral.500');
+  }
+
+  /* Dark mode scrollbar */
+  @media (prefers-color-scheme: dark) {
+    .diff-content {
+      scrollbar-color: theme('colors.creative.neutral.600') theme('colors.creative.neutral.800');
+    }
+
+    .diff-content::-webkit-scrollbar-track {
+      background: theme('colors.creative.neutral.800');
+    }
+
+    .diff-content::-webkit-scrollbar-thumb {
+      background: theme('colors.creative.neutral.600');
+    }
+
+    .diff-content::-webkit-scrollbar-thumb:hover {
+      background: theme('colors.creative.neutral.500');
+    }
+  }
+
+  /* Timer animation */
+  .timer-fill {
+    transition: width 1s linear;
+  }
+
+  /* Button hover effects */
+  .action-button {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .action-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .action-button:hover::before {
+    left: 100%;
+  }
+
+  /* Merge editor enhancements */
+  .merged-content-editor {
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+    line-height: 1.5;
+    tab-size: 2;
+  }
+
+  /* Mobile responsive adjustments */
+  @media (max-width: 640px) {
+    .modal-container {
+      margin: 1rem;
+      max-height: calc(100vh - 2rem);
+    }
+
+    .diff-container {
+      grid-template-columns: 1fr;
+    }
+
+    .modal-footer {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .modal-footer > div {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .action-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  /* High contrast mode */
+  @media (prefers-contrast: high) {
+    .diff-panel {
+      border-width: 2px;
+    }
+
+    .action-button {
+      border-width: 2px;
+    }
+
+    .timer-bar {
+      border: 1px solid currentColor;
+    }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .conflict-resolution-modal,
+    .modal-container,
+    .timer-fill,
+    .action-button::before {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+
+  /* Focus management */
+  .conflict-resolution-modal:focus-within .modal-container {
+    outline: 2px solid theme('colors.creative.primary.500');
+    outline-offset: 2px;
+  }
+
+  /* Backdrop click prevention */
+  .modal-backdrop {
+    cursor: pointer;
+  }
+
+  .modal-container {
+    cursor: default;
+  }
+</style>

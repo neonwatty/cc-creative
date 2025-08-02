@@ -1,0 +1,267 @@
+<div class="<%= container_class %>"
+     data-controller="cursor-tracking"
+     <% configuration_data.each do |key, value| %>
+       data-<%= key.to_s.gsub('_', '-') %>-value="<%= value %>"
+     <% end %>
+     <%= accessibility_attributes.map { |k, v| "#{k}=\"#{v}\"" }.join(' ').html_safe %>>
+
+  <!-- Main Cursors Container -->
+  <div class="cursors-container absolute inset-0 pointer-events-none z-40"
+       data-cursor-tracking-target="cursorsContainer">
+    <!-- Dynamic cursor elements will be inserted here -->
+  </div>
+
+  <!-- Trail Effects Container (if enabled) -->
+  <% if show_trails %>
+    <div class="<%= trail_container_class %>"
+         data-cursor-tracking-target="trailsContainer">
+      <!-- Trail dots will be dynamically added here -->
+    </div>
+  <% end %>
+
+  <!-- Collision Detection Overlay (if enabled) -->
+  <% if collision_detection %>
+    <div class="<%= collision_overlay_class %>"
+         data-cursor-tracking-target="collisionOverlay">
+      <!-- Collision zones will be dynamically added here -->
+    </div>
+  <% end %>
+</div>
+
+<!-- Cursor Template (hidden, used for cloning) -->
+<template data-cursor-tracking-target="cursorTemplate">
+  <div class="<%= cursor_base_class %> <%= animation_preferences_class %>"
+       data-cursor-user-id=""
+       data-cursor-user-name=""
+       data-cursor-last-activity="">
+    
+    <!-- Cursor Icon -->
+    <div class="<%= cursor_icon_class %>">
+      <svg class="w-full h-full cursor-color-placeholder"
+           fill="currentColor"
+           viewBox="<%= cursor_viewbox %>"
+           xmlns="http://www.w3.org/2000/svg">
+        <path d="<%= cursor_svg_path %>"/>
+      </svg>
+    </div>
+
+    <!-- User Label (if enabled) -->
+    <% if show_labels %>
+      <div class="<%= cursor_label_class %> cursor-color-bg-placeholder">
+        <span class="cursor-user-name-placeholder"></span>
+      </div>
+    <% end %>
+  </div>
+</template>
+
+<!-- Trail Dot Template (if trails enabled) -->
+<% if show_trails %>
+  <template data-cursor-tracking-target="trailTemplate">
+    <div class="<%= trail_dot_class %> trail-color-placeholder"
+         data-trail-timestamp=""
+         data-trail-user-id="">
+    </div>
+  </template>
+<% end %>
+
+<!-- Collision Zone Template (if collision detection enabled) -->
+<% if collision_detection %>
+  <template data-cursor-tracking-target="collisionTemplate">
+    <div class="<%= collision_zone_class %>"
+         data-collision-user-ids=""
+         data-collision-intensity="">
+    </div>
+  </template>
+<% end %>
+
+<!-- Styles for cursor tracking -->
+<style>
+  /* Base cursor tracking styles */
+  .cursor-tracking-overlay {
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* Cursor animations */
+  .cursor-element {
+    transform-origin: top left;
+  }
+
+  .cursor-element.entering {
+    animation: cursorEnter 200ms ease-out;
+  }
+
+  .cursor-element.leaving {
+    animation: cursorLeave 200ms ease-in;
+  }
+
+  /* Trail effects */
+  .trail-dot {
+    animation: trailFade 2s ease-out forwards;
+  }
+
+  /* Collision detection */
+  .collision-zone.active {
+    animation: collisionPulse 500ms ease-in-out infinite alternate;
+  }
+
+  /* Cursor color classes (dynamically applied) */
+  .cursor-primary { color: theme('colors.creative.primary.500'); }
+  .cursor-secondary { color: theme('colors.creative.secondary.500'); }
+  .cursor-purple { color: theme('colors.creative.accent.purple'); }
+  .cursor-amber { color: theme('colors.creative.accent.amber'); }
+  .cursor-rose { color: theme('colors.creative.accent.rose'); }
+  .cursor-teal { color: theme('colors.creative.accent.teal'); }
+  .cursor-indigo { color: theme('colors.creative.accent.indigo'); }
+  .cursor-orange { color: theme('colors.creative.accent.orange'); }
+
+  /* Background color classes for labels */
+  .cursor-bg-primary { background-color: theme('colors.creative.primary.500'); }
+  .cursor-bg-secondary { background-color: theme('colors.creative.secondary.500'); }
+  .cursor-bg-purple { background-color: theme('colors.creative.accent.purple'); }
+  .cursor-bg-amber { background-color: theme('colors.creative.accent.amber'); }
+  .cursor-bg-rose { background-color: theme('colors.creative.accent.rose'); }
+  .cursor-bg-teal { background-color: theme('colors.creative.accent.teal'); }
+  .cursor-bg-indigo { background-color: theme('colors.creative.accent.indigo'); }
+  .cursor-bg-orange { background-color: theme('colors.creative.accent.orange'); }
+
+  /* Keyframe animations */
+  @keyframes cursorEnter {
+    from {
+      opacity: 0;
+      transform: scale(0.8) translate(-2px, -2px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translate(0, 0);
+    }
+  }
+
+  @keyframes cursorLeave {
+    from {
+      opacity: 1;
+      transform: scale(1) translate(0, 0);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.8) translate(-2px, -2px);
+    }
+  }
+
+  @keyframes trailFade {
+    0% {
+      opacity: 0.6;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.4;
+      transform: scale(0.8);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+  }
+
+  @keyframes collisionPulse {
+    0% {
+      transform: scale(1);
+      opacity: 0.3;
+    }
+    100% {
+      transform: scale(1.2);
+      opacity: 0.6;
+    }
+  }
+
+  /* Smooth movement transitions */
+  .cursor-element.smooth-move {
+    transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Cursor label positioning adjustments */
+  .cursor-label {
+    /* Prevent label from going off-screen */
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Mobile responsive adjustments */
+  @media (max-width: 640px) {
+    .cursor-element {
+      transform: scale(0.8);
+    }
+    
+    .cursor-label {
+      font-size: 0.7rem;
+      padding: 0.25rem 0.5rem;
+      max-width: 120px;
+    }
+    
+    .collision-zone {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    .cursor-element svg {
+      stroke: currentColor;
+      stroke-width: 1px;
+    }
+    
+    .cursor-label {
+      border: 1px solid currentColor;
+    }
+    
+    .collision-zone {
+      border-width: 3px;
+    }
+  }
+
+  /* Reduced motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    .cursor-element,
+    .trail-dot,
+    .collision-zone {
+      animation: none !important;
+      transition: none !important;
+    }
+    
+    .cursor-element.smooth-move {
+      transition: none;
+    }
+  }
+
+  /* Dark mode adjustments */
+  @media (prefers-color-scheme: dark) {
+    .cursor-label {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  /* Focus and hover states for accessibility */
+  .cursor-element:focus-visible {
+    outline: 2px solid theme('colors.creative.primary.500');
+    outline-offset: 2px;
+  }
+
+  /* Performance optimizations */
+  .cursor-tracking-overlay,
+  .cursor-element,
+  .trail-dot {
+    will-change: transform;
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+
+  /* Prevent text selection on cursor elements */
+  .cursor-tracking-overlay * {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+</style>

@@ -54,6 +54,24 @@ Rails.application.routes.draw do
     # Command execution routes
     resources :commands, only: [:create]
 
+    # Collaboration routes
+    scope path: "collaboration", as: "collaboration" do
+      post "start", to: "collaboration#start"
+      post "join", to: "collaboration#join"
+      delete "leave", to: "collaboration#leave"
+      post "lock", to: "collaboration#lock"
+      delete "unlock", to: "collaboration#unlock"
+      get "locks/:lock_id", to: "collaboration#lock_status", as: "lock_status"
+      get "permissions", to: "collaboration#permissions"
+      post "presence", to: "collaboration#presence"
+      post "typing", to: "collaboration#typing"
+      post "reconnect", to: "collaboration#reconnect"
+      post "operation", to: "collaboration#operation"
+      get "status", to: "collaboration#status"
+      get "users", to: "collaboration#users"
+      delete "terminate", to: "collaboration#terminate"
+    end
+
     # Nested sub agents
     resources :sub_agents do
       member do

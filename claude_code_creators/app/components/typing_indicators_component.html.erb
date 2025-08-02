@@ -1,0 +1,158 @@
+<div class="<%= container_class %>"
+     data-controller="typing-indicators"
+     data-typing-indicators-document-id-value="<%= document.id %>"
+     data-typing-indicators-current-user-id-value="<%= current_user.id %>"
+     data-typing-indicators-max-visible-value="<%= max_visible %>"
+     data-typing-indicators-show-avatars-value="<%= show_avatars %>"
+     data-typing-indicators-style-value="<%= style %>"
+     data-typing-indicators-animation-style-value="<%= animation_style %>"
+     style="display: none;"
+     role="status"
+     aria-live="polite"
+     aria-label="Typing indicators">
+
+  <!-- Typing Indicator Card -->
+  <div class="<%= indicator_card_class %>"
+       data-typing-indicators-target="container">
+    
+    <!-- User Avatars (if enabled) -->
+    <% if show_avatars %>
+      <div class="<%= avatar_container_class %>"
+           data-typing-indicators-target="avatarsContainer">
+        <!-- Avatars will be dynamically added here -->
+      </div>
+    <% end %>
+
+    <!-- Typing Text and Animation -->
+    <div class="flex items-center space-x-3">
+      <!-- User Names -->
+      <span class="<%= typing_text_class %>"
+            data-typing-indicators-target="typingText">
+        <!-- Text like "John is typing..." will be inserted here -->
+      </span>
+
+      <!-- Typing Animation -->
+      <div class="<%= animation_container_class %>"
+           data-typing-indicators-target="animation"
+           aria-hidden="true">
+        <div class="<%= typing_dot_class(0) %>"></div>
+        <div class="<%= typing_dot_class(1) %>"></div>
+        <div class="<%= typing_dot_class(2) %>"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Avatar Template (hidden, used for cloning) -->
+<template data-typing-indicators-target="avatarTemplate">
+  <div class="<%= typing_avatar_class %> avatar-color-placeholder"
+       data-user-id=""
+       data-user-name="">
+    <span class="avatar-initials"></span>
+  </div>
+</template>
+
+<!-- Styles for animations -->
+<style>
+  <%= animation_styles %>
+  
+  /* Fade in/out transitions */
+  .typing-indicators {
+    transition: opacity 200ms ease-in-out, transform 200ms ease-in-out;
+  }
+  
+  .typing-indicators[style*="display: none"] {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  
+  /* Enhanced animations */
+  @media (prefers-reduced-motion: no-preference) {
+    .typing-animation-wave .typing-dot {
+      animation: wave 1.2s infinite ease-in-out;
+    }
+    
+    .typing-animation-dots .typing-dot:nth-child(1) {
+      animation-delay: 0s;
+    }
+    
+    .typing-animation-dots .typing-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    
+    .typing-animation-dots .typing-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    
+    .typing-animation-pulse .typing-dot:nth-child(1) {
+      animation-delay: 0s;
+    }
+    
+    .typing-animation-pulse .typing-dot:nth-child(2) {
+      animation-delay: 0.1s;
+    }
+    
+    .typing-animation-pulse .typing-dot:nth-child(3) {
+      animation-delay: 0.2s;
+    }
+  }
+  
+  /* Respect reduced motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    .typing-indicators,
+    .typing-indicators * {
+      animation: none !important;
+      transition: none !important;
+    }
+    
+    .typing-animation-wave .typing-dot,
+    .typing-animation-dots .typing-dot,
+    .typing-animation-pulse .typing-dot {
+      animation: none;
+      opacity: 0.7;
+    }
+  }
+
+  /* Dark mode adjustments */
+  @media (prefers-color-scheme: dark) {
+    .typing-indicators {
+      backdrop-filter: blur(10px) saturate(180%);
+    }
+  }
+
+  /* Mobile responsiveness */
+  @media (max-width: 640px) {
+    .typing-indicators .indicator-card {
+      margin: 0 1rem;
+      max-width: calc(100vw - 2rem);
+    }
+    
+    .typing-indicators .typing-text {
+      font-size: 0.875rem;
+    }
+    
+    .typing-indicators .typing-avatar {
+      width: 1.25rem;
+      height: 1.25rem;
+      font-size: 0.625rem;
+    }
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    .typing-indicators .indicator-card {
+      border-width: 2px;
+      border-color: currentColor;
+    }
+    
+    .typing-dot {
+      border: 1px solid currentColor;
+    }
+  }
+
+  /* Focus management for accessibility */
+  .typing-indicators:focus-within {
+    outline: 2px solid theme('colors.creative.primary.500');
+    outline-offset: 2px;
+  }
+</style>

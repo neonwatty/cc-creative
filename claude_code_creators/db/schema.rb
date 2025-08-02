@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_02_132300) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_02_201548) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.string "name", null: false
     t.text "body"
@@ -119,6 +119,25 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_02_132300) do
     t.index ["user_id"], name: "index_cloud_integrations_on_user_id"
   end
 
+  create_table "collaboration_sessions", force: :cascade do |t|
+    t.integer "document_id", null: false
+    t.integer "user_id", null: false
+    t.string "session_id", null: false
+    t.string "status", default: "active", null: false
+    t.text "settings"
+    t.integer "max_users", default: 10
+    t.integer "active_users_count", default: 0
+    t.datetime "started_at", null: false
+    t.datetime "expires_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["document_id", "status"], name: "index_collaboration_sessions_on_document_id_and_status"
+    t.index ["document_id"], name: "index_collaboration_sessions_on_document_id"
+    t.index ["session_id"], name: "index_collaboration_sessions_on_session_id", unique: true
+    t.index ["started_at"], name: "index_collaboration_sessions_on_started_at"
+    t.index ["user_id"], name: "index_collaboration_sessions_on_user_id"
+  end
+
   create_table "command_audit_logs", force: :cascade do |t|
     t.string "command", null: false
     t.text "parameters"
@@ -181,6 +200,24 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_02_132300) do
     t.index ["user_id"], name: "index_context_items_on_user_id"
   end
 
+  create_table "context_permissions", force: :cascade do |t|
+    t.integer "context_item_id", null: false
+    t.integer "user_id", null: false
+    t.integer "granted_by_id", null: false
+    t.text "permissions", null: false
+    t.datetime "granted_at", null: false
+    t.datetime "expires_at"
+    t.string "status", default: "active", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["context_item_id", "user_id"], name: "index_context_permissions_on_context_item_id_and_user_id", unique: true
+    t.index ["context_item_id"], name: "index_context_permissions_on_context_item_id"
+    t.index ["expires_at"], name: "index_context_permissions_on_expires_at"
+    t.index ["granted_by_id"], name: "index_context_permissions_on_granted_by_id"
+    t.index ["user_id", "status"], name: "index_context_permissions_on_user_id_and_status"
+    t.index ["user_id"], name: "index_context_permissions_on_user_id"
+  end
+
   create_table "document_versions", force: :cascade do |t|
     t.integer "document_id", null: false
     t.integer "version_number", null: false
@@ -225,6 +262,29 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_02_132300) do
     t.datetime "updated_at", null: false
     t.index ["provider", "uid"], name: "index_identities_on_provider_and_uid", unique: true
     t.index ["user_id"], name: "index_identities_on_user_id"
+  end
+
+  create_table "operational_transforms", force: :cascade do |t|
+    t.integer "document_id", null: false
+    t.integer "user_id", null: false
+    t.string "operation_type", null: false
+    t.integer "position", null: false
+    t.integer "length"
+    t.text "content"
+    t.decimal "timestamp", precision: 15, scale: 6, null: false
+    t.datetime "applied_at"
+    t.string "status", default: "pending", null: false
+    t.boolean "conflict_resolved", default: false
+    t.text "conflict_resolution_data"
+    t.string "operation_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["document_id", "status"], name: "index_operational_transforms_on_document_id_and_status"
+    t.index ["document_id", "timestamp"], name: "index_operational_transforms_on_document_id_and_timestamp"
+    t.index ["document_id"], name: "index_operational_transforms_on_document_id"
+    t.index ["operation_id"], name: "index_operational_transforms_on_operation_id", unique: true
+    t.index ["user_id", "timestamp"], name: "index_operational_transforms_on_user_id_and_timestamp"
+    t.index ["user_id"], name: "index_operational_transforms_on_user_id"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -281,17 +341,57 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_02_132300) do
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
+  create_table "workflow_tasks", force: :cascade do |t|
+    t.integer "document_id", null: false
+    t.integer "assigned_to_id", null: false
+    t.integer "created_by_id", null: false
+    t.string "title", null: false
+    t.text "description"
+    t.string "priority", default: "medium", null: false
+    t.string "status", default: "pending", null: false
+    t.string "category"
+    t.decimal "estimated_hours", precision: 8, scale: 2
+    t.decimal "time_spent", precision: 8, scale: 2, default: "0.0"
+    t.integer "progress_percentage", default: 0
+    t.datetime "due_date"
+    t.datetime "completed_at"
+    t.text "acceptance_criteria"
+    t.text "tags"
+    t.string "git_branch"
+    t.text "dependencies"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["assigned_to_id", "status"], name: "index_workflow_tasks_on_assigned_to_id_and_status"
+    t.index ["assigned_to_id"], name: "index_workflow_tasks_on_assigned_to_id"
+    t.index ["created_by_id", "created_at"], name: "index_workflow_tasks_on_created_by_id_and_created_at"
+    t.index ["created_by_id"], name: "index_workflow_tasks_on_created_by_id"
+    t.index ["document_id", "status"], name: "index_workflow_tasks_on_document_id_and_status"
+    t.index ["document_id"], name: "index_workflow_tasks_on_document_id"
+    t.index ["due_date"], name: "index_workflow_tasks_on_due_date"
+    t.index ["priority"], name: "index_workflow_tasks_on_priority"
+  end
+
   add_foreign_key "claude_contexts", "documents"
   add_foreign_key "claude_contexts", "users"
+  add_foreign_key "collaboration_sessions", "documents"
+  add_foreign_key "collaboration_sessions", "users"
   add_foreign_key "command_audit_logs", "documents"
   add_foreign_key "command_audit_logs", "users"
   add_foreign_key "command_histories", "documents"
   add_foreign_key "command_histories", "users"
+  add_foreign_key "context_permissions", "context_items"
+  add_foreign_key "context_permissions", "users"
+  add_foreign_key "context_permissions", "users", column: "granted_by_id"
   add_foreign_key "documents", "users"
   add_foreign_key "identities", "users"
+  add_foreign_key "operational_transforms", "documents"
+  add_foreign_key "operational_transforms", "users"
   add_foreign_key "sessions", "users"
   add_foreign_key "sub_agent_messages", "sub_agents"
   add_foreign_key "sub_agent_messages", "users"
   add_foreign_key "sub_agents", "documents"
   add_foreign_key "sub_agents", "users"
+  add_foreign_key "workflow_tasks", "documents"
+  add_foreign_key "workflow_tasks", "users", column: "assigned_to_id"
+  add_foreign_key "workflow_tasks", "users", column: "created_by_id"
 end
