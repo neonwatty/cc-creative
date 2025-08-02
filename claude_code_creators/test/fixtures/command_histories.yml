@@ -1,0 +1,58 @@
+# Command execution history fixtures
+
+one:
+  command: "save"
+  parameters: ["test_context"]
+  user: one
+  document: one
+  executed_at: <%= 1.hour.ago %>
+  execution_time: 0.05
+  status: "success"
+  result_data: |
+    {
+      "context_item_id": 1,
+      "context_name": "test_context"
+    }
+
+two:
+  command: "load"
+  parameters: ["existing_context"]
+  user: one
+  document: one
+  executed_at: <%= 30.minutes.ago %>
+  execution_time: 0.03
+  status: "success"
+  result_data: |
+    {
+      "loaded_content": "Test content",
+      "claude_context_updated": true
+    }
+
+three:
+  command: "compact"
+  parameters: []
+  user: one
+  document: one
+  executed_at: <%= 10.minutes.ago %>
+  execution_time: 2.1
+  status: "success"
+  result_data: |
+    {
+      "original_message_count": 20,
+      "compacted_message_count": 3,
+      "compression_ratio": 0.15
+    }
+
+failed_command:
+  command: "load"
+  parameters: ["non_existent"]
+  user: one
+  document: one
+  executed_at: <%= 5.minutes.ago %>
+  execution_time: 0.01
+  status: "error"
+  error_message: "Context 'non_existent' not found"
+  result_data: |
+    {
+      "suggestions": ["test_context", "existing_context"]
+    }

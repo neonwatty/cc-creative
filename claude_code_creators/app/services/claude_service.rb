@@ -1,6 +1,7 @@
 # Service class for interacting with Claude AI via Anthropic SDK
 class ClaudeService
-  class ApiError < StandardError; end
+  class APIError < StandardError; end
+  class ApiError < StandardError; end  # Maintain backwards compatibility
   class ConfigurationError < StandardError; end
 
   MAX_CONTEXT_TOKENS = 100_000 # Claude's context window limit
@@ -38,7 +39,7 @@ class ClaudeService
         sub_agent: @sub_agent_name
       }
     rescue Anthropic::Error => e
-      raise ApiError, "Claude API error: #{e.message}"
+      raise APIError, "Claude API error: #{e.message}"
     end
   end
 
@@ -99,6 +100,61 @@ class ClaudeService
           yielder << chunk
         end
       )
+    end
+  end
+
+  # Compact context using Claude AI summarization
+  def compact_context(messages, aggressive: false)
+    raise ConfigurationError, "Anthropic client not configured" unless @client
+    return { compacted_messages: messages, compression_ratio: 1.0 } if messages.empty?
+
+    # Determine compression strategy
+    target_message_count = aggressive ? [messages.length / 4, 2].max : [messages.length / 2, 5].max
+    
+    # Don't compact if already at target size
+    return { compacted_messages: messages, compression_ratio: 1.0 } if messages.length <= target_message_count
+
+    begin
+      # Create summarization prompt
+      conversation_text = messages.map { |msg| "#{msg[:role]}: #{msg[:content]}" }.join("\n\n")
+      
+      prompt = if aggressive
+        "Please provide a very concise summary of this conversation, preserving only the most essential information and key decisions:\n\n#{conversation_text}"
+      else
+        "Please summarize this conversation, preserving important details, context, and key decisions:\n\n#{conversation_text}"
+      end
+
+      response = @client.messages(
+        model: Rails.application.config.anthropic[:model],
+        max_tokens: [Rails.application.config.anthropic[:max_tokens] / 2, 1000].min,
+        temperature: 0.3, # Lower temperature for consistent summarization
+        system: "You are an expert at summarizing conversations while preserving important context and details.",
+        messages: [{ role: "user", content: prompt }]
+      )
+
+      summary = response.content.first.text
+      
+      # Create compacted message structure
+      compacted_messages = [
+        { role: "system", content: "Previous conversation summary: #{summary}" }
+      ]
+      
+      # Keep the last few messages for immediate context
+      recent_messages = messages.last([target_message_count - 1, 2].max)
+      compacted_messages.concat(recent_messages)
+
+      compression_ratio = compacted_messages.length.to_f / messages.length
+
+      {
+        compacted_messages: compacted_messages,
+        compression_ratio: compression_ratio,
+        original_count: messages.length,
+        compacted_count: compacted_messages.length
+      }
+    rescue Anthropic::Error => e
+      raise APIError, "Failed to compact context: #{e.message}"
+    rescue Timeout::Error
+      raise APIError, "Context compaction timed out"
     end
   end
 

@@ -3,6 +3,9 @@ class Document < ApplicationRecord
   has_many :context_items, dependent: :destroy
   has_many :document_versions, dependent: :destroy
   has_many :sub_agents, dependent: :destroy
+  has_many :claude_contexts, dependent: :destroy
+  has_many :command_histories, dependent: :destroy
+  has_many :command_audit_logs, dependent: :destroy
 
   # Rich text association for content
   has_rich_text :content
@@ -11,7 +14,6 @@ class Document < ApplicationRecord
   serialize :tags, coder: JSON, type: Array
 
   validates :title, presence: true, length: { maximum: 255 }
-  validates :content, presence: true
   validates :description, length: { maximum: 1000 }
 
   # Scopes for common queries

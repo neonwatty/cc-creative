@@ -51,6 +51,9 @@ Rails.application.routes.draw do
       end
     end
 
+    # Command execution routes
+    resources :commands, only: [:create]
+
     # Nested sub agents
     resources :sub_agents do
       member do

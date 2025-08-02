@@ -26,74 +26,9 @@ See visual workflow: [workflow-diagram.md](.claude/workflow-diagram.md)
 
 Agents communicate through structured completion reports embedded in their responses. Each agent knows when to hand off work to the next appropriate agent.
 
-## Context7 Documentation Integration
-
-All agents are enhanced with real-time documentation access via Context7 MCP server:
-
-- **📚 Current Best Practices**: Agents query up-to-date framework documentation before making decisions
-- **🔍 Version-Specific Guidance**: Access to latest stable versions and migration guides  
-- **⚡ Performance Optimization**: Current techniques and patterns from official sources
-- **🛡️ Security Standards**: Latest security guidelines and vulnerability patterns
-- **🧪 Testing Strategies**: Modern testing framework patterns and best practices
-
-**Integration Guide**: [context7-integration-guide.md](.claude/context7-integration-guide.md)
-
-### Usage Pattern
-Agents automatically query Context7 for current documentation when:
-- Making architectural decisions
-- Implementing new features
-- Debugging complex issues
-- Running linting and quality checks
-- Creating comprehensive plans
-
-### Fallback Strategy
-If Context7 is unavailable, agents gracefully degrade to existing knowledge while noting documentation verification needs in completion reports.
-
-## Playwright Browser Automation Integration
-
-All agents are enhanced with comprehensive browser automation capabilities via Playwright MCP server:
-
-- **🌐 Real-Browser Testing**: Agents perform E2E testing, visual validation, and user interaction simulation
-- **📱 Cross-Platform Validation**: Testing across Chromium, Firefox, WebKit, and mobile viewports
-- **🎨 Visual Regression Testing**: Automated screenshot comparison and responsive design validation
-- **🔍 Interactive Debugging**: Browser-based error reproduction and real-time debugging capabilities
-- **⚡ Performance Testing**: Real-world performance monitoring and optimization in browser environments
-- **🧪 System Testing**: Full-stack user journey validation and integration testing
-
-**Integration Guide**: [playwright-integration-guide.md](.claude/playwright-integration-guide.md)
-
-### Usage Patterns by Agent
-- **🧪 test-runner-fixer**: E2E test automation, visual regression testing, cross-browser validation
-- **🎨 tailwind-css-expert**: Responsive design testing, component visual validation, interactive state testing
-- **🐛 error-debugger**: Browser bug reproduction, JavaScript error analysis, UI debugging workflows
-- **📦 javascript-package-expert**: Real-browser JS testing, Stimulus controller validation, package integration
-- **🚂 ruby-rails-expert**: Rails system testing, user journey validation, Hotwire/Turbo testing
-- **📋 project-orchestrator**: Comprehensive testing strategy coordination, multi-agent workflow orchestration
-
-### Browser Automation Capabilities
-Agents automatically use Playwright for:
-- User interaction simulation (clicks, form submission, navigation)
-- Visual state capture and screenshot comparison
-- Console error monitoring and network request analysis
-- Cross-browser compatibility validation
-- Performance profiling and optimization
-- Accessibility testing and validation
-
-### Fallback Strategy
-If Playwright is unavailable, agents gracefully fall back to traditional testing methods while documenting browser testing limitations in completion reports.
-
 ## Router Configuration
 
 Automatic agent selection rules: [router.yaml](.claude/router.yaml)
-
-## Task Master Integration
-
-**Import Task Master commands:**
-@./.taskmaster/CLAUDE.md
-
-All agents automatically:
-- Update task status via `mcp__task-master-ai__set_task_status`
-- Log progress via `mcp__task-master-ai__update_subtask`
 
 ## Starting Complex Tasks
 

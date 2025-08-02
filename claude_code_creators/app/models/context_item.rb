@@ -3,7 +3,7 @@ class ContextItem < ApplicationRecord
   belongs_to :user
 
   validates :content, presence: true
-  validates :item_type, presence: true, inclusion: { in: %w[snippet draft version] }
+  validates :item_type, presence: true, inclusion: { in: %w[snippet draft version saved_context file] }
   validates :title, presence: true, length: { maximum: 255 }
 
   # Callbacks to maintain search content
@@ -12,6 +12,8 @@ class ContextItem < ApplicationRecord
   scope :snippets, -> { where(item_type: "snippet") }
   scope :drafts, -> { where(item_type: "draft") }
   scope :versions, -> { where(item_type: "version") }
+  scope :saved_contexts, -> { where(item_type: "saved_context") }
+  scope :files, -> { where(item_type: "file") }
   scope :recent, -> { order(created_at: :desc) }
   scope :ordered, -> { order(position: :asc, created_at: :desc) }
 
@@ -96,6 +98,14 @@ class ContextItem < ApplicationRecord
 
   def version?
     item_type == "version"
+  end
+
+  def saved_context?
+    item_type == "saved_context"
+  end
+
+  def file?
+    item_type == "file"
   end
 
   private

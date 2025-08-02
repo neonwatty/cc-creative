@@ -6,8 +6,11 @@ class User < ApplicationRecord
   has_many :context_items, dependent: :destroy
   has_many :sub_agents, dependent: :destroy
   has_many :cloud_integrations, dependent: :destroy
+  has_many :claude_contexts, dependent: :destroy
+  has_many :command_histories, dependent: :destroy
+  has_many :command_audit_logs, dependent: :destroy
 
-  enum :role, { user: "user", editor: "editor", admin: "admin" }, default: :user
+  enum :role, { guest: "guest", user: "user", editor: "editor", admin: "admin" }, default: :user
 
   validates :name, presence: true
   validates :email_address, presence: true, uniqueness: { case_sensitive: false }, format: { with: URI::MailTo::EMAIL_REGEXP }

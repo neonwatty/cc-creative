@@ -1,6 +1,11 @@
 class ClaudeContext < ApplicationRecord
   # Associations
   belongs_to :claude_session, foreign_key: :session_id, primary_key: :session_id, optional: true
+  belongs_to :document, optional: true
+  belongs_to :user, optional: true
+
+  # Serialization
+  serialize :context_data, coder: JSON
 
   # Validations
   validates :session_id, presence: true
@@ -20,6 +25,8 @@ class ClaudeContext < ApplicationRecord
     user_preference
     file_content
     sub_agent_context
+    file_include
+    loaded_content
   ].freeze
 
   validates :context_type, inclusion: { in: CONTEXT_TYPES }
@@ -85,6 +92,12 @@ class ClaudeContext < ApplicationRecord
   def set_defaults
     self.content ||= {}
     self.token_count ||= 0
+    self.session_id ||= generate_session_id if document_id.present?
+    self.context_type ||= "document" if document_id.present?
+  end
+
+  def generate_session_id
+    "doc_#{SecureRandom.hex(8)}"
   end
 
   def calculate_tokens

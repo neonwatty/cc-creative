@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_28_211556) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_02_132300) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.string "name", null: false
     t.text "body"
@@ -56,9 +56,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_28_211556) do
     t.integer "token_count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "document_id"
+    t.integer "user_id"
+    t.text "context_data"
     t.index ["context_type"], name: "index_claude_contexts_on_context_type"
+    t.index ["document_id", "user_id"], name: "index_claude_contexts_on_document_id_and_user_id"
+    t.index ["document_id"], name: "index_claude_contexts_on_document_id"
     t.index ["session_id", "context_type"], name: "index_claude_contexts_on_session_id_and_context_type"
     t.index ["session_id"], name: "index_claude_contexts_on_session_id"
+    t.index ["user_id", "created_at"], name: "index_claude_contexts_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_claude_contexts_on_user_id"
   end
 
   create_table "claude_messages", force: :cascade do |t|
@@ -110,6 +117,48 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_28_211556) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_cloud_integrations_on_user_id"
+  end
+
+  create_table "command_audit_logs", force: :cascade do |t|
+    t.string "command", null: false
+    t.text "parameters"
+    t.integer "user_id", null: false
+    t.integer "document_id", null: false
+    t.datetime "executed_at", null: false
+    t.decimal "execution_time", precision: 8, scale: 4
+    t.string "status", null: false
+    t.text "error_message"
+    t.string "ip_address"
+    t.text "user_agent"
+    t.string "session_id"
+    t.text "metadata"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["command", "status"], name: "index_command_audit_logs_on_command_and_status"
+    t.index ["document_id", "executed_at"], name: "index_command_audit_logs_on_document_id_and_executed_at"
+    t.index ["document_id"], name: "index_command_audit_logs_on_document_id"
+    t.index ["session_id"], name: "index_command_audit_logs_on_session_id"
+    t.index ["user_id", "executed_at"], name: "index_command_audit_logs_on_user_id_and_executed_at"
+    t.index ["user_id"], name: "index_command_audit_logs_on_user_id"
+  end
+
+  create_table "command_histories", force: :cascade do |t|
+    t.string "command", null: false
+    t.text "parameters"
+    t.integer "user_id", null: false
+    t.integer "document_id", null: false
+    t.datetime "executed_at", null: false
+    t.decimal "execution_time", precision: 8, scale: 4
+    t.string "status", null: false
+    t.text "result_data"
+    t.text "error_message"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["command", "status"], name: "index_command_histories_on_command_and_status"
+    t.index ["document_id", "executed_at"], name: "index_command_histories_on_document_id_and_executed_at"
+    t.index ["document_id"], name: "index_command_histories_on_document_id"
+    t.index ["user_id", "executed_at"], name: "index_command_histories_on_user_id_and_executed_at"
+    t.index ["user_id"], name: "index_command_histories_on_user_id"
   end
 
   create_table "context_items", force: :cascade do |t|
@@ -232,6 +281,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_28_211556) do
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
+  add_foreign_key "claude_contexts", "documents"
+  add_foreign_key "claude_contexts", "users"
+  add_foreign_key "command_audit_logs", "documents"
+  add_foreign_key "command_audit_logs", "users"
+  add_foreign_key "command_histories", "documents"
+  add_foreign_key "command_histories", "users"
   add_foreign_key "documents", "users"
   add_foreign_key "identities", "users"
   add_foreign_key "sessions", "users"

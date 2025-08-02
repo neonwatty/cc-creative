@@ -1,0 +1,43 @@
+# Command audit log fixtures for security and compliance tracking
+
+audit_save_command:
+  command: "save"
+  parameters: ["audit_test"]
+  user: one
+  document: one
+  executed_at: <%= 2.hours.ago %>
+  execution_time: 0.08
+  status: "success"
+  ip_address: "127.0.0.1"
+  user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
+  session_id: "session_123456"
+
+audit_load_command:
+  command: "load"
+  parameters: ["sensitive_context"]
+  user: two
+  document: one
+  executed_at: <%= 1.hour.ago %>
+  execution_time: 0.05
+  status: "error"
+  error_message: "Access denied - insufficient permissions"
+  ip_address: "192.168.1.100"
+  user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+  session_id: "session_789012"
+
+audit_clear_command:
+  command: "clear"
+  parameters: ["context"]
+  user: one
+  document: one
+  executed_at: <%= 30.minutes.ago %>
+  execution_time: 0.12
+  status: "success"
+  ip_address: "127.0.0.1"
+  user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
+  session_id: "session_123456"
+  metadata: |
+    {
+      "cleared_items": 5,
+      "context_types": ["claude_context", "sub_agent_context"]
+    }
