@@ -134,7 +134,11 @@ class PluginTest < ActiveSupport::TestCase
   test "should scope active plugins" do
     active_plugin = Plugin.create!(@plugin.attributes)
     inactive_plugin = Plugin.create!(
-      @plugin.attributes.merge(name: "inactive-plugin", status: "inactive")
+      @plugin.attributes.except("id", "created_at", "updated_at").merge(
+        name: "inactive-plugin",
+        version: "1.0.1",
+        status: "inactive"
+      )
     )
 
     assert_includes Plugin.active, active_plugin
@@ -144,7 +148,11 @@ class PluginTest < ActiveSupport::TestCase
   test "should scope by category" do
     editor_plugin = Plugin.create!(@plugin.attributes)
     command_plugin = Plugin.create!(
-      @plugin.attributes.merge(name: "command-plugin", category: "command")
+      @plugin.attributes.except("id", "created_at", "updated_at").merge(
+        name: "command-plugin",
+        version: "1.0.2",
+        category: "command"
+      )
     )
 
     assert_includes Plugin.by_category("editor"), editor_plugin

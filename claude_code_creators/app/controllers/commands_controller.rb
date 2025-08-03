@@ -8,7 +8,7 @@ class CommandsController < ApplicationController
   before_action :require_api_authentication
   before_action :set_document
   before_action :verify_document_access
-  before_action :parse_command_params
+  before_action :parse_command_params, except: [ :suggestions ]
   before_action :rate_limit_check
 
   # POST /documents/:document_id/commands
@@ -41,6 +41,43 @@ class CommandsController < ApplicationController
       Rails.logger.error "Unexpected error in CommandsController: #{e.message}\n#{e.backtrace.join("\n")}"
       error_id = SecureRandom.hex(8)
       render_error("internal error occurred", :internal_server_error, error_id: error_id)
+    end
+  end
+
+  # GET /documents/:document_id/command_suggestions
+  def suggestions
+    filter = params[:filter] || ""
+    position = params[:position] || {}
+
+    begin
+      # Get available commands for this document
+      parser = CommandParserService.new(@document, Current.user)
+      suggestions = parser.get_command_suggestions(
+        filter: filter,
+        context: {
+          document_id: @document.id,
+          user: Current.user,
+          cursor_position: position
+        }
+      )
+
+      render json: {
+        status: "success",
+        suggestions: suggestions,
+        filter: filter,
+        timestamp: Time.current.iso8601
+      }
+
+    rescue StandardError => e
+      Rails.logger.error "[COMMAND_SUGGESTIONS] Error: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+
+      render json: {
+        status: "error",
+        error: "Failed to generate suggestions",
+        suggestions: [],
+        filter: filter
+      }, status: :internal_server_error
     end
   end
 

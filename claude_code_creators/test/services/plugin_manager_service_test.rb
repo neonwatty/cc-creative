@@ -35,7 +35,11 @@ class PluginManagerServiceTest < ActiveSupport::TestCase
 
   test "should filter plugins by category" do
     command_plugin = Plugin.create!(
-      @plugin.attributes.merge(name: "command-plugin", category: "command")
+      @plugin.attributes.except("id", "created_at", "updated_at").merge(
+        name: "command-plugin",
+        version: "1.0.1",
+        category: "command"
+      )
     )
 
     editor_plugins = @service.discover_plugins(category: "editor")
@@ -49,8 +53,9 @@ class PluginManagerServiceTest < ActiveSupport::TestCase
 
   test "should search plugins by name and description" do
     searching_plugin = Plugin.create!(
-      @plugin.attributes.merge(
+      @plugin.attributes.except("id", "created_at", "updated_at").merge(
         name: "search-helper",
+        version: "1.0.2",
         description: "Advanced search functionality"
       )
     )
@@ -86,9 +91,10 @@ class PluginManagerServiceTest < ActiveSupport::TestCase
 
   test "should not install incompatible plugin" do
     incompatible_plugin = Plugin.create!(
-      @plugin.attributes.merge(
+      @plugin.attributes.except("id", "created_at", "updated_at").merge(
         name: "incompatible-plugin",
-        metadata: { "min_version" => "99.0.0" }
+        version: "1.0.3",
+        metadata: { "min_version" => "99.0.0", "entry_point" => "index.js" }
       )
     )
 
@@ -100,9 +106,10 @@ class PluginManagerServiceTest < ActiveSupport::TestCase
 
   test "should handle missing dependencies during installation" do
     plugin_with_deps = Plugin.create!(
-      @plugin.attributes.merge(
+      @plugin.attributes.except("id", "created_at", "updated_at").merge(
         name: "deps-plugin",
-        metadata: { "dependencies" => [ "nonexistent-package@1.0.0" ] }
+        version: "1.0.4",
+        metadata: { "dependencies" => [ "nonexistent-package@1.0.0" ], "entry_point" => "index.js" }
       )
     )
 
@@ -208,16 +215,18 @@ class PluginManagerServiceTest < ActiveSupport::TestCase
 
   test "should check plugin compatibility" do
     compatible_plugin = Plugin.create!(
-      @plugin.attributes.merge(
+      @plugin.attributes.except("id", "created_at", "updated_at").merge(
         name: "compatible-plugin",
-        metadata: { "min_version" => "1.0.0", "max_version" => "2.0.0" }
+        version: "1.0.5",
+        metadata: { "min_version" => "1.0.0", "max_version" => "2.0.0", "entry_point" => "index.js" }
       )
     )
 
     incompatible_plugin = Plugin.create!(
-      @plugin.attributes.merge(
+      @plugin.attributes.except("id", "created_at", "updated_at").merge(
         name: "incompatible-plugin",
-        metadata: { "min_version" => "99.0.0" }
+        version: "1.0.6",
+        metadata: { "min_version" => "99.0.0", "entry_point" => "index.js" }
       )
     )
 
@@ -227,9 +236,10 @@ class PluginManagerServiceTest < ActiveSupport::TestCase
 
   test "should resolve plugin dependencies" do
     plugin_with_deps = Plugin.create!(
-      @plugin.attributes.merge(
+      @plugin.attributes.except("id", "created_at", "updated_at").merge(
         name: "deps-plugin",
-        metadata: { "dependencies" => [ "lodash@4.17.21", "axios@0.24.0" ] }
+        version: "1.0.7",
+        metadata: { "dependencies" => [ "lodash@4.17.21", "axios@0.24.0" ], "entry_point" => "index.js" }
       )
     )
 
@@ -255,7 +265,10 @@ class PluginManagerServiceTest < ActiveSupport::TestCase
     )
 
     new_version = Plugin.create!(
-      @plugin.attributes.merge(name: "test-plugin", version: "2.0.0")
+      @plugin.attributes.except("id", "created_at", "updated_at").merge(
+        name: "test-plugin",
+        version: "2.0.0"
+      )
     )
 
     result = @service.update_plugin(@plugin.id, new_version.id)

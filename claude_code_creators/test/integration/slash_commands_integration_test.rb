@@ -301,7 +301,7 @@ class SlashCommandsIntegrationTest < ActionDispatch::IntegrationTest
   test "integration performance with large documents" do
     # Create large document content
     large_content = "Lorem ipsum dolor sit amet. " * 10000
-    @document.update!(rich_text_content: large_content)
+    @document.update!(content: large_content)
 
     # Create many context items
     50.times do |i|

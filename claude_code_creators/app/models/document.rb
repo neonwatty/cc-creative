@@ -14,6 +14,7 @@ class Document < ApplicationRecord
   serialize :tags, coder: JSON, type: Array
 
   validates :title, presence: true, length: { maximum: 255 }
+  validates :content, presence: true
   validates :description, length: { maximum: 1000 }
 
   # Optimized scopes for common queries
@@ -23,7 +24,7 @@ class Document < ApplicationRecord
   scope :active_in_period, ->(period) { where("updated_at > ?", period.ago) }
   scope :with_content, -> { joins(:rich_text_content) }
   scope :popular, -> { left_joins(:context_items).group(:id).order("COUNT(context_items.id) DESC") }
-  
+
   # Performance-optimized scopes
   scope :recent_with_minimal_data, -> { select(:id, :title, :user_id, :created_at, :updated_at).recent }
   scope :user_documents_summary, ->(user) {
@@ -34,7 +35,7 @@ class Document < ApplicationRecord
 
   # Ensure tags is always an array
   before_save :ensure_tags_array
-  
+
   # Cache invalidation callbacks
   after_update :invalidate_content_caches
   after_destroy :invalidate_content_caches
@@ -73,12 +74,12 @@ class Document < ApplicationRecord
 
   def excerpt(length = 150)
     return "" if content.blank?
-    
+
     Rails.cache.fetch("document_#{id}_excerpt_#{length}", expires_in: 1.hour) do
       content.to_plain_text.truncate(length, separator: " ")
     end
   end
-  
+
   # Optimized content retrieval
   def content_plain_text
     @content_plain_text ||= content&.to_plain_text || ""
@@ -86,7 +87,7 @@ class Document < ApplicationRecord
 
   def content_for_search
     Rails.cache.fetch("document_#{id}_search_content", expires_in: 2.hours) do
-      [title, description, content_plain_text].compact.join(" ").strip
+      [ title, description, content_plain_text ].compact.join(" ").strip
     end
   end
 
@@ -124,7 +125,7 @@ class Document < ApplicationRecord
   end
 
   def create_auto_version(user)
-    create_version(user, is_auto_version: true)
+    create_version(user, { is_auto_version: true })
   end
 
   def create_manual_version(user, version_name: nil, version_notes: nil)
@@ -187,18 +188,18 @@ class Document < ApplicationRecord
   def ensure_tags_array
     self.tags ||= []
   end
-  
+
   def invalidate_content_caches
     cache_keys = [
       "document_#{id}_word_count",
       "document_#{id}_search_content"
     ]
-    
+
     # Invalidate excerpt caches for common lengths
-    [100, 150, 200, 300].each do |length|
+    [ 100, 150, 200, 300 ].each do |length|
       cache_keys << "document_#{id}_excerpt_#{length}"
     end
-    
+
     cache_keys.each { |key| Rails.cache.delete(key) }
   end
 end

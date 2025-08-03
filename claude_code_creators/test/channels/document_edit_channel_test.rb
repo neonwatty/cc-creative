@@ -30,7 +30,8 @@ class DocumentEditChannelTest < ActionCable::Channel::TestCase
     unauthorized_doc = Document.create!(
       title: "Private Document",
       user: @other_user,
-      description: "Private content"
+      description: "Private content",
+      content: "Private document content"
     )
 
     subscribe document_id: unauthorized_doc.id

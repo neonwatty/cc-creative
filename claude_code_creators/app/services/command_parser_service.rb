@@ -258,6 +258,36 @@ class CommandParserService
     { valid: true, error: nil }
   end
 
+  def get_command_suggestions(filter: "", context: {})
+    filtered_commands = if filter.empty?
+      COMMAND_REGISTRY.keys
+    else
+      COMMAND_REGISTRY.keys.select { |cmd| cmd.include?(filter.downcase) }
+    end
+
+    suggestions = filtered_commands.map do |command|
+      metadata = COMMAND_REGISTRY[command]
+
+      # Check if user has permission for this command
+      permission_result = validate_permissions(command)
+      next unless permission_result[:allowed]
+
+      {
+        command: command,
+        description: metadata[:description],
+        examples: metadata[:examples] || [],
+        category: metadata[:category] || "general",
+        required_params: metadata[:required_params] || 0,
+        max_params: metadata[:max_params] || 0,
+        valid_values: metadata[:valid_values] || [],
+        match_score: calculate_match_score(command, filter)
+      }
+    end.compact
+
+    # Sort by match score (higher is better)
+    suggestions.sort_by { |s| -s[:match_score] }
+  end
+
   private
 
   def parse_command_string(command_string)
@@ -317,5 +347,24 @@ class CommandParserService
     else
       {}
     end
+  end
+
+  def calculate_match_score(command, filter)
+    return 1.0 if filter.empty?
+
+    filter_downcase = filter.downcase
+    command_downcase = command.downcase
+
+    # Exact match gets highest score
+    return 10.0 if command_downcase == filter_downcase
+
+    # Starts with filter gets high score
+    return 8.0 if command_downcase.start_with?(filter_downcase)
+
+    # Contains filter gets medium score
+    return 5.0 if command_downcase.include?(filter_downcase)
+
+    # Default score for partial matches
+    1.0
   end
 end

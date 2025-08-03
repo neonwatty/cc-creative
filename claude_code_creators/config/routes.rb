@@ -76,6 +76,9 @@ Rails.application.routes.draw do
     # Command execution routes
     resources :commands, only: [ :create ]
 
+    # Command suggestions route
+    get :command_suggestions, to: "commands#suggestions"
+
     # Collaboration routes
     scope path: "collaboration", as: "collaboration" do
       post "start", to: "collaboration#start"
@@ -122,7 +125,7 @@ Rails.application.routes.draw do
   # Metrics and monitoring endpoints
   get "metrics" => "metrics#show", as: :metrics
   get "metrics/prometheus" => "metrics#prometheus", as: :prometheus_metrics
-  
+
   # Admin analytics dashboard
   namespace :admin do
     resources :analytics, only: [ :index ] do

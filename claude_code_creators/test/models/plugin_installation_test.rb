@@ -97,7 +97,12 @@ class PluginInstallationTest < ActiveSupport::TestCase
     installed = PluginInstallation.create!(@installation.attributes)
     uninstalled = PluginInstallation.create!(
       @installation.attributes.merge(
-        plugin: Plugin.create!(@plugin.attributes.merge(name: "other-plugin")),
+        plugin: Plugin.create!(
+          @plugin.attributes.except("id", "created_at", "updated_at").merge(
+            name: "other-plugin",
+            version: "1.0.1"
+          )
+        ),
         status: "uninstalled"
       )
     )
@@ -110,7 +115,12 @@ class PluginInstallationTest < ActiveSupport::TestCase
     active = PluginInstallation.create!(@installation.attributes)
     disabled = PluginInstallation.create!(
       @installation.attributes.merge(
-        plugin: Plugin.create!(@plugin.attributes.merge(name: "disabled-plugin")),
+        plugin: Plugin.create!(
+          @plugin.attributes.except("id", "created_at", "updated_at").merge(
+            name: "disabled-plugin",
+            version: "1.0.2"
+          )
+        ),
         status: "disabled"
       )
     )
@@ -125,7 +135,12 @@ class PluginInstallationTest < ActiveSupport::TestCase
     other_installation = PluginInstallation.create!(
       @installation.attributes.merge(
         user: other_user,
-        plugin: Plugin.create!(@plugin.attributes.merge(name: "other-plugin"))
+        plugin: Plugin.create!(
+          @plugin.attributes.except("id", "created_at", "updated_at").merge(
+            name: "other-plugin",
+            version: "1.0.3"
+          )
+        )
       )
     )
 
@@ -173,9 +188,10 @@ class PluginInstallationTest < ActiveSupport::TestCase
 
   test "should validate plugin compatibility on save" do
     incompatible_plugin = Plugin.create!(
-      @plugin.attributes.merge(
+      @plugin.attributes.except("id", "created_at", "updated_at").merge(
         name: "incompatible-plugin",
-        metadata: { "min_version" => "99.0.0" }
+        version: "1.0.4",
+        metadata: { "min_version" => "99.0.0", "entry_point" => "index.js" }
       )
     )
     @installation.plugin = incompatible_plugin

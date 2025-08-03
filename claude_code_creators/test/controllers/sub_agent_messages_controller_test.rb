@@ -89,7 +89,7 @@ class SubAgentMessagesControllerTest < ActionDispatch::IntegrationTest
          params: { message: "Hello!" },
          as: :json
 
-    assert_response :redirect
+    assert_response :unauthorized
   end
 
   test "should require document authorization" do

@@ -253,7 +253,7 @@ class DocumentTest < ActiveSupport::TestCase
   test "create_auto_version creates automatic version" do
     @document.save!
 
-    DocumentVersion.expects(:create_from_document).with(@document, @user, is_auto_version: true).returns(true)
+    DocumentVersion.expects(:create_from_document).with(@document, @user, { is_auto_version: true }).returns(true)
 
     @document.create_auto_version(@user)
   end

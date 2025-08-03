@@ -24,7 +24,11 @@ class Plugin < ApplicationRecord
   # Scopes
   scope :active, -> { where(status: "active") }
   scope :by_category, ->(category) { where(category: category) }
-  scope :search, ->(query) { where("name ILIKE ? OR description ILIKE ?", "%#{query}%", "%#{query}%") }
+  scope :search, ->(query) {
+    return all if query.blank?
+    sanitized_query = "%#{sanitize_sql_like(query.downcase)}%"
+    where("LOWER(name) LIKE ? OR LOWER(description) LIKE ?", sanitized_query, sanitized_query)
+  }
 
   # Instance methods
   def installed_for?(user)

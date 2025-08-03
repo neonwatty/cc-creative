@@ -76,9 +76,10 @@ class SandboxServiceTest < ActiveSupport::TestCase
   test "should handle code execution timeout" do
     # Create plugin with very short timeout
     short_timeout_plugin = Plugin.create!(
-      @plugin.attributes.merge(
+      @plugin.attributes.except("id", "created_at", "updated_at").merge(
         name: "timeout-plugin",
-        sandbox_config: { "timeout" => 0.1 }
+        version: "1.0.1",
+        sandbox_config: { "timeout" => 1 }
       )
     )
     installation = PluginInstallation.create!(
@@ -112,8 +113,9 @@ class SandboxServiceTest < ActiveSupport::TestCase
   test "should enforce memory limits" do
     # Create plugin with very low memory limit
     low_memory_plugin = Plugin.create!(
-      @plugin.attributes.merge(
+      @plugin.attributes.except("id", "created_at", "updated_at").merge(
         name: "memory-plugin",
+        version: "1.0.2",
         sandbox_config: { "memory_limit" => 1 } # 1MB limit
       )
     )
@@ -287,7 +289,7 @@ class SandboxServiceTest < ActiveSupport::TestCase
   end
 
   test "should handle plugin dependency loading" do
-    @plugin.update!(metadata: { "dependencies" => [ "lodash@4.17.21" ] })
+    @plugin.update!(metadata: { "dependencies" => [ "lodash@4.17.21" ], "entry_point" => "index.js" })
 
     code = "const _ = require('lodash'); console.log(_.version);"
 

@@ -19,16 +19,21 @@ class ExtensionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should get index of available plugins" do
-    get extensions_path
+    get extensions_path, headers: { "Accept" => "application/json" }
 
     assert_response :success
-    assert_includes response.body, @plugin.name
-    assert_includes response.body, @plugin.description
+    response_json = JSON.parse(response.body)
+    plugin_names = response_json["plugins"].map { |p| p["name"] }
+    assert_includes plugin_names, @plugin.name
   end
 
   test "should get index with category filter" do
     command_plugin = Plugin.create!(
-      @plugin.attributes.merge(name: "command-plugin", category: "command")
+      @plugin.attributes.except("id", "created_at", "updated_at").merge(
+        name: "command-plugin",
+        version: "1.0.1",
+        category: "command"
+      )
     )
 
     get extensions_path, params: { category: "editor" }
@@ -39,19 +44,22 @@ class ExtensionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should search plugins" do
-    get extensions_path, params: { search: "test" }
+    get extensions_path, params: { search: "test" }, headers: { "Accept" => "application/json" }
 
     assert_response :success
-    assert_includes response.body, @plugin.name
+    response_json = JSON.parse(response.body)
+    plugin_names = response_json["plugins"].map { |p| p["name"] }
+    assert_includes plugin_names, @plugin.name
   end
 
   test "should show individual plugin" do
-    get extension_path(@plugin)
+    get extension_path(@plugin), headers: { "Accept" => "application/json" }
 
     assert_response :success
-    assert_includes response.body, @plugin.name
-    assert_includes response.body, @plugin.description
-    assert_includes response.body, @plugin.author
+    response_json = JSON.parse(response.body)
+    assert_equal @plugin.name, response_json["plugin"]["name"]
+    assert_equal @plugin.description, response_json["plugin"]["description"]
+    assert_equal @plugin.author, response_json["plugin"]["author"]
   end
 
   test "should install plugin successfully" do
@@ -82,9 +90,9 @@ class ExtensionsControllerTest < ActionDispatch::IntegrationTest
 
   test "should not install incompatible plugin" do
     incompatible_plugin = Plugin.create!(
-      @plugin.attributes.merge(
+      @plugin.attributes.except("id", "created_at", "updated_at").merge(
         name: "incompatible-plugin",
-        metadata: { "min_version" => "99.0.0" }
+        metadata: { "min_version" => "99.0.0", "entry_point" => "index.js", "api_version" => "1.0" }
       )
     )
 
@@ -309,7 +317,7 @@ class ExtensionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should require authentication for plugin actions" do
-    sign_out @user
+    sign_out
 
     post install_extension_path(@plugin), as: :json
 
@@ -318,9 +326,10 @@ class ExtensionsControllerTest < ActionDispatch::IntegrationTest
 
   test "should validate plugin permissions before installation" do
     dangerous_plugin = Plugin.create!(
-      @plugin.attributes.merge(
+      @plugin.attributes.except("id", "created_at", "updated_at").merge(
         name: "dangerous-plugin",
-        permissions: { "system_access" => true, "write_files" => true }
+        version: "1.0.2",
+        permissions: { "read_files" => true, "write_files" => true }
       )
     )
 
@@ -355,7 +364,10 @@ class ExtensionsControllerTest < ActionDispatch::IntegrationTest
     )
 
     new_version = Plugin.create!(
-      @plugin.attributes.merge(version: "2.0.0")
+      @plugin.attributes.except("id", "created_at", "updated_at").merge(
+        name: "#{@plugin.name}-v2",
+        version: "2.0.0"
+      )
     )
 
     patch update_extension_path(@plugin),
@@ -389,7 +401,10 @@ class ExtensionsControllerTest < ActionDispatch::IntegrationTest
 
   test "should handle bulk plugin operations" do
     plugin2 = Plugin.create!(
-      @plugin.attributes.merge(name: "plugin2")
+      @plugin.attributes.except("id", "created_at", "updated_at").merge(
+        name: "plugin2",
+        version: "1.0.3"
+      )
     )
 
     plugin_ids = [ @plugin.id, plugin2.id ]

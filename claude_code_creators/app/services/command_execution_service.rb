@@ -504,7 +504,9 @@ class CommandExecutionService
   end
 
   def clear_document_content
-    @document.update!(content: "")
+    # Skip validation when clearing document content programmatically
+    @document.content = ""
+    @document.save!(validate: false)
   end
 
   def format_content(content, format)

@@ -505,6 +505,46 @@ class OperationalTransformService
                        .map(&:to_operation_hash)
   end
 
+  # Manual Conflict Resolution
+  def resolve_conflict_manually(document_id, resolution_data)
+    begin
+      conflict_id = resolution_data[:conflict_id]
+      strategy = resolution_data[:resolution_strategy]
+      content = resolution_data[:resolved_content]
+      resolved_by = resolution_data[:resolved_by]
+
+      # Validate strategy
+      unless VALID_CONFLICT_STRATEGIES.include?(strategy)
+        return { success: false, error: "Invalid resolution strategy: #{strategy}" }
+      end
+
+      # For manual resolution, we accept the provided content
+      document = Document.find(document_id)
+
+      # Update document content with resolved content
+      document.update!(content: content)
+
+      # Clear any pending operations for this conflict
+      OperationalTransform.where(document_id: document_id, operation_id: conflict_id).destroy_all
+
+      # Log the manual resolution
+      Rails.logger.info "[CONFLICT_RESOLUTION] Manual resolution for conflict #{conflict_id} by user #{resolved_by}"
+
+      {
+        success: true,
+        final_content: content,
+        resolution_strategy: strategy,
+        resolved_by: resolved_by,
+        resolved_at: Time.current
+      }
+    rescue ActiveRecord::RecordNotFound => e
+      { success: false, error: "Document not found: #{e.message}" }
+    rescue StandardError => e
+      Rails.logger.error "[CONFLICT_RESOLUTION] Error in manual resolution: #{e.message}"
+      { success: false, error: "Resolution failed: #{e.message}" }
+    end
+  end
+
   # Utility Methods
   def validate_operation!(operation)
     raise InvalidOperationError, "Operation must be a hash" unless operation.is_a?(Hash)

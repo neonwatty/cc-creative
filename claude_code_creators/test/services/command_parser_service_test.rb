@@ -139,13 +139,16 @@ class CommandParserServiceTest < ActiveSupport::TestCase
 
   test "should suggest commands based on empty input" do
     suggestions = @service.suggest_commands("")
-    assert_equal 6, suggestions.length
+    assert_equal 9, suggestions.length
     assert_includes suggestions, "save"
     assert_includes suggestions, "load"
     assert_includes suggestions, "compact"
     assert_includes suggestions, "clear"
     assert_includes suggestions, "include"
     assert_includes suggestions, "snippet"
+    assert_includes suggestions, "review"
+    assert_includes suggestions, "suggest"
+    assert_includes suggestions, "critique"
   end
 
   test "should suggest commands with descriptions" do
@@ -189,7 +192,7 @@ class CommandParserServiceTest < ActiveSupport::TestCase
   end
 
   test "should validate document access" do
-    other_document = Document.create!(title: "Other Doc", user: users(:two))
+    other_document = Document.create!(title: "Other Doc", content: "Some content", user: users(:two))
     result = @service.validate_document_access(other_document)
 
     assert_not result[:allowed]

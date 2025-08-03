@@ -8,16 +8,22 @@ class DocumentEditChannel < ApplicationCable::Channel
     # Performance optimization: batch operations
     @user_id = current_user.id
     @document_id = @document.id
-    
+
     stream_for @document
 
     # Batch Redis operations for performance
-    Redis.current.pipelined do |redis|
-      # Add user to document editing session
-      add_user_to_editing_session_batched(@document, redis)
-      
-      # Update presence data
-      update_editing_presence_batched(@document, "editing", redis)
+    if Redis.current
+      Redis.current.pipelined do |redis|
+        # Add user to document editing session
+        add_user_to_editing_session_batched(@document, redis)
+
+        # Update presence data
+        update_editing_presence_batched(@document, "editing", redis)
+      end
+    else
+      # Fallback to individual operations without Redis
+      add_user_to_editing_session(@document)
+      update_editing_presence(@document, "editing")
     end
 
     # Broadcast user joined editing (async to reduce latency)
@@ -57,14 +63,14 @@ class DocumentEditChannel < ApplicationCable::Channel
 
     # Performance: early validation before expensive operations
     return transmit_error("Invalid operation data") unless data.is_a?(Hash)
-    
+
     begin
       operation = prepare_operation(data)
       validate_operation!(operation)
 
       # Performance optimization: use cached service instance
       service = operational_transform_service
-      
+
       # Process operation with performance monitoring
       result = measure_operation_performance("edit_operation") do
         service.apply_and_broadcast_operation(@document, operation)
@@ -469,12 +475,12 @@ class DocumentEditChannel < ApplicationCable::Channel
     start_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     result = yield
     duration_ms = ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - start_time) * 1000).round(2)
-    
+
     # Log slow operations
     if duration_ms > 50  # Log operations slower than 50ms
       Rails.logger.warn "[SLOW_CABLE_OP] #{operation_name}: #{duration_ms}ms for document #{@document_id}"
     end
-    
+
     # Track performance metrics
     if defined?(PerformanceLog) && duration_ms > 10
       PerformanceLog.create!(
@@ -482,14 +488,14 @@ class DocumentEditChannel < ApplicationCable::Channel
         duration_ms: duration_ms,
         occurred_at: Time.current,
         environment: Rails.env,
-        metadata: { 
-          document_id: @document_id, 
+        metadata: {
+          document_id: @document_id,
           user_id: @user_id,
           channel: "DocumentEditChannel"
         }
       )
     end
-    
+
     result
   end
 
@@ -517,7 +523,7 @@ class DocumentEditChannel < ApplicationCable::Channel
       joined_at: Time.current.to_f,
       last_activity: Time.current.to_f
     }
-    
+
     if redis
       redis.hset(editing_key, current_user.id, user_data.to_json)
       redis.expire(editing_key, 3600)  # 1 hour
@@ -559,7 +565,7 @@ class DocumentEditChannel < ApplicationCable::Channel
       activity: activity,
       timestamp: Time.current.to_f
     }
-    
+
     if redis
       redis.setex(presence_key, 600, presence_data.to_json)  # 10 minutes
     else
@@ -569,7 +575,7 @@ class DocumentEditChannel < ApplicationCable::Channel
 
   def update_editing_presence(document, activity)
     update_editing_presence_batched(document, activity)
-    
+
     # Broadcast presence update asynchronously
     ActionCable.server.broadcast(
       "presence_#{document.id}",

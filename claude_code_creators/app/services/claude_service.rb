@@ -39,7 +39,7 @@ class ClaudeService
         sub_agent: @sub_agent_name
       }
     rescue Anthropic::Error => e
-      raise APIError, "Claude API error: #{e.message}"
+      raise ApiError, "Claude API error: #{e.message}"
     end
   end
 
@@ -152,9 +152,9 @@ class ClaudeService
         compacted_count: compacted_messages.length
       }
     rescue Anthropic::Error => e
-      raise APIError, "Failed to compact context: #{e.message}"
+      raise ApiError, "Failed to compact context: #{e.message}"
     rescue Timeout::Error
-      raise APIError, "Context compaction timed out"
+      raise ApiError, "Context compaction timed out"
     end
   end
 
@@ -224,7 +224,7 @@ class ClaudeService
 
       parse_review_response(response.content.first.text)
     rescue Anthropic::Error => e
-      raise APIError, "Claude API error during review: #{e.message}"
+      raise ApiError, "Claude API error during review: #{e.message}"
     end
   end
 
@@ -245,7 +245,7 @@ class ClaudeService
 
       parse_suggestion_response(response.content.first.text)
     rescue Anthropic::Error => e
-      raise APIError, "Claude API error during suggestion generation: #{e.message}"
+      raise ApiError, "Claude API error during suggestion generation: #{e.message}"
     end
   end
 
@@ -266,7 +266,7 @@ class ClaudeService
 
       parse_critique_response(response.content.first.text)
     rescue Anthropic::Error => e
-      raise APIError, "Claude API error during critique: #{e.message}"
+      raise ApiError, "Claude API error during critique: #{e.message}"
     end
   end
 
