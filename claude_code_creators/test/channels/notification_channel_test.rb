@@ -14,14 +14,14 @@ class NotificationChannelTest < ActionCable::Channel::TestCase
 
   # Subscription Tests
   test "subscribes to user notifications successfully" do
-    subscribe user_id: @user.id
+    subscribe notification_type: "user_specific", user_id: @user.id
 
     assert subscription.confirmed?
     assert_has_stream_for @user
   end
 
   test "subscribes to document notifications successfully" do
-    subscribe document_id: @document.id
+    subscribe notification_type: "document_specific", document_id: @document.id
 
     assert subscription.confirmed?
     assert_has_stream_for @document

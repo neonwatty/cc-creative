@@ -8,6 +8,31 @@ Rails.application.routes.draw do
   get "auth/:provider/callback", to: "sessions#omniauth"
   get "auth/failure", to: "sessions#omniauth_failure"
 
+  # API routes
+  namespace :api do
+    namespace :v1 do
+      resources :documents, controller: "documents" do
+        # Collaboration routes
+        scope path: "collaboration", as: "collaboration" do
+          post "start", to: "collaboration#start"
+          post "join", to: "collaboration#join"
+          delete "leave", to: "collaboration#leave"
+          post "lock", to: "collaboration#lock"
+          delete "unlock", to: "collaboration#unlock"
+          get "locks/:lock_id", to: "collaboration#lock_status", as: "lock_status"
+          get "permissions", to: "collaboration#permissions"
+          post "presence", to: "collaboration#presence"
+          post "typing", to: "collaboration#typing"
+          post "reconnect", to: "collaboration#reconnect"
+          post "operation", to: "collaboration#operation"
+          get "status", to: "collaboration#status"
+          get "users", to: "collaboration#users"
+          delete "terminate", to: "collaboration#terminate"
+        end
+      end
+    end
+  end
+
   # Cloud integrations
   resources :cloud_integrations, only: [ :index, :new, :destroy ] do
     collection do

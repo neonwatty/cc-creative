@@ -370,7 +370,7 @@ class ExtensionsControllerTest < ActionDispatch::IntegrationTest
       )
     )
 
-    patch update_extension_path(@plugin),
+    patch extension_path(@plugin),
           params: { new_version_id: new_version.id },
           as: :json
 

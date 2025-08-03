@@ -1,3 +1,13 @@
+one_content:
+  record: one (Document)
+  name: content
+  body: <p>This is content about Rails best practices. It covers <strong>testing</strong>, conventions, and performance optimization.</p>
+
+two_content:
+  record: two (Document)
+  name: content
+  body: <p>This is content about modern JavaScript patterns. It covers React, <em>async/await</em>, and ES6+ features.</p>
+
 document_one_content:
   record: document_one (Document)
   name: content
@@ -7,3 +17,13 @@ document_two_content:
   record: document_two (Document)
   name: content
   body: <p>This is the content of the second document. It has <em>different content</em> for variety.</p>
+
+article_one_content:
+  record: article_one (Document)
+  name: content
+  body: <p>This is content about Rails best practices. It covers <strong>testing</strong>, conventions, and performance optimization.</p>
+
+article_two_content:
+  record: article_two (Document)
+  name: content
+  body: <p>This is content about modern JavaScript patterns. It covers React, <em>async/await</em>, and ES6+ features.</p>

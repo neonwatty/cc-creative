@@ -36,6 +36,7 @@ class ContextSynchronizationServiceTest < ActiveSupport::TestCase
     unauthorized_context = ContextItem.create!(
       document: @document,
       user: @other_user,
+      title: "Private Context Item",
       content: "Private context",
       item_type: "snippet"
     )
@@ -425,7 +426,8 @@ class ContextSynchronizationServiceTest < ActiveSupport::TestCase
     new_document = Document.create!(
       title: "Import Test Document",
       user: @user,
-      description: "For testing context import"
+      description: "For testing context import",
+      content: "Initial content for import test"
     )
 
     # Import context

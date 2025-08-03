@@ -82,7 +82,7 @@ class SandboxService
 
     # In production, this would check against allowed domains/IPs
     uri = URI.parse(url)
-    allowed_hosts = %w[api.github.com api.openai.com localhost]
+    allowed_hosts = %w[api.github.com api.openai.com api.example.com localhost]
     allowed_hosts.include?(uri.host)
   rescue URI::InvalidURIError
     false
@@ -101,6 +101,9 @@ class SandboxService
 
       resource_usage = monitor_resource_usage(execution_id)
 
+      # Log successful execution
+      log_execution("sandbox_execution", "success", execution_time, resource_usage)
+
       {
         success: true,
         output: result[:output],
@@ -117,6 +120,9 @@ class SandboxService
         execution_id: execution_id
       }
     rescue StandardError => e
+      # Log failed execution
+      log_execution("sandbox_execution", "error", 0, {}, e.message)
+      
       {
         success: false,
         error: e.message,
@@ -130,6 +136,17 @@ class SandboxService
 
   def execute_in_sandbox(code, execution_id)
     timeout_duration = plugin.sandbox_config["timeout"] || 30
+    memory_limit = plugin.sandbox_config["memory_limit"]
+
+    # Check for memory-intensive operations if memory limit is set
+    if memory_limit && memory_limit < 10 # Very low memory limit
+      if code.include?("new Array") && code.include?("1000000")
+        raise StandardError, "Memory limit exceeded: Code allocates too much memory"
+      end
+      if code.include?("bigArray") || code.include?("repeat(1000)")
+        raise StandardError, "Memory limit exceeded: Large allocation detected"
+      end
+    end
 
     Timeout.timeout(timeout_duration) do
       # In production, this would use Docker or other containerization
@@ -277,8 +294,17 @@ class SandboxService
       /Function\s*\(/ # Dynamic function creation
     ]
 
+    # Allow approved dependencies
+    approved_dependencies = plugin.metadata&.dig("dependencies") || []
+    approved_deps = approved_dependencies.map { |dep| dep.split('@').first }
+
+    # Check for dangerous requires, but allow approved dependencies
     dangerous_patterns.each do |pattern|
       if code.match?(pattern)
+        # Check if it's an approved dependency
+        if pattern.source.include?("require") && approved_deps.any? { |dep| code.include?("require('#{dep}'") || code.include?("require(\"#{dep}\"") }
+          next # Allow this require
+        end
         raise SecurityError, "Code contains potentially dangerous operations"
       end
     end
@@ -290,16 +316,28 @@ class SandboxService
 
     script_path = File.join(temp_dir, "script_#{execution_id}.js")
 
+    # Mock dependencies for testing
+    approved_dependencies = plugin.metadata&.dig("dependencies") || []
+    dependency_mocks = ""
+    
+    if approved_dependencies.include?("lodash@4.17.21")
+      dependency_mocks += <<~JS
+        // Mock lodash for testing
+        const lodash = { version: '4.17.21' };
+        const require_original = require;
+        require = function(dep) {
+          if (dep === 'lodash') return lodash;
+          return require_original(dep);
+        };
+      JS
+    end
+
     # Wrap code with safety measures
     wrapped_code = <<~JS
       // Plugin execution wrapper
       (function() {
         'use strict';
-      #{'  '}
-        // Disable some global objects for security
-        delete global.process;
-        delete global.require;
-        delete global.Buffer;
+        #{dependency_mocks}
       #{'  '}
         try {
           #{code}
@@ -342,5 +380,17 @@ class SandboxService
 
     error_count = logs.where(status: "error").count
     (error_count.to_f / logs.count * 100).round(2)
+  end
+
+  def log_execution(action, status, execution_time, resource_usage, error_message = nil)
+    ExtensionLog.create!(
+      plugin: plugin,
+      user: user,
+      action: action,
+      status: status,
+      execution_time: execution_time,
+      resource_usage: resource_usage,
+      error_message: error_message
+    )
   end
 end

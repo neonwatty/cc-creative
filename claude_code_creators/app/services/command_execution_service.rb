@@ -77,6 +77,14 @@ class CommandExecutionService
       # Log the command execution
       log_command_execution(command, parameters, execution_time, "success", result)
 
+      # Create document version for successful command execution
+      begin
+        @document.create_auto_version(@user)
+      rescue StandardError => e
+        Rails.logger.warn "[COMMAND_EXECUTION] Failed to create version: #{e.message}"
+        # Don't fail the command execution if version creation fails
+      end
+
       result
 
     rescue StandardError => e

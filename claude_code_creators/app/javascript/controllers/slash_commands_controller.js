@@ -64,6 +64,7 @@ export default class extends Controller {
   }
 
   connect() {
+    console.log("SlashCommandsController connected")
     this.currentCommand = null
     this.commandPosition = -1
     this.commandParameters = []
@@ -359,11 +360,11 @@ export default class extends Controller {
       li.setAttribute("role", "option")
       li.setAttribute("aria-selected", "false")
       li.setAttribute("data-command", suggestion.command)
-      li.className = "suggestion-item"
+      li.className = "command-item suggestion-item p-2 hover:bg-gray-100 cursor-pointer"
       li.innerHTML = `
-        <div class="command-name">${suggestion.command}</div>
-        <div class="command-description">${suggestion.description}</div>
-        <div class="command-category">${suggestion.category}</div>
+        <div class="command-name font-semibold">${suggestion.command}</div>
+        <div class="command-description text-sm text-gray-600">${suggestion.description}</div>
+        <div class="command-category text-xs text-gray-400">${suggestion.category}</div>
       `
       
       li.addEventListener("click", () => {
@@ -415,15 +416,20 @@ export default class extends Controller {
 
   showSuggestions() {
     this.suggestionsTarget.style.display = "block"
+    this.suggestionsTarget.classList.remove("hidden")
+    this.suggestionsTarget.classList.add("visible")
   }
 
   hideSuggestions() {
     this.suggestionsTarget.style.display = "none"
+    this.suggestionsTarget.classList.add("hidden")  
+    this.suggestionsTarget.classList.remove("visible")
     this.selectedSuggestionIndex = -1
   }
 
   isSuggestionsVisible() {
-    return this.suggestionsTarget.style.display !== "none"
+    return this.suggestionsTarget.style.display !== "none" && 
+           !this.suggestionsTarget.classList.contains("hidden")
   }
 
   // Keyboard navigation
@@ -498,7 +504,7 @@ export default class extends Controller {
       return
     }
 
-    this.showStatus("Executing command...", "loading")
+    this.showStatus(`Executing ${this.currentCommand} command...`, "loading")
 
     try {
       const response = await fetch(`/documents/${this.documentIdValue}/commands`, {
@@ -662,7 +668,16 @@ export default class extends Controller {
   // Status management
   showStatus(message, type) {
     this.statusTarget.textContent = message
-    this.statusTarget.className = `command-status ${type}`
+    this.statusTarget.className = `command-status ${type} mt-2 text-sm`
+    
+    // Add type-specific styling
+    if (type === "loading") {
+      this.statusTarget.classList.add("text-blue-600", "animate-pulse")
+    } else if (type === "success") {
+      this.statusTarget.classList.add("text-green-600")
+    } else if (type === "error") {
+      this.statusTarget.classList.add("text-red-600")
+    }
     
     // Auto-clear success messages
     if (type === "success") {

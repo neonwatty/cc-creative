@@ -11,7 +11,7 @@ class CollaborationControllerTest < ActionDispatch::IntegrationTest
     @admin_user.update!(role: "admin")
 
     # Set up user session
-    post sessions_path, params: { email_address: @user.email_address, password: "Secret123!" }
+    post session_path, params: { email_address: @user.email_address, password: "Secret123!" }
   end
 
   # Session Management Tests
@@ -40,7 +40,8 @@ class CollaborationControllerTest < ActionDispatch::IntegrationTest
     private_doc = Document.create!(
       title: "Private Document",
       user: @other_user,
-      description: "Private content"
+      description: "Private content",
+      content: "This is private document content."
     )
 
     post collaboration_start_path(private_doc),
@@ -205,7 +206,7 @@ class CollaborationControllerTest < ActionDispatch::IntegrationTest
       name: "Limited User",
       email_address: "limited@example.com",
       password: "Secret123!",
-      role: "viewer"
+      role: "guest"
     )
 
     post sessions_path, params: { email_address: limited_user.email_address, password: "Secret123!" }
@@ -470,58 +471,58 @@ class CollaborationControllerTest < ActionDispatch::IntegrationTest
   private
 
   def collaboration_start_path(document)
-    "/api/v1/documents/#{document.id}/collaboration/start"
+    "/api/v1/collaboration/documents/#{document.id}/start"
   end
 
   def collaboration_join_path(document)
-    "/api/v1/documents/#{document.id}/collaboration/join"
+    "/api/v1/collaboration/documents/#{document.id}/join"
   end
 
   def collaboration_leave_path(document)
-    "/api/v1/documents/#{document.id}/collaboration/leave"
+    "/api/v1/collaboration/documents/#{document.id}/leave"
   end
 
   def collaboration_lock_path(document)
-    "/api/v1/documents/#{document.id}/collaboration/lock"
+    "/api/v1/collaboration/documents/#{document.id}/lock"
   end
 
   def collaboration_unlock_path(document)
-    "/api/v1/documents/#{document.id}/collaboration/unlock"
+    "/api/v1/collaboration/documents/#{document.id}/unlock"
   end
 
   def collaboration_lock_status_path(document, lock_id)
-    "/api/v1/documents/#{document.id}/collaboration/locks/#{lock_id}"
+    "/api/v1/collaboration/documents/#{document.id}/locks/#{lock_id}"
   end
 
   def collaboration_permissions_path(document)
-    "/api/v1/documents/#{document.id}/collaboration/permissions"
+    "/api/v1/collaboration/documents/#{document.id}/permissions"
   end
 
   def collaboration_presence_path(document)
-    "/api/v1/documents/#{document.id}/collaboration/presence"
+    "/api/v1/collaboration/documents/#{document.id}/presence"
   end
 
   def collaboration_typing_path(document)
-    "/api/v1/documents/#{document.id}/collaboration/typing"
+    "/api/v1/collaboration/documents/#{document.id}/typing"
   end
 
   def collaboration_reconnect_path(document)
-    "/api/v1/documents/#{document.id}/collaboration/reconnect"
+    "/api/v1/collaboration/documents/#{document.id}/reconnect"
   end
 
   def collaboration_operation_path(document)
-    "/api/v1/documents/#{document.id}/collaboration/operation"
+    "/api/v1/collaboration/documents/#{document.id}/operation"
   end
 
   def collaboration_status_path(document)
-    "/api/v1/documents/#{document.id}/collaboration/status"
+    "/api/v1/collaboration/documents/#{document.id}/status"
   end
 
   def collaboration_users_path(document)
-    "/api/v1/documents/#{document.id}/collaboration/users"
+    "/api/v1/collaboration/documents/#{document.id}/users"
   end
 
   def collaboration_terminate_path(document)
-    "/api/v1/documents/#{document.id}/collaboration/terminate"
+    "/api/v1/collaboration/documents/#{document.id}/terminate"
   end
 end

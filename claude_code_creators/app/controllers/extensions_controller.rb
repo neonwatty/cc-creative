@@ -111,7 +111,7 @@ class ExtensionsController < ApplicationController
 
   # GET /extensions/installed
   def installed
-    installations = plugin_manager.installed_plugins.includes(:plugin)
+    installations = plugin_manager.installed_plugins
 
     render json: {
       plugins: installations.map { |installation|

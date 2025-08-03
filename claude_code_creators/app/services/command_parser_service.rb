@@ -272,7 +272,7 @@ class CommandParserService
       permission_result = validate_permissions(command)
       next unless permission_result[:allowed]
 
-      {
+      base_suggestion = {
         command: command,
         description: metadata[:description],
         examples: metadata[:examples] || [],
@@ -282,6 +282,11 @@ class CommandParserService
         valid_values: metadata[:valid_values] || [],
         match_score: calculate_match_score(command, filter)
       }
+
+      # Add context-aware suggestions for certain commands
+      base_suggestion = add_context_suggestions(base_suggestion, command)
+      
+      base_suggestion
     end.compact
 
     # Sort by match score (higher is better)
@@ -289,6 +294,27 @@ class CommandParserService
   end
 
   private
+
+  def add_context_suggestions(suggestion, command)
+    case command
+    when "load"
+      # Add saved context items as examples for load command
+      context_items = @document.context_items.where(item_type: "saved_context").limit(5)
+      if context_items.any?
+        suggestion[:examples] = context_items.pluck(:title)
+        suggestion[:description] += " (Available: #{context_items.pluck(:title).join(', ')})"
+      end
+    when "include"
+      # Add file context items as examples for include command
+      file_items = @document.context_items.where(item_type: "file").limit(5)
+      if file_items.any?
+        suggestion[:examples] = file_items.pluck(:title)
+        suggestion[:description] += " (Available: #{file_items.pluck(:title).join(', ')})"
+      end
+    end
+    
+    suggestion
+  end
 
   def parse_command_string(command_string)
     # Use shellwords to properly handle quoted parameters

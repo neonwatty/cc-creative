@@ -190,7 +190,15 @@ class OperationalTransformService
   def apply_operations_to_document(document, operations)
     return unless document && operations.any?
 
-    current_content = document.content || ""
+    current_content = document.content
+    # Handle ActionText::RichText objects
+    if current_content.respond_to?(:to_plain_text)
+      current_content = current_content.to_plain_text
+    elsif current_content.respond_to?(:to_s)
+      current_content = current_content.to_s
+    end
+    current_content ||= ""
+    
     final_content = apply_operations_sequence(current_content, operations)
 
     # Update document content
@@ -235,7 +243,7 @@ class OperationalTransformService
       end
 
       # Apply operation to document
-      current_content = document.content || ""
+      current_content = document.content&.to_plain_text || ""
       new_content = apply_operation(current_content, operation)
       document.update!(content: new_content)
 
@@ -267,7 +275,8 @@ class OperationalTransformService
 
   # Operation Application Helpers
   def apply_insert_operation(content, operation)
-    position = clamp_position(operation[:position], content.length + 1)
+    position = clamp_position(operation[:position], content.length)
+    content = content.dup if content.frozen?
     content.insert(position, operation[:content] || "")
   end
 
@@ -592,7 +601,7 @@ class OperationalTransformService
       end
     end
 
-    content_length = document.content&.length || 0
+    content_length = document.content&.to_plain_text&.length || 0
     change_percentage = content_length > 0 ? (total_changes.to_f / content_length) * 100 : 100
 
     change_percentage > 50 || total_changes > 1000

@@ -282,6 +282,7 @@ class NotificationChannel < ApplicationCable::Channel
   end
 
   def cleanup_notification_session
+    return unless current_user
     session_key = "notification_session_#{current_user.id}"
     Rails.cache.delete(session_key)
   end

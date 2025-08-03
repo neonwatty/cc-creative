@@ -36,7 +36,8 @@ class DocumentVersion < ApplicationRecord
     )
 
     if version.save
-      document.update(current_version_number: version.version_number)
+      # Use update_column to bypass validations for version number update
+      document.update_column(:current_version_number, version.version_number)
     end
 
     version
